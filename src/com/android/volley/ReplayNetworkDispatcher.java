@@ -140,7 +140,12 @@ public class ReplayNetworkDispatcher extends Thread {
     	dispatchInterval = seconds;
     }
     
+    public int getDispatchInterval() {
+    	return dispatchInterval;
+    }
+    
     public void dispatchNow() {
     	dispatchNow = true;
     }
+    
 }

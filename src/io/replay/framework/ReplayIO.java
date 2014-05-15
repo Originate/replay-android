@@ -22,9 +22,11 @@ public class ReplayIO {
 	private ReplayRequestQueue replayQueue;
 	private static ReplayIO mInstance;
 	private Context mContext;
+	private boolean initialized;
 	
 	private ReplayIO(Context context) {
 		mContext = context;
+		initialized = false;
 	}
 	
 	public static ReplayIO init(Context context, String apiKey) {
@@ -34,11 +36,20 @@ public class ReplayIO {
 		mInstance.enabled = true;
 		mInstance.replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
 		mInstance.replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
+		mInstance.initialized = true;
 		return mInstance;
 	}
 	
-	public void trackWithAPIKey(String apiKey) {
-		this.apiKey = apiKey;
+	public static ReplayIO getInstance(Context context, String apiKey) {
+		if (mInstance != null && mInstance.initialized) {
+			return mInstance;
+		} else {
+			return init(context, apiKey);
+		}
+	}
+	
+	public static void trackWithAPIKey(String apiKey) {
+		mInstance.apiKey = apiKey;
 	}
 	
 	public void trackEvent(String eventName, Map<String, String> data) {
@@ -53,41 +64,54 @@ public class ReplayIO {
 		replayQueue.add(request);
 	}
 	
-	public void setDisaptchInterval(int interval) {
-		replayQueue.setDispatchInterval(interval);
+	public static void setDispatchInterval(int interval) {
+		mInstance.replayQueue.setDispatchInterval(interval);
 	}
 	
-	public void dispatch() {
-		if (!enabled) return;
-		replayQueue.dispatchNow();
+	public static int getDispatchInterval() {
+		return mInstance.replayQueue.getDispatchInterval();
 	}
 	
-	public void enable() {
-		enabled = true;
+	public static void dispatch() {
+		if (!mInstance.enabled) return;
+		mInstance.replayQueue.dispatchNow();
 	}
 	
-	public void disable() {
-		enabled = false;
+	public static void enable() {
+		mInstance.enabled = true;
 	}
 	
-	public boolean isEnabled() {
-		return enabled;
+	public static void disable() {
+		mInstance.enabled = false;
 	}
 	
-	public void setDebugMode(boolean debugMode) {
-		this.debugMode = debugMode;
+	public static boolean isEnabled() {
+		return mInstance.enabled;
 	}
 	
-	public boolean isDebugMode() {
-		return debugMode;
+	public static void setDebugMode(boolean debugMode) {
+		mInstance.debugMode = debugMode;
 	}
 	
-	public void applicationDidEnterBackground() {
-		ReplaySessionManager.endSession(mContext);
+	public static boolean isDebugMode() {
+		return mInstance.debugMode;
 	}
 	
-	public void applicationWillEnterForeground() {
-		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
+	/** when the App enter background */
+	public static void stop() {
+		mInstance.replayQueue.stop();
+		ReplaySessionManager.endSession(mInstance.mContext);
+	}
+	
+	/** when the App entered foreground */
+	public static void run() {
+		mInstance.replayQueue.start();
+		mInstance.replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mInstance.mContext));
+	}
+	
+	/** tell if the replayio is running, ie. ReplayRequestQueue is running */
+	public static boolean isRunning() {
+		return mInstance.replayQueue.isRunning();
 	}
 	
 	public synchronized static String getClientUUID(Context context) {

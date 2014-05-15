@@ -33,6 +33,7 @@ import android.net.http.AndroidHttpClient;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
@@ -49,6 +50,7 @@ import com.android.volley.toolbox.HurlStack;
  */
 public class ReplayRequestQueue extends RequestQueue {
 	private static final String DEFAULT_CACHE_DIR = "volley";
+	private boolean isRunning;
 
     /** Used for generating monotonically-increasing sequence numbers for requests. */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -82,7 +84,7 @@ public class ReplayRequestQueue extends RequestQueue {
         new PriorityBlockingQueue<Request<?>>();
 
     /** Number of network request dispatcher threads to start. */
-    private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 1;
+    private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 1; //default to 1 to ensure the "timer" works
 
     /** Cache interface for retrieving and storing responses. */
     private final Cache mCache;
@@ -188,6 +190,10 @@ public class ReplayRequestQueue extends RequestQueue {
             mDispatchers[i] = networkDispatcher;
             networkDispatcher.start();
         }
+        
+        isRunning = true;
+        
+        Log.d("REPLAY_IO", "ReplayRequestQueue started");
     }
 
     /**
@@ -202,6 +208,10 @@ public class ReplayRequestQueue extends RequestQueue {
                 mDispatchers[i].quit();
             }
         }
+        
+        isRunning = false;
+        
+        Log.d("REPLAY_IO", "ReplayRequestQueue stopped");
     }
 
     /**
@@ -338,9 +348,17 @@ public class ReplayRequestQueue extends RequestQueue {
     	}
     }
     
+    public int getDispatchInterval() {
+    	return mDispatchers[0].getDispatchInterval();
+    }
+    
     public void dispatchNow() {
     	for (ReplayNetworkDispatcher dispatcher : mDispatchers ){
     		dispatcher.dispatchNow();
     	}
+    }
+    
+    public boolean isRunning() {
+    	return isRunning;
     }
 }
