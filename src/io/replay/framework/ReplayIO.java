@@ -8,21 +8,22 @@ import java.util.Map;
 import java.util.UUID;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.ReplayRequestQueue;
 import com.android.volley.Request;
 
 public class ReplayIO {
 
-	private boolean debugMode;
-	private String apiKey;
+	private static boolean debugMode;
+	private static String apiKey;
 	private static String clientUUID;
-	private boolean enabled;
-	private ReplayAPIManager replayAPIManager;
-	private ReplayRequestQueue replayQueue;
+	private static boolean enabled;
+	private static ReplayAPIManager replayAPIManager;
+	private static ReplayRequestQueue replayQueue;
 	private static ReplayIO mInstance;
-	private Context mContext;
-	private boolean initialized;
+	private static Context mContext;
+	private static boolean initialized;
 	
 	private ReplayIO(Context context) {
 		mContext = context;
@@ -33,87 +34,144 @@ public class ReplayIO {
 		if (mInstance == null) {
 			mInstance = new ReplayIO(context);
 		}
-		mInstance.enabled = true;
-		mInstance.replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
-		mInstance.replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
-		mInstance.initialized = true;
+		enabled = true;
+		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
+		replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
+		initialized = true;
 		return mInstance;
 	}
 	
-	public static ReplayIO getInstance(Context context, String apiKey) {
-		if (mInstance != null && mInstance.initialized) {
-			return mInstance;
-		} else {
-			return init(context, apiKey);
-		}
+	/**
+	 * Update API key 
+	 * @param key
+	 */
+	public static void trackWithAPIKey(String key) {
+		apiKey = key;
 	}
 	
-	public static void trackWithAPIKey(String apiKey) {
-		mInstance.apiKey = apiKey;
-	}
-	
-	public void trackEvent(String eventName, Map<String, String> data) {
+	/**
+	 * Send event with data to server 
+	 * @param eventName
+	 * @param data
+	 */
+	public static void trackEvent(String eventName, final Map<String, String> data) {
+		checkInitialized();
 		if (!enabled) return;
 		Request<?> request = replayAPIManager.requestForEvent(eventName, data);
 		replayQueue.add(request);
 	}
 	
-	public void updateAlias(String userAlias) {
+	/**
+	 * Update alias
+	 * @param userAlias
+	 */
+	public static void updateAlias(String userAlias) {
+		checkInitialized();
 		if (!enabled) return;
 		Request<?> request = replayAPIManager.requestForAlias(userAlias);
 		replayQueue.add(request);
 	}
 	
+	/**
+	 * Set interval of dispatches
+	 * @param interval
+	 */
 	public static void setDispatchInterval(int interval) {
-		mInstance.replayQueue.setDispatchInterval(interval);
+		replayQueue.setDispatchInterval(interval);
 	}
 	
+	/**
+	 * Get interval of dispatches
+	 * @return 
+	 */
 	public static int getDispatchInterval() {
-		return mInstance.replayQueue.getDispatchInterval();
+		return replayQueue.getDispatchInterval();
 	}
 	
+	/**
+	 * Dispatch one event in the queue immediately
+	 */
 	public static void dispatch() {
-		if (!mInstance.enabled) return;
-		mInstance.replayQueue.dispatchNow();
+		checkInitialized();
+		if (!enabled) return;
+		replayQueue.dispatchNow();
 	}
 	
+	/**
+	 * Enable ReplayIO
+	 */
 	public static void enable() {
-		mInstance.enabled = true;
+		enabled = true;
 	}
 	
+	/**
+	 * Disable ReplayIO
+	 */
 	public static void disable() {
-		mInstance.enabled = false;
+		enabled = false;
 	}
 	
+	/**
+	 * true if ReplayIO is enabled
+	 * @return 
+	 */
 	public static boolean isEnabled() {
-		return mInstance.enabled;
+		return enabled;
 	}
 	
-	public static void setDebugMode(boolean debugMode) {
-		mInstance.debugMode = debugMode;
+	/**
+	 * Set debug mode
+	 * @param debugMode
+	 */
+	public static void setDebugMode(boolean debug) {
+		debugMode = debug;
 	}
 	
+	/**
+	 * true if debug mode is enabled
+	 * @return
+	 */
 	public static boolean isDebugMode() {
-		return mInstance.debugMode;
+		return debugMode;
 	}
 	
-	/** when the App enter background */
+	/** 
+	 * Call from ReplayApplication when the app entered background 
+	 */
 	public static void stop() {
-		mInstance.replayQueue.stop();
-		ReplaySessionManager.endSession(mInstance.mContext);
+		checkInitialized();
+		replayQueue.stop();
+		ReplaySessionManager.endSession(mContext);
 	}
 	
-	/** when the App entered foreground */
+	/**
+	 * Call from ReplayApplication when the app entered foreground
+	 */
 	public static void run() {
-		mInstance.replayQueue.start();
-		mInstance.replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mInstance.mContext));
+		checkInitialized();
+		replayQueue.start();
+		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
 	}
 	
-	/** tell if the replayio is running, ie. ReplayRequestQueue is running */
+	/**
+	 * tell if the replayio is running, ie. ReplayRequestQueue is running
+	 * @return 
+	 */
 	public static boolean isRunning() {
-		return mInstance.replayQueue.isRunning();
+		return replayQueue.isRunning();
 	}
 	
+	private static void checkInitialized() {
+		if (!initialized) {
+			Log.e("REPLAY_IO", "ReplayIO not initialized");
+			return;
+		}
+	}
+	/**
+	 * Get or generate a UUID as a the client UUID
+	 * @param context
+	 * @return
+	 */
 	public synchronized static String getClientUUID(Context context) {
 		if (clientUUID == null) {
 			File clientIDFile = new File(context.getFilesDir(),ReplayConfig.KEY_CLIENT_ID);
@@ -131,6 +189,12 @@ public class ReplayIO {
 		return clientUUID;
 	}
 
+	/**
+	 * Read client UUID from file
+	 * @param clientIDFile
+	 * @return
+	 * @throws IOException
+	 */
 	private static String readClientIDFile(File clientIDFile) throws IOException {
 		RandomAccessFile f = new RandomAccessFile(clientIDFile, "r");
 		byte[] bytes = new byte[(int) f.length()];
@@ -139,6 +203,11 @@ public class ReplayIO {
 		return new String(bytes);
 	}
 	
+	/**
+	 * Write client UUID into file
+	 * @param clientIDFile
+	 * @throws IOException
+	 */
 	private static void writeClientIDFile(File clientIDFile) throws IOException {
 		FileOutputStream out = new FileOutputStream(clientIDFile);
 		String id = UUID.randomUUID().toString();

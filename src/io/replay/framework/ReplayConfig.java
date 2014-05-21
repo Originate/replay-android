@@ -7,5 +7,5 @@ public interface ReplayConfig {
 	public static final String KEY_SESSION_ID = "sessionId";
 	public static final String KEY_DATA = "data";
 	
-	public static final String REPLAY_URL = "http://192.168.1.102:3000/";
+	public static final String REPLAY_URL = "http://dyn.originatechina.com:3000/";
 }
