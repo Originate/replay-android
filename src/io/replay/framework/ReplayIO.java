@@ -7,6 +7,8 @@ import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.UUID;
 
+import org.json.JSONException;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -57,8 +59,14 @@ public class ReplayIO {
 	public static void trackEvent(String eventName, final Map<String, String> data) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request = replayAPIManager.requestForEvent(eventName, data);
-		replayQueue.add(request);
+		Request<?> request;
+		try {
+			request = replayAPIManager.requestForEvent(eventName, data);
+			replayQueue.add(request);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -68,8 +76,13 @@ public class ReplayIO {
 	public static void updateAlias(String userAlias) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request = replayAPIManager.requestForAlias(userAlias);
-		replayQueue.add(request);
+		Request<?> request;
+		try {
+			request = replayAPIManager.requestForAlias(userAlias);
+			replayQueue.add(request);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -141,6 +154,12 @@ public class ReplayIO {
 	public static void stop() {
 		checkInitialized();
 		replayQueue.stop();
+		try {
+			replayQueue.persist(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ReplaySessionManager.endSession(mContext);
 	}
 	
@@ -151,6 +170,15 @@ public class ReplayIO {
 		checkInitialized();
 		replayQueue.start();
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
+		try {
+			replayQueue.load(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
