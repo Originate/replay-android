@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Process;
+import android.util.Log;
 
 public class ReplayNetworkDispatcher extends Thread {
 
@@ -21,8 +22,8 @@ public class ReplayNetworkDispatcher extends Thread {
     private volatile boolean mQuit = false;
     /** Used for telling how much time to wait till the next dispatch */
     private volatile int dispatchInterval = 0;
-    /** Used for telling us to work now */
-    private volatile boolean dispatchNow = false;
+    /** Indicating if the dispatcher is processing the queue at the moment */
+    private volatile boolean dispatching = false;
     
     
 	public ReplayNetworkDispatcher(BlockingQueue<Request<?>> queue,
@@ -55,23 +56,31 @@ public class ReplayNetworkDispatcher extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Request<?> request;
         while (true) {
+        	// check if the queue is empty for this dispatch, wait if empty
+        	if (dispatching && mQueue.isEmpty()) {
+        		//Log.d("REPLAY_IO", "mQueue isEmpty ");
+        		dispatching = false;
+        	}
+        	
         	// sleep for a interval time or wait for the manual dispatch signal.
-        	if (dispatchInterval >= 0) {
+        	if (!dispatching && dispatchInterval >= 0) {
         		int delayed = 0;
         		while (delayed < dispatchInterval * 1000) {
-        			if (dispatchNow) {
-        				dispatchNow = false;
+        			// dispatchNow() is invoked
+        			if (dispatching) {
+        				//Log.d("REPLAY_IO", "dispatchNow() ?");
         				break;
         			}
 
         			try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
         			delayed += 100;
         		}
+        		dispatching = true;
+        		//Log.d("REPLAY_IO", "dispatching");
         	}
         	
             try {
@@ -141,7 +150,7 @@ public class ReplayNetworkDispatcher extends Thread {
     }
     
     public void dispatchNow() {
-    	dispatchNow = true;
+    	dispatching = true;
     }
     
 }
