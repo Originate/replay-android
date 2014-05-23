@@ -17,6 +17,7 @@
 package com.android.volley;
 
 import io.replay.framework.ReplayAPIManager;
+import io.replay.framework.ReplayConfig;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -360,10 +361,6 @@ public class ReplayRequestQueue extends RequestQueue {
     	}
     }
     
-    public int getDispatchInterval() {
-    	return mDispatchers[0].getDispatchInterval();
-    }
-    
     public void dispatchNow() {
     	for (ReplayNetworkDispatcher dispatcher : mDispatchers ){
     		dispatcher.dispatchNow();
@@ -393,11 +390,13 @@ public class ReplayRequestQueue extends RequestQueue {
     		byte[] body = ((JsonObjectRequest)request).getBody();
     		bw.write(new String(body));
     		bw.newLine();
+    		//Log.d("REPLAY_IO", "write request: "+new String(body));
     	}
     	for (Request<?> request; (request = mNetworkQueue.poll()) != null; ) {
     		byte[] body = ((JsonObjectRequest)request).getBody();
     		bw.write(new String(body));
     		bw.newLine();
+    		//Log.d("REPLAY_IO", "write request: "+new String(body));
     	}
     	bw.close();
     }
@@ -411,16 +410,19 @@ public class ReplayRequestQueue extends RequestQueue {
     	File cacheDir = new File(context.getCacheDir(), PERSIST_DIR);
     	BufferedReader br = new BufferedReader(new FileReader(new File(cacheDir, "0")));
     	for (String line; (line = br.readLine()) != null; ) {
+    		//Log.d("REPLAY_IO", "cached file read: "+line);
     		JSONObject json = new JSONObject(line);
     		Request<?> request = null;
-    		if (json.has("event")) {
-    			request = ReplayAPIManager.request(json.getString("event"), json);
-    		} else if (json.has("alias")) {
-    			request = ReplayAPIManager.request(json.getString("alias"), json);
+    		if (json.has(ReplayConfig.KEY_DATA)) {
+    			request = ReplayAPIManager.request(ReplayConfig.REQUEST_TYPE_EVENTS, json);
+    		} else if (json.has(ReplayConfig.REQUEST_TYPE_ALIAS)) {
+    			request = ReplayAPIManager.request(ReplayConfig.REQUEST_TYPE_ALIAS, json);
     		}
     		if (request != null) {
     			add(request);
+    			//Log.d("REPLAY_IO", "load request: "+json);
     		}
     	}
+    	br.close();
     }
 }

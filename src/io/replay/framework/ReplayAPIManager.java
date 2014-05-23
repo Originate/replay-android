@@ -32,12 +32,12 @@ public class ReplayAPIManager implements ReplayConfig {
 	}
 	
 	public Request<?> requestForEvent(String event, Map<String, String> data) throws JSONException {
-		return request("events", jsonForEvent(event, data));
+		return request(REQUEST_TYPE_EVENTS, jsonForEvent(event, data));
 			
 	}
 	
 	public Request<?> requestForAlias(String alias) throws JSONException {
-		return request("alias", jsonForAlias(alias));
+		return request(REQUEST_TYPE_ALIAS, jsonForAlias(alias));
 	}
 	
 	public static Request<?> request(String type, JSONObject json) {
