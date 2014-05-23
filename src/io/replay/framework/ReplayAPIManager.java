@@ -31,8 +31,17 @@ public class ReplayAPIManager implements ReplayConfig {
 		Log.d("REPLAY_IO", "Session UUID: "+sessionUUID);
 	}
 	
-	public Request<?> requestForEvent(String event, Map<String, String> data) {
-		JsonObjectRequest request = new JsonObjectRequest(REPLAY_URL+"events", jsonForEvent(event, data),
+	public Request<?> requestForEvent(String event, Map<String, String> data) throws JSONException {
+		return request(REQUEST_TYPE_EVENTS, jsonForEvent(event, data));
+			
+	}
+	
+	public Request<?> requestForAlias(String alias) throws JSONException {
+		return request(REQUEST_TYPE_ALIAS, jsonForAlias(alias));
+	}
+	
+	public static Request<?> request(String type, JSONObject json) {
+		JsonObjectRequest request = new JsonObjectRequest(REPLAY_URL + type, json,
 				new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
@@ -48,55 +57,25 @@ public class ReplayAPIManager implements ReplayConfig {
 						VolleyLog.e("Error: ", error.getMessage());
 					}
 				});
-		//queue.add(request);
 		return request;
 	}
 	
-	public Request<?> requestForAlias(String alias) {
-		JsonObjectRequest request = new JsonObjectRequest(REPLAY_URL+"alias", jsonForAlias(alias),
-				new Response.Listener<JSONObject>() {
-					@Override
-					public void onResponse(JSONObject response) {
-						try {
-							VolleyLog.v("Response:%n %s", response.toString(4));
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						VolleyLog.e("Error: ", error.getMessage());
-					}
-				});
-		//queue.add(request);
-		return request;
-	}
-	
-	private JSONObject jsonForEvent(String event, Map<String, String> data) {
+	private JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
 		JSONObject json = new JSONObject();
-		try {
-			json.put(KEY_REPLAY_KEY, apiKey);
-			json.put(KEY_CLIENT_ID, clientUUID);
-			json.put(KEY_SESSION_ID, sessionUUID);
-			data.put("event", event);
-			json.put(KEY_DATA, data);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		json.put(KEY_REPLAY_KEY, apiKey);
+		json.put(KEY_CLIENT_ID, clientUUID);
+		json.put(KEY_SESSION_ID, sessionUUID);
+		data.put("event", event);
+		json.put(KEY_DATA, data);
 		Log.d("REPLAY_IO", json.toString());
 		return json;
 	}
 	
-	private JSONObject jsonForAlias(String alias) {
+	private JSONObject jsonForAlias(String alias) throws JSONException {
 		JSONObject json = new JSONObject();
-		try {
-			json.put(KEY_REPLAY_KEY, apiKey);
-			json.put(KEY_CLIENT_ID, clientUUID);
-			json.put("alias", alias);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		json.put(KEY_REPLAY_KEY, apiKey);
+		json.put(KEY_CLIENT_ID, clientUUID);
+		json.put("alias", alias);
 		Log.d("REPLAY_IO", json.toString());
 		return json;
 	}

@@ -7,7 +7,10 @@ import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.UUID;
 
+import org.json.JSONException;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.android.volley.ReplayRequestQueue;
@@ -24,10 +27,13 @@ public class ReplayIO {
 	private static ReplayIO mInstance;
 	private static Context mContext;
 	private static boolean initialized;
+	private static SharedPreferences mPrefs;
 	
 	private ReplayIO(Context context) {
 		mContext = context;
 		initialized = false;
+
+		mPrefs = mContext.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
 	}
 	
 	public static ReplayIO init(Context context, String apiKey) {
@@ -57,8 +63,14 @@ public class ReplayIO {
 	public static void trackEvent(String eventName, final Map<String, String> data) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request = replayAPIManager.requestForEvent(eventName, data);
-		replayQueue.add(request);
+		Request<?> request;
+		try {
+			request = replayAPIManager.requestForEvent(eventName, data);
+			replayQueue.add(request);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -68,24 +80,34 @@ public class ReplayIO {
 	public static void updateAlias(String userAlias) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request = replayAPIManager.requestForAlias(userAlias);
-		replayQueue.add(request);
+		Request<?> request;
+		try {
+			request = replayAPIManager.requestForAlias(userAlias);
+			replayQueue.add(request);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * Set interval of dispatches
+	 * Set interval for dispatches
 	 * @param interval
 	 */
 	public static void setDispatchInterval(int interval) {
 		replayQueue.setDispatchInterval(interval);
+		
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putInt(ReplayConfig.PREF_DISPATCH_INTERVAL, interval);
+		editor.commit();
 	}
 	
 	/**
-	 * Get interval of dispatches
+	 * Get interval for dispatches
 	 * @return 
 	 */
 	public static int getDispatchInterval() {
-		return replayQueue.getDispatchInterval();
+		
+		return mPrefs.getInt(ReplayConfig.PREF_DISPATCH_INTERVAL, 0);
 	}
 	
 	/**
@@ -141,6 +163,13 @@ public class ReplayIO {
 	public static void stop() {
 		checkInitialized();
 		replayQueue.stop();
+		
+		try {
+			replayQueue.persist(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ReplaySessionManager.endSession(mContext);
 	}
 	
@@ -150,7 +179,18 @@ public class ReplayIO {
 	public static void run() {
 		checkInitialized();
 		replayQueue.start();
+		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
+		
+		try {
+			replayQueue.load(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

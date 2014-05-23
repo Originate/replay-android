@@ -16,7 +16,15 @@
 
 package com.android.volley;
 
+import io.replay.framework.ReplayAPIManager;
+import io.replay.framework.ReplayConfig;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,6 +33,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -40,6 +51,7 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 /**
  * A request dispatch queue with a thread pool of dispatchers.
@@ -50,6 +62,7 @@ import com.android.volley.toolbox.HurlStack;
  */
 public class ReplayRequestQueue extends RequestQueue {
 	private static final String DEFAULT_CACHE_DIR = "volley";
+	private static final String PERSIST_DIR = "persist";
 	private boolean isRunning;
 
     /** Used for generating monotonically-increasing sequence numbers for requests. */
@@ -348,10 +361,6 @@ public class ReplayRequestQueue extends RequestQueue {
     	}
     }
     
-    public int getDispatchInterval() {
-    	return mDispatchers[0].getDispatchInterval();
-    }
-    
     public void dispatchNow() {
     	for (ReplayNetworkDispatcher dispatcher : mDispatchers ){
     		dispatcher.dispatchNow();
@@ -360,5 +369,60 @@ public class ReplayRequestQueue extends RequestQueue {
     
     public boolean isRunning() {
     	return isRunning;
+    }
+    
+
+    
+    /**
+     * Store the events in queue to disk
+     * @throws IOException 
+     */
+    public void persist(Context context) throws IOException {
+    	File cacheDir = new File(context.getCacheDir(), PERSIST_DIR);
+    	if (!cacheDir.exists()) {
+    		if (!cacheDir.mkdirs()) {
+    			Log.d("REPLAY_IO", "Unable to create persist dir "+cacheDir.getAbsolutePath());
+    		}
+    	}
+    	
+    	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(cacheDir, "0")));
+    	for (Request<?> request; (request = mCacheQueue.poll()) != null; ) {
+    		byte[] body = ((JsonObjectRequest)request).getBody();
+    		bw.write(new String(body));
+    		bw.newLine();
+    		//Log.d("REPLAY_IO", "write request: "+new String(body));
+    	}
+    	for (Request<?> request; (request = mNetworkQueue.poll()) != null; ) {
+    		byte[] body = ((JsonObjectRequest)request).getBody();
+    		bw.write(new String(body));
+    		bw.newLine();
+    		//Log.d("REPLAY_IO", "write request: "+new String(body));
+    	}
+    	bw.close();
+    }
+    
+    /**
+     * Load the stored events into queue  
+     * @throws IOException 
+     * @throws JSONException 
+     */
+    public void load(Context context) throws IOException, JSONException {
+    	File cacheDir = new File(context.getCacheDir(), PERSIST_DIR);
+    	BufferedReader br = new BufferedReader(new FileReader(new File(cacheDir, "0")));
+    	for (String line; (line = br.readLine()) != null; ) {
+    		//Log.d("REPLAY_IO", "cached file read: "+line);
+    		JSONObject json = new JSONObject(line);
+    		Request<?> request = null;
+    		if (json.has(ReplayConfig.KEY_DATA)) {
+    			request = ReplayAPIManager.request(ReplayConfig.REQUEST_TYPE_EVENTS, json);
+    		} else if (json.has(ReplayConfig.REQUEST_TYPE_ALIAS)) {
+    			request = ReplayAPIManager.request(ReplayConfig.REQUEST_TYPE_ALIAS, json);
+    		}
+    		if (request != null) {
+    			add(request);
+    			//Log.d("REPLAY_IO", "load request: "+json);
+    		}
+    	}
+    	br.close();
     }
 }
