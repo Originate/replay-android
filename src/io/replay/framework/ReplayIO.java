@@ -203,7 +203,7 @@ public class ReplayIO {
 	
 	private static void checkInitialized() {
 		if (!initialized) {
-			Log.e("REPLAY_IO", "ReplayIO not initialized");
+			debugLog("ReplayIO not initialized");
 			return;
 		}
 	}
@@ -253,5 +253,11 @@ public class ReplayIO {
 		String id = UUID.randomUUID().toString();
 		out.write(id.getBytes());
 		out.close();
+	}
+	
+	public static void debugLog(String log) {
+		if (debugMode) {
+			Log.d("REPLAY_IO", log);
+		}
 	}
 }

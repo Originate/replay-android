@@ -1,12 +1,13 @@
 package com.android.volley;
 
+import io.replay.framework.ReplayIO;
+
 import java.util.concurrent.BlockingQueue;
 
 import android.annotation.TargetApi;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Process;
-import android.util.Log;
 
 public class ReplayNetworkDispatcher extends Thread {
 
@@ -57,8 +58,8 @@ public class ReplayNetworkDispatcher extends Thread {
         Request<?> request;
         while (true) {
         	// check if the queue is empty for this dispatch, wait if empty
-        	if (dispatching && mQueue.isEmpty()) {
-        		//Log.d("REPLAY_IO", "mQueue isEmpty ");
+        	if (dispatching && mQueue.isEmpty()) {  // TODO bug here
+        		ReplayIO.debugLog("mQueue isEmpty ");
         		dispatching = false;
         	}
         	
@@ -68,7 +69,7 @@ public class ReplayNetworkDispatcher extends Thread {
         		while (delayed < dispatchInterval * 1000) {
         			// dispatchNow() is invoked
         			if (dispatching) {
-        				//Log.d("REPLAY_IO", "dispatchNow() ?");
+        				//ReplayIO.debugLog("dispatchNow() ?");
         				break;
         			}
 
@@ -80,7 +81,7 @@ public class ReplayNetworkDispatcher extends Thread {
         			delayed += 100;
         		}
         		dispatching = true;
-        		//Log.d("REPLAY_IO", "dispatching");
+        		ReplayIO.debugLog("dispatching");
         	}
         	
             try {

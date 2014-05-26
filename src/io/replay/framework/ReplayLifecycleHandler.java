@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.os.Bundle;
-import android.util.Log;
 
 @SuppressLint("NewApi")
 public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
@@ -71,12 +70,12 @@ public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
     private void checkAppVisibility() {
     	if (!isApplicationVisible()) {
     		if (ReplayIO.isRunning()) {
-    			Log.d("REPLAY_IO", "App goes to background. Stop!");
+    			ReplayIO.debugLog("App goes to background. Stop!");
     			ReplayIO.stop();
     		}
     	} else {
     		if (!ReplayIO.isRunning()) {
-    			Log.d("REPLAY_IO", "App goes to foreground. Run!");
+    			ReplayIO.debugLog("App goes to foreground. Run!");
     			ReplayIO.run();
     		}
     	}
