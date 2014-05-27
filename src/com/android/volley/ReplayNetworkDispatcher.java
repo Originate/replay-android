@@ -1,7 +1,5 @@
 package com.android.volley;
 
-import io.replay.framework.ReplayIO;
-
 import java.util.concurrent.BlockingQueue;
 
 import android.annotation.TargetApi;
