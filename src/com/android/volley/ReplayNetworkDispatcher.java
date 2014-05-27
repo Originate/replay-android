@@ -109,7 +109,6 @@ public class ReplayNetworkDispatcher extends Thread {
 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
-                ReplayIO.debugLog("perform request ");
                 request.addMarker("network-http-complete");
 
                 // If the server returned 304 AND we delivered a response already,
