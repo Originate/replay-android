@@ -45,6 +45,17 @@ public class ReplayIO {
 		debugMode = isDebugMode();
 		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
 		replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
+		replayQueue.setDispatchInterval(getDispatchInterval());
+		replayQueue.start();
+		try {
+			replayQueue.load(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		initialized = true;
 		return mInstance;
 	}
@@ -55,6 +66,7 @@ public class ReplayIO {
 	 */
 	public static void trackWithAPIKey(String key) {
 		apiKey = key;
+		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(mContext), ReplaySessionManager.sessionUUID(mContext));
 	}
 	
 	/**
@@ -194,8 +206,8 @@ public class ReplayIO {
 	 */
 	public static void run() {
 		checkInitialized();
-		//replayQueue = ReplayRequestQueue.newReplayRequestQueue(mContext, null);
-		replayQueue.start();
+		replayQueue = ReplayRequestQueue.newReplayRequestQueue(mContext, null);
+		//replayQueue.start();
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
 		
@@ -271,7 +283,10 @@ public class ReplayIO {
 		out.write(id.getBytes());
 		out.close();
 	}
-	
+	/**
+	 * Print debug log if debugMode is on
+	 * @param log
+	 */
 	public static void debugLog(String log) {
 		if (debugMode) {
 			Log.d("REPLAY_IO", log);

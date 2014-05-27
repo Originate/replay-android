@@ -10,6 +10,7 @@ public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
 
 	private static int started;
 	private static int resumed;
+	@SuppressWarnings("unused")
 	private static int paused;
 	private static int stopped;
 	

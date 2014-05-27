@@ -16,7 +16,7 @@ public class ReplayNetworkDispatcher extends Thread {
     /** The network interface for processing requests. */
     private final Network mNetwork;
     /** The cache to write to. */
-    private final Cache mCache;
+    //private final Cache mCache;
     /** For posting responses and errors. */
     private final ResponseDelivery mDelivery;
     /** Used for telling us to die. */
@@ -26,12 +26,11 @@ public class ReplayNetworkDispatcher extends Thread {
     /** Indicating if the dispatcher is processing the queue at the moment */
     private volatile boolean dispatching = false;
     
-    
 	public ReplayNetworkDispatcher(BlockingQueue<Request<?>> queue,
 			Network network, Cache cache, ResponseDelivery delivery) {
         mQueue = queue;
         mNetwork = network;
-        mCache = cache;
+        //mCache = cache;
         mDelivery = delivery;
 	}
 
@@ -58,30 +57,31 @@ public class ReplayNetworkDispatcher extends Thread {
         Request<?> request;
         while (true) {
         	// check if the queue is empty for this dispatch, wait if empty
-        	if (dispatching && mQueue.isEmpty()) {  // TODO bug here
-        		ReplayIO.debugLog("mQueue isEmpty ");
+        	if (dispatching && mQueue.isEmpty()) {
         		dispatching = false;
         	}
-        	
+
         	// sleep for a interval time or wait for the manual dispatch signal.
         	if (!dispatching && dispatchInterval >= 0) {
         		int delayed = 0;
         		while (delayed < dispatchInterval * 1000) {
         			// dispatchNow() is invoked
         			if (dispatching) {
-        				//ReplayIO.debugLog("dispatchNow() ?");
         				break;
         			}
 
         			try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						// We may have been interrupted because it was time to quit.
+						if (mQuit) {
+		                    return;
+		                }
+		                continue;
 					}
         			delayed += 100;
         		}
         		dispatching = true;
-        		ReplayIO.debugLog("dispatching");
         	}
         	
             try {
@@ -94,7 +94,7 @@ public class ReplayNetworkDispatcher extends Thread {
                 }
                 continue;
             }
-
+        	
             try {
                 request.addMarker("network-queue-take");
 
@@ -109,6 +109,7 @@ public class ReplayNetworkDispatcher extends Thread {
 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
+                ReplayIO.debugLog("perform request ");
                 request.addMarker("network-http-complete");
 
                 // If the server returned 304 AND we delivered a response already,
@@ -124,10 +125,10 @@ public class ReplayNetworkDispatcher extends Thread {
 
                 // Write to cache if applicable.
                 // TODO: Only update cache metadata instead of entire record for 304s.
-                if (request.shouldCache() && response.cacheEntry != null) {
+                /*if (request.shouldCache() && response.cacheEntry != null) {
                     mCache.put(request.getCacheKey(), response.cacheEntry);
                     request.addMarker("network-cache-written");
-                }
+                }*/
 
                 // Post the response back.
                 request.markDelivered();

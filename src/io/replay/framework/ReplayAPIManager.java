@@ -65,7 +65,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_SESSION_ID, sessionUUID);
 		data.put("event", event);
 		json.put(KEY_DATA, data);
-		ReplayIO.debugLog(json.toString());
+		//ReplayIO.debugLog(json.toString());
 		return json;
 	}
 	
@@ -74,7 +74,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_REPLAY_KEY, apiKey);
 		json.put(KEY_CLIENT_ID, clientUUID);
 		json.put("alias", alias);
-		ReplayIO.debugLog(json.toString());
+		//ReplayIO.debugLog(json.toString());
 		return json;
 	}
 }

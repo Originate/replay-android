@@ -26,11 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +43,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
@@ -61,7 +56,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
  * a parsed response on the main thread.
  */
 public class ReplayRequestQueue extends RequestQueue {
-	private static final String DEFAULT_CACHE_DIR = "volley";
+	//private static final String DEFAULT_CACHE_DIR = "volley";
 	private static final String PERSIST_DIR = "persist";
 	private boolean isRunning;
 
@@ -78,8 +73,8 @@ public class ReplayRequestQueue extends RequestQueue {
      *          is <em>not</em> contained in that list. Is null if no requests are staged.</li>
      * </ul>
      */
-    private final Map<String, Queue<Request<?>>> mWaitingRequests =
-            new HashMap<String, Queue<Request<?>>>();
+    //private final Map<String, Queue<Request<?>>> mWaitingRequests =
+    //        new HashMap<String, Queue<Request<?>>>();
 
     /**
      * The set of all requests currently being processed by this RequestQueue. A Request
@@ -89,8 +84,8 @@ public class ReplayRequestQueue extends RequestQueue {
     private final Set<Request<?>> mCurrentRequests = new LinkedHashSet<Request<?>>();
 
     /** The cache triage queue. */
-    private final PriorityBlockingQueue<Request<?>> mCacheQueue =
-        new PriorityBlockingQueue<Request<?>>();
+    //private final PriorityBlockingQueue<Request<?>> mCacheQueue =
+    //    new PriorityBlockingQueue<Request<?>>();
 
     /** The queue of requests that are actually going out to the network. */
     private final PriorityBlockingQueue<Request<?>> mNetworkQueue =
@@ -112,7 +107,7 @@ public class ReplayRequestQueue extends RequestQueue {
     private ReplayNetworkDispatcher[] mDispatchers;
 
     /** The cache dispatcher. */
-    private CacheDispatcher mCacheDispatcher;
+    //private CacheDispatcher mCacheDispatcher;
 
     
     /** Static method to create a queue
@@ -120,7 +115,7 @@ public class ReplayRequestQueue extends RequestQueue {
      */
     public static ReplayRequestQueue newReplayRequestQueue(Context context, HttpStack stack) { 
 		// TODO Auto-generated constructor stub
-	    File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
+	    //File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
 
         String userAgent = "volley/0";
         try {
@@ -142,7 +137,8 @@ public class ReplayRequestQueue extends RequestQueue {
 
         Network network = new BasicNetwork(stack);
 
-        ReplayRequestQueue queue = new ReplayRequestQueue(new DiskBasedCache(cacheDir), network);
+        //ReplayRequestQueue queue = new ReplayRequestQueue(new DiskBasedCache(cacheDir), network);
+        ReplayRequestQueue queue = new ReplayRequestQueue(null, network);
         queue.start();
 
         return queue;
@@ -193,8 +189,8 @@ public class ReplayRequestQueue extends RequestQueue {
     public void start() {
         stop();  // Make sure any currently running dispatchers are stopped.
         // Create the cache dispatcher and start it.
-        mCacheDispatcher = new CacheDispatcher(mCacheQueue, mNetworkQueue, mCache, mDelivery);
-        mCacheDispatcher.start();
+        //mCacheDispatcher = new CacheDispatcher(mCacheQueue, mNetworkQueue, mCache, mDelivery);
+        //mCacheDispatcher.start();
 
         // Create network dispatchers (and corresponding threads) up to the pool size.
         for (int i = 0; i < mDispatchers.length; i++) {
@@ -213,9 +209,9 @@ public class ReplayRequestQueue extends RequestQueue {
      * Stops the cache and network dispatchers.
      */
     public void stop() {
-        if (mCacheDispatcher != null) {
-            mCacheDispatcher.quit();
-        }
+        //if (mCacheDispatcher != null) {
+        //    mCacheDispatcher.quit();
+        //}
         for (int i = 0; i < mDispatchers.length; i++) {
             if (mDispatchers[i] != null) {
                 mDispatchers[i].quit();
@@ -296,13 +292,15 @@ public class ReplayRequestQueue extends RequestQueue {
         request.addMarker("add-to-queue");
 
         // If the request is uncacheable, skip the cache queue and go straight to the network.
-        if (!request.shouldCache()) {
+        /*if (!request.shouldCache()) {
             mNetworkQueue.add(request);
             return request;
-        }
+        }*/
+        mNetworkQueue.add(request);
+        return request;
 
         // Insert request into stage if there's already a request with the same cache key in flight.
-        synchronized (mWaitingRequests) {
+        /*synchronized (mWaitingRequests) {
             String cacheKey = request.getCacheKey();
             if (mWaitingRequests.containsKey(cacheKey)) {
                 // There is already a request in flight. Queue up.
@@ -322,7 +320,7 @@ public class ReplayRequestQueue extends RequestQueue {
                 mCacheQueue.add(request);
             }
             return request;
-        }
+        }*/
     }
 
     /**
@@ -338,7 +336,7 @@ public class ReplayRequestQueue extends RequestQueue {
             mCurrentRequests.remove(request);
         }
 
-        if (request.shouldCache()) {
+        /*if (request.shouldCache()) {
             synchronized (mWaitingRequests) {
                 String cacheKey = request.getCacheKey();
                 Queue<Request<?>> waitingRequests = mWaitingRequests.remove(cacheKey);
@@ -352,7 +350,7 @@ public class ReplayRequestQueue extends RequestQueue {
                     mCacheQueue.addAll(waitingRequests);
                 }
             }
-        }
+        }*/
     }
     
     public void setDispatchInterval(int interval) {
@@ -386,6 +384,7 @@ public class ReplayRequestQueue extends RequestQueue {
     	}
     	
     	int count = 0;
+    	int totalCount = 0;
     	int fileCount = 0;
     	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
     	for (Request<?> request: mCurrentRequests ) {
@@ -394,6 +393,7 @@ public class ReplayRequestQueue extends RequestQueue {
     		bw.newLine();
     		
     		count ++;
+    		totalCount ++;
     		if (count >= 100) {
     			count = 0;
     			fileCount ++;
@@ -401,9 +401,9 @@ public class ReplayRequestQueue extends RequestQueue {
     			bw.close();
     			bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
     		}
-    		//ReplayIO.debugLog("write request: "+new String(body));
     	}
     	bw.close();
+    	ReplayIO.debugLog("Persisted " + totalCount + " requests");
     }
     
     /**
@@ -417,10 +417,12 @@ public class ReplayRequestQueue extends RequestQueue {
     	if (files == null) {
     		return;
     	}
+    	
+    	int count = 0;
     	for (File file : files) {
 	    	BufferedReader br = new BufferedReader(new FileReader(file));
 	    	for (String line; (line = br.readLine()) != null; file.delete() ) {
-	    		ReplayIO.debugLog("cached file read: "+line);
+	    		//ReplayIO.debugLog("cached file read: "+line);
 	    		JSONObject json = new JSONObject(line);
 	    		Request<?> request = null;
 	    		if (json.has(ReplayConfig.KEY_DATA)) {
@@ -430,10 +432,11 @@ public class ReplayRequestQueue extends RequestQueue {
 	    		}
 	    		if (request != null) {
 	    			add(request);
-	    			//ReplayIO.debugLog("load request: "+json);
+	    			count ++;
 	    		}
 	    	}
 	    	br.close();
     	}
+    	ReplayIO.debugLog("Loaded " + count + " requests");
     }
 }
