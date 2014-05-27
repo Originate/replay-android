@@ -5,8 +5,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,12 +21,12 @@ public class ReplayAPIManager implements ReplayConfig {
 		this.apiKey = apiKey;
 		this.clientUUID = clientUUID;
 		this.sessionUUID = sessionUUID;
-		Log.d("REPLAY_IO", "Tracking with { API Key: "+apiKey+", Client UUID: "+clientUUID+", Session UUID: "+sessionUUID);
+		ReplayIO.debugLog("Tracking with { API Key: "+apiKey+", Client UUID: "+clientUUID+", Session UUID: "+sessionUUID);
 	}
 	
 	public void updateSessionUUID(String sessionUUID) {
 		this.sessionUUID = sessionUUID;
-		Log.d("REPLAY_IO", "Session UUID: "+sessionUUID);
+		ReplayIO.debugLog("Session UUID: "+sessionUUID);
 	}
 	
 	public Request<?> requestForEvent(String event, Map<String, String> data) throws JSONException {
@@ -67,7 +65,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_SESSION_ID, sessionUUID);
 		data.put("event", event);
 		json.put(KEY_DATA, data);
-		Log.d("REPLAY_IO", json.toString());
+		//ReplayIO.debugLog(json.toString());
 		return json;
 	}
 	
@@ -76,7 +74,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_REPLAY_KEY, apiKey);
 		json.put(KEY_CLIENT_ID, clientUUID);
 		json.put("alias", alias);
-		Log.d("REPLAY_IO", json.toString());
+		//ReplayIO.debugLog(json.toString());
 		return json;
 	}
 }

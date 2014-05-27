@@ -13,4 +13,6 @@ public interface ReplayConfig {
 	public static final String REQUEST_TYPE_EVENTS = "events";
 	
 	public static final String PREF_DISPATCH_INTERVAL = "dispatchInterval";
+	public static final String PREF_ENABLED = "enabled";
+	public static final String PREF_DEBUG_MODE_ENABLED = "debugMode";
 }

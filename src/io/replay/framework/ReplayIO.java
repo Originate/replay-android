@@ -40,9 +40,22 @@ public class ReplayIO {
 		if (mInstance == null) {
 			mInstance = new ReplayIO(context);
 		}
-		enabled = true;
+		
+		enabled = isEnabled();
+		debugMode = isDebugMode();
 		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
 		replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
+		replayQueue.setDispatchInterval(getDispatchInterval());
+		replayQueue.start();
+		try {
+			replayQueue.load(mContext);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		initialized = true;
 		return mInstance;
 	}
@@ -53,6 +66,7 @@ public class ReplayIO {
 	 */
 	public static void trackWithAPIKey(String key) {
 		apiKey = key;
+		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(mContext), ReplaySessionManager.sessionUUID(mContext));
 	}
 	
 	/**
@@ -124,6 +138,10 @@ public class ReplayIO {
 	 */
 	public static void enable() {
 		enabled = true;
+		
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putBoolean(ReplayConfig.PREF_ENABLED, true);
+		editor.commit();
 	}
 	
 	/**
@@ -131,6 +149,10 @@ public class ReplayIO {
 	 */
 	public static void disable() {
 		enabled = false;
+		
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putBoolean(ReplayConfig.PREF_ENABLED, false);
+		editor.commit();
 	}
 	
 	/**
@@ -138,6 +160,7 @@ public class ReplayIO {
 	 * @return 
 	 */
 	public static boolean isEnabled() {
+		enabled = mPrefs.getBoolean(ReplayConfig.PREF_ENABLED, true);
 		return enabled;
 	}
 	
@@ -147,6 +170,10 @@ public class ReplayIO {
 	 */
 	public static void setDebugMode(boolean debug) {
 		debugMode = debug;
+		
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, debugMode);
+		editor.commit();
 	}
 	
 	/**
@@ -154,6 +181,7 @@ public class ReplayIO {
 	 * @return
 	 */
 	public static boolean isDebugMode() {
+		debugMode = mPrefs.getBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, false);
 		return debugMode;
 	}
 	
@@ -178,7 +206,8 @@ public class ReplayIO {
 	 */
 	public static void run() {
 		checkInitialized();
-		replayQueue.start();
+		replayQueue = ReplayRequestQueue.newReplayRequestQueue(mContext, null);
+		//replayQueue.start();
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
 		
@@ -203,7 +232,7 @@ public class ReplayIO {
 	
 	private static void checkInitialized() {
 		if (!initialized) {
-			Log.e("REPLAY_IO", "ReplayIO not initialized");
+			debugLog("ReplayIO not initialized");
 			return;
 		}
 	}
@@ -253,5 +282,14 @@ public class ReplayIO {
 		String id = UUID.randomUUID().toString();
 		out.write(id.getBytes());
 		out.close();
+	}
+	/**
+	 * Print debug log if debugMode is on
+	 * @param log
+	 */
+	public static void debugLog(String log) {
+		if (debugMode) {
+			Log.d("REPLAY_IO", log);
+		}
 	}
 }

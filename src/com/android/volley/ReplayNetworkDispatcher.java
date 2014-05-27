@@ -14,22 +14,21 @@ public class ReplayNetworkDispatcher extends Thread {
     /** The network interface for processing requests. */
     private final Network mNetwork;
     /** The cache to write to. */
-    private final Cache mCache;
+    //private final Cache mCache;
     /** For posting responses and errors. */
     private final ResponseDelivery mDelivery;
     /** Used for telling us to die. */
     private volatile boolean mQuit = false;
     /** Used for telling how much time to wait till the next dispatch */
     private volatile int dispatchInterval = 0;
-    /** Used for telling us to work now */
-    private volatile boolean dispatchNow = false;
-    
+    /** Indicating if the dispatcher is processing the queue at the moment */
+    private volatile boolean dispatching = false;
     
 	public ReplayNetworkDispatcher(BlockingQueue<Request<?>> queue,
 			Network network, Cache cache, ResponseDelivery delivery) {
         mQueue = queue;
         mNetwork = network;
-        mCache = cache;
+        //mCache = cache;
         mDelivery = delivery;
 	}
 
@@ -55,23 +54,32 @@ public class ReplayNetworkDispatcher extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Request<?> request;
         while (true) {
+        	// check if the queue is empty for this dispatch, wait if empty
+        	if (dispatching && mQueue.isEmpty()) {
+        		dispatching = false;
+        	}
+
         	// sleep for a interval time or wait for the manual dispatch signal.
-        	if (dispatchInterval >= 0) {
+        	if (!dispatching && dispatchInterval >= 0) {
         		int delayed = 0;
         		while (delayed < dispatchInterval * 1000) {
-        			if (dispatchNow) {
-        				dispatchNow = false;
+        			// dispatchNow() is invoked
+        			if (dispatching) {
         				break;
         			}
 
         			try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						// We may have been interrupted because it was time to quit.
+						if (mQuit) {
+		                    return;
+		                }
+		                continue;
 					}
         			delayed += 100;
         		}
+        		dispatching = true;
         	}
         	
             try {
@@ -84,7 +92,7 @@ public class ReplayNetworkDispatcher extends Thread {
                 }
                 continue;
             }
-
+        	
             try {
                 request.addMarker("network-queue-take");
 
@@ -114,10 +122,10 @@ public class ReplayNetworkDispatcher extends Thread {
 
                 // Write to cache if applicable.
                 // TODO: Only update cache metadata instead of entire record for 304s.
-                if (request.shouldCache() && response.cacheEntry != null) {
+                /*if (request.shouldCache() && response.cacheEntry != null) {
                     mCache.put(request.getCacheKey(), response.cacheEntry);
                     request.addMarker("network-cache-written");
-                }
+                }*/
 
                 // Post the response back.
                 request.markDelivered();
@@ -141,7 +149,7 @@ public class ReplayNetworkDispatcher extends Thread {
     }
     
     public void dispatchNow() {
-    	dispatchNow = true;
+    	dispatching = true;
     }
     
 }
