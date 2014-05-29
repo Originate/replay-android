@@ -3,6 +3,7 @@
 	<name>ReplayIODemo</name>
 	<comment></comment>
 	<projects>
+		<project>ReplayIO</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
