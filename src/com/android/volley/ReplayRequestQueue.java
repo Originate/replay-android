@@ -383,27 +383,29 @@ public class ReplayRequestQueue extends RequestQueue {
     		}
     	}
     	
-    	int count = 0;
-    	int totalCount = 0;
-    	int fileCount = 0;
-    	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
-    	for (Request<?> request: mCurrentRequests ) {
-    		byte[] body = ((JsonObjectRequest)request).getBody();
-    		bw.write(new String(body));
-    		bw.newLine();
-    		
-    		count ++;
-    		totalCount ++;
-    		if (count >= 100) {
-    			count = 0;
-    			fileCount ++;
-    			bw.flush();
-    			bw.close();
-    			bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
-    		}
+    	synchronized(mCurrentRequests) {
+	    	int count = 0;
+	    	int totalCount = 0;
+	    	int fileCount = 0;
+	    	BufferedWriter bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
+	    	for (Request<?> request : mCurrentRequests ) {
+	    		byte[] body = ((JsonObjectRequest)request).getBody();
+	    		bw.write(new String(body));
+	    		bw.newLine();
+	    		
+	    		count ++;
+	    		totalCount ++;
+	    		if (count >= 99) {
+	    			count = 0;
+	    			fileCount ++;
+	    			bw.flush();
+	    			bw.close();
+	    			bw = new BufferedWriter(new FileWriter(new File(cacheDir, "requests"+fileCount)));
+	    		}
+	    	}
+	    	bw.close();
+	    	ReplayIO.debugLog("Persisted " + totalCount + " requests");
     	}
-    	bw.close();
-    	ReplayIO.debugLog("Persisted " + totalCount + " requests");
     }
     
     /**
