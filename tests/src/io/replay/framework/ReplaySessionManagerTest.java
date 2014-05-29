@@ -12,7 +12,7 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+		mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
 	}
 
 	public void testSessionUUID() {
@@ -22,15 +22,14 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 		
 		// should get UUID string
 		assertNotNull(uuid);
-		assertTrue(uuid.length() != 0);
-		assertEquals(uuid, UUID.fromString(uuid).toString());
+		assertEquals(UUID.fromString(uuid).toString(), uuid);
 		
 		// should save to preferences
 		assertTrue(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
-		assertEquals(uuid, mPrefs.getString(ReplayConfig.KEY_SESSION_ID, ""));
+		assertEquals(mPrefs.getString(ReplayConfig.KEY_SESSION_ID, ""), uuid);
 		
 		// should not regenerate the UUID
-		assertEquals(uuid, ReplaySessionManager.sessionUUID(getContext()));
+		assertEquals(ReplaySessionManager.sessionUUID(getContext()), uuid);
 	}
 	
 	public void testEndSession() {

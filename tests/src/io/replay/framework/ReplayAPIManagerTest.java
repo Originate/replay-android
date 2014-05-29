@@ -24,17 +24,17 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		Field apiKey = ReplayAPIManager.class.getDeclaredField("apiKey");
 		apiKey.setAccessible(true);
 		String apiKeyValue = (String) apiKey.get(manager);
-		assertEquals(apiKeyValue, "api_key");
+		assertEquals("api_key", apiKeyValue);
 		
 		Field clientUUID = ReplayAPIManager.class.getDeclaredField("clientUUID");
 		clientUUID.setAccessible(true);
 		String clientUUIDValue = (String) clientUUID.get(manager);
-		assertEquals(clientUUIDValue, "client_uuid");
+		assertEquals("client_uuid", clientUUIDValue);
 		
 		Field sessionUUID = ReplayAPIManager.class.getDeclaredField("sessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
-		assertEquals(sessionUUIDValue, "session_uuid");
+		assertEquals("session_uuid", sessionUUIDValue);
 	}
 	
 	public void testUpdateSessionUUID() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
@@ -45,7 +45,7 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		Field sessionUUID = ReplayAPIManager.class.getDeclaredField("sessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
-		assertEquals(sessionUUIDValue, "new_session_uuid");
+		assertEquals("new_session_uuid", sessionUUIDValue);
 	}
 	
 	public void testRequestForEvent() throws JSONException, AuthFailureError {
@@ -62,22 +62,22 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		assertNotNull(json);
 		
 		assertTrue(json.has(ReplayConfig.KEY_REPLAY_KEY));
-		assertEquals(json.getString(ReplayConfig.KEY_REPLAY_KEY), "api_key");
+		assertEquals("api_key", json.getString(ReplayConfig.KEY_REPLAY_KEY));
 		
 		assertTrue(json.has(ReplayConfig.KEY_CLIENT_ID));
-		assertEquals(json.getString(ReplayConfig.KEY_CLIENT_ID), "client_uuid");
+		assertEquals("client_uuid", json.getString(ReplayConfig.KEY_CLIENT_ID));
 		
 		assertTrue(json.has(ReplayConfig.KEY_SESSION_ID));
-		assertEquals(json.getString(ReplayConfig.KEY_SESSION_ID), "session_uuid");
+		assertEquals("session_uuid", json.getString(ReplayConfig.KEY_SESSION_ID));
 		
 		assertTrue(json.has(ReplayConfig.KEY_DATA));
 		
 		JSONObject data = json.getJSONObject(ReplayConfig.KEY_DATA);
 		assertTrue(data.has("event"));
-		assertEquals(data.getString("event"), "color_selected");
+		assertEquals("color_selected", data.getString("event"));
 		
 		assertTrue(data.has("color"));
-		assertEquals(data.getString("color"), "green");
+		assertEquals("green", data.getString("color"));
 	}
 	
 	public void testRequestForAlias() throws JSONException, AuthFailureError {
@@ -91,16 +91,16 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		assertNotNull(json);
 		
 		assertTrue(json.has(ReplayConfig.KEY_REPLAY_KEY));
-		assertEquals(json.getString(ReplayConfig.KEY_REPLAY_KEY), "api_key");
+		assertEquals("api_key", json.getString(ReplayConfig.KEY_REPLAY_KEY));
 		
 		assertTrue(json.has(ReplayConfig.KEY_CLIENT_ID));
-		assertEquals(json.getString(ReplayConfig.KEY_CLIENT_ID), "client_uuid");
+		assertEquals("client_uuid", json.getString(ReplayConfig.KEY_CLIENT_ID));
 		
 		assertFalse(json.has(ReplayConfig.KEY_SESSION_ID));
 		assertFalse(json.has(ReplayConfig.KEY_DATA));
 		
 		assertTrue(json.has("alias"));
-		assertEquals(json.getString("alias"), "new_alias");
+		assertEquals("new_alias", json.getString("alias"));
 	}
 	
 	public void testRequest() throws JSONException, AuthFailureError {
@@ -111,13 +111,12 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		JSONObject body = new JSONObject(new String(request.getBody()));
 		assertNotNull(body);
 		// can not compare JSONObject directly
-		//assertEquals(body,json);
+		//assertEquals(json, body);
 		
 		assertTrue(body.has("test"));
-		assertEquals(body.getBoolean("test"), true);
+		assertEquals(true, body.getBoolean("test"));
 		
-		String url = request.getUrl();
-		assertEquals(url, ReplayConfig.REPLAY_URL+"testType");
+		assertEquals(ReplayConfig.REPLAY_URL+"testType", request.getUrl());
 		
 		
 		

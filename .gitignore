@@ -2,3 +2,5 @@ bin/*
 gen/*
 demo/bin/*
 demo/gen/*
+tests/bin/*
+tests/gen/*
