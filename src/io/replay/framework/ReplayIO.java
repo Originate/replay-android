@@ -137,6 +137,7 @@ public class ReplayIO {
 	 * Enable ReplayIO
 	 */
 	public static void enable() {
+		checkInitialized();
 		enabled = true;
 		
 		SharedPreferences.Editor editor = mPrefs.edit();
@@ -148,6 +149,7 @@ public class ReplayIO {
 	 * Disable ReplayIO
 	 */
 	public static void disable() {
+		checkInitialized();
 		enabled = false;
 		
 		SharedPreferences.Editor editor = mPrefs.edit();
@@ -160,6 +162,7 @@ public class ReplayIO {
 	 * @return 
 	 */
 	public static boolean isEnabled() {
+		checkInitialized();
 		enabled = mPrefs.getBoolean(ReplayConfig.PREF_ENABLED, true);
 		return enabled;
 	}
@@ -169,6 +172,7 @@ public class ReplayIO {
 	 * @param debugMode
 	 */
 	public static void setDebugMode(boolean debug) {
+		checkInitialized();
 		debugMode = debug;
 		
 		SharedPreferences.Editor editor = mPrefs.edit();
@@ -181,6 +185,7 @@ public class ReplayIO {
 	 * @return
 	 */
 	public static boolean isDebugMode() {
+		checkInitialized();
 		debugMode = mPrefs.getBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, false);
 		return debugMode;
 	}
@@ -227,6 +232,7 @@ public class ReplayIO {
 	 * @return 
 	 */
 	public static boolean isRunning() {
+		checkInitialized();
 		return replayQueue.isRunning();
 	}
 	
@@ -243,46 +249,17 @@ public class ReplayIO {
 	 */
 	public synchronized static String getClientUUID(Context context) {
 		if (clientUUID == null) {
-			File clientIDFile = new File(context.getFilesDir(),ReplayConfig.KEY_CLIENT_ID);
-
-			try {
-				if (!clientIDFile.exists()) {
-					writeClientIDFile(clientIDFile);
-				}
-				clientUUID = readClientIDFile(clientIDFile);
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(!mPrefs.contains(ReplayConfig.KEY_CLIENT_ID)) {
+				SharedPreferences.Editor editor = mPrefs.edit();
+				editor.putString(ReplayConfig.KEY_CLIENT_ID, UUID.randomUUID().toString());
+				editor.commit();
+				ReplayIO.debugLog("Generated new client uuid");
 			}
-				
+			return mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, "");				
 		}
 		return clientUUID;
 	}
 
-	/**
-	 * Read client UUID from file
-	 * @param clientIDFile
-	 * @return
-	 * @throws IOException
-	 */
-	private static String readClientIDFile(File clientIDFile) throws IOException {
-		RandomAccessFile f = new RandomAccessFile(clientIDFile, "r");
-		byte[] bytes = new byte[(int) f.length()];
-		f.readFully(bytes);
-		f.close();
-		return new String(bytes);
-	}
-	
-	/**
-	 * Write client UUID into file
-	 * @param clientIDFile
-	 * @throws IOException
-	 */
-	private static void writeClientIDFile(File clientIDFile) throws IOException {
-		FileOutputStream out = new FileOutputStream(clientIDFile);
-		String id = UUID.randomUUID().toString();
-		out.write(id.getBytes());
-		out.close();
-	}
 	/**
 	 * Print debug log if debugMode is on
 	 * @param log
