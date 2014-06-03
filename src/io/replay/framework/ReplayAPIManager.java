@@ -1,5 +1,6 @@
 package io.replay.framework;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -63,6 +64,9 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_REPLAY_KEY, apiKey);
 		json.put(KEY_CLIENT_ID, clientUUID);
 		json.put(KEY_SESSION_ID, sessionUUID);
+		if (null == data) {
+			data = new HashMap<String, String>();
+		}
 		data.put("event", event);
 		json.put(KEY_DATA, new JSONObject(data));
 		//ReplayIO.debugLog(json.toString());
