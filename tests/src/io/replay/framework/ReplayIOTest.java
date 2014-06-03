@@ -17,17 +17,21 @@ public class ReplayIOTest extends AndroidTestCase {
 	}
 
 	public void testGetClientUUID() {
+		// make sure no KEY_CLIENT_ID exist
+		SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+		mPrefs.contains(ReplayConfig.KEY_CLIENT_ID);
+		mPrefs.edit().remove(ReplayConfig.KEY_CLIENT_ID);
+		mPrefs.edit().commit();
+
+		// get/generate client UUID
 		String clientUUID = ReplayIO.getClientUUID(getContext());
-		assertNotNull(clientUUID);
-		
 		assertNotNull(clientUUID);
 		assertEquals(UUID.fromString(clientUUID).toString(), clientUUID);
 		
 		
-		SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
 		// should save to preferences
-		assertTrue(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
-		assertEquals(mPrefs.getString(ReplayConfig.KEY_SESSION_ID, ""), clientUUID);
+		assertTrue(mPrefs.contains(ReplayConfig.KEY_CLIENT_ID));
+		assertEquals(mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, ""), clientUUID);
 		
 		// should not regenerate the UUID
 		assertEquals(ReplayIO.getClientUUID(getContext()), clientUUID);
