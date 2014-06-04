@@ -1,4 +1,4 @@
-package com.android.volley;
+package io.replay.framework;
 
 import io.replay.framework.ReplayAPIManager;
 
@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 import android.test.AndroidTestCase;
 
-public class ReplayNetworkDispatcherTest extends AndroidTestCase {
+public class ReplayRequestDispatcherTest extends AndroidTestCase {
 
 	private ReplayAPIManager apiManager;
 	
@@ -22,12 +22,12 @@ public class ReplayNetworkDispatcherTest extends AndroidTestCase {
 	
 	public void testSetDispatcherInterval() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
-		ReplayRequestQueue queue = ReplayRequestQueue.newReplayRequestQueue(getContext(), null);
+		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
 		queue.start();
 		
-		ReplayNetworkDispatcher dispatcher = getDispatcher(queue);
+		ReplayRequestDispatcher dispatcher = getDispatcher(queue);
 		
-		Field dispatchIntervalField = ReplayNetworkDispatcher.class.getDeclaredField("dispatchInterval");
+		Field dispatchIntervalField = ReplayRequestDispatcher.class.getDeclaredField("dispatchInterval");
 		dispatchIntervalField.setAccessible(true);
 		
 		// interval should be 0 by default
@@ -38,7 +38,7 @@ public class ReplayNetworkDispatcherTest extends AndroidTestCase {
 		assertEquals(5, (int) dispatchIntervalField.get(dispatcher));
 		
 		// make sure dispatch not start at beginning
-		Field dispatchingField = ReplayNetworkDispatcher.class.getDeclaredField("dispatching");
+		Field dispatchingField = ReplayRequestDispatcher.class.getDeclaredField("dispatching");
 		dispatchingField.setAccessible(true);
 		dispatchingField.setBoolean(dispatcher, false);
 		
@@ -70,13 +70,13 @@ public class ReplayNetworkDispatcherTest extends AndroidTestCase {
 	
 	public void testDispatchNow() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
-		ReplayRequestQueue queue = ReplayRequestQueue.newReplayRequestQueue(getContext(), null);
+		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
 		queue.start();
 		
 		// Dispatcher is recreated when start queue
-		ReplayNetworkDispatcher dispatcher = getDispatcher(queue);
+		ReplayRequestDispatcher dispatcher = getDispatcher(queue);
 		
-		Field dispatchingField = ReplayNetworkDispatcher.class.getDeclaredField("dispatching");
+		Field dispatchingField = ReplayRequestDispatcher.class.getDeclaredField("dispatching");
 		dispatchingField.setAccessible(true);
 		dispatchingField.setBoolean(dispatcher, false);
 		assertEquals(false, (boolean) dispatchingField.get(dispatcher));
@@ -128,7 +128,7 @@ public class ReplayNetworkDispatcherTest extends AndroidTestCase {
 	private int getQueueSize(ReplayRequestQueue queue) throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
 		Field currentRequests = ReplayRequestQueue.class.getDeclaredField("mCurrentRequests");
 		currentRequests.setAccessible(true);
-		LinkedHashSet<Request<?>> requests = (LinkedHashSet<Request<?>>) currentRequests.get(queue);
+		LinkedHashSet<ReplayRequest> requests = (LinkedHashSet<ReplayRequest>) currentRequests.get(queue);
 		synchronized (requests) {
 			return requests.size();
 		}
@@ -142,13 +142,12 @@ public class ReplayNetworkDispatcherTest extends AndroidTestCase {
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 */
-	private ReplayNetworkDispatcher getDispatcher(ReplayRequestQueue queue) throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
+	private ReplayRequestDispatcher getDispatcher(ReplayRequestQueue queue) throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
 
-		Field dispatchersField = ReplayRequestQueue.class.getDeclaredField("mDispatchers");
-		dispatchersField.setAccessible(true);
-		ReplayNetworkDispatcher[] dispatchers = (ReplayNetworkDispatcher[]) dispatchersField.get(queue);
+		Field dispatcherField = ReplayRequestQueue.class.getDeclaredField("mDispatcher");
+		dispatcherField.setAccessible(true);
+		ReplayRequestDispatcher dispatcher = (ReplayRequestDispatcher) dispatcherField.get(queue);
 		
-		ReplayNetworkDispatcher dispatcher = dispatchers[0];
 		return dispatcher;
 	}
 	

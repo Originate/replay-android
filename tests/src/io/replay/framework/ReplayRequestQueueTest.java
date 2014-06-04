@@ -1,4 +1,4 @@
-package com.android.volley;
+package io.replay.framework;
 
 import io.replay.framework.ReplayAPIManager;
 
@@ -26,7 +26,7 @@ public class ReplayRequestQueueTest extends AndroidTestCase {
 		apiManager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
 		
 		// add 101 request, so it will goes into two files
-		queue = ReplayRequestQueue.newReplayRequestQueue(getContext(), null);
+		queue = new ReplayRequestQueue(apiManager);
 		queue.stop(); // stop dispatcher actually
 		
 		for (int i=0; i < 101; i++) {
@@ -34,7 +34,7 @@ public class ReplayRequestQueueTest extends AndroidTestCase {
 		}
 	}
 	
-	private Request<?> newRequest(String event) throws JSONException {
+	private ReplayRequest newRequest(String event) throws JSONException {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("key", "value");
 		return apiManager.requestForEvent(event, map);
@@ -63,13 +63,12 @@ public class ReplayRequestQueueTest extends AndroidTestCase {
     	assertEquals(101, count);
 	}
 	
-	public void testLoad() throws IOException, JSONException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException, AuthFailureError {
+	public void testLoad() throws IOException, JSONException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
 		queue.persist(getContext());
-		
 
 		Field currentRequests = ReplayRequestQueue.class.getDeclaredField("mCurrentRequests");
 		currentRequests.setAccessible(true);
-		LinkedHashSet<Request<?>> requests = (LinkedHashSet<Request<?>>) currentRequests.get(queue);
+		LinkedHashSet<ReplayRequest> requests = (LinkedHashSet<ReplayRequest>) currentRequests.get(queue);
 		assertEquals(101, requests.size());
 		requests.clear();
 		assertEquals(0, requests.size());
@@ -79,7 +78,7 @@ public class ReplayRequestQueueTest extends AndroidTestCase {
 		assertEquals(101, requests.size());
 		
 		int count = 0;
-		for (Request<?> request : requests) {
+		for (ReplayRequest request : requests) {
 			JSONObject json = new JSONObject(new String(request.getBody()));
 			JSONObject data = json.getJSONObject("data");
 			

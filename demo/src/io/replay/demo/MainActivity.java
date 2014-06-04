@@ -19,16 +19,12 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 
-	private static ReplayIO replayIO;
-	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        //ActionBar actionBar = getActionBar();
-        
-        replayIO = ReplayIO.init(this, "51cbeec7-be27-451f-809b-03dbd02dfe5a");
+        ReplayIO.init(getApplicationContext(), "51cbeec7-be27-451f-809b-03dbd02dfe5a");
         //replayIO.updateAlias("Alias-"+ new Random().nextInt(9));
         
         ReplayIO.setDispatchInterval(5);
@@ -42,7 +38,7 @@ public class MainActivity extends Activity {
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put("name", "button1");
 				map.put("id", String.valueOf(R.id.button1));
-				replayIO.trackEvent("Button clicked", map);
+				ReplayIO.trackEvent("Button clicked", map);
 			}
 		});
     	
@@ -64,7 +60,7 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				HashMap<String,String> map = new HashMap<String, String>();
 				map.put("toggle", isChecked ? "checked":"unchecked");
-				replayIO.trackEvent("ToggleButton check changed", map);
+				ReplayIO.trackEvent("ToggleButton check changed", map);
 			}
 		});
     	
@@ -78,7 +74,7 @@ public class MainActivity extends Activity {
 				HashMap<String,String> map = new HashMap<String, String>();
 				map.put("value", String.valueOf(progress));
 				map.put("fromUser", String.valueOf(fromUser));
-				replayIO.trackEvent("SeekBar changed", map);
+				ReplayIO.trackEvent("SeekBar changed", map);
 			}
 
 			@Override

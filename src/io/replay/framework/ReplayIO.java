@@ -1,9 +1,6 @@
 package io.replay.framework;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,9 +9,6 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-
-import com.android.volley.ReplayRequestQueue;
-import com.android.volley.Request;
 
 public class ReplayIO {
 
@@ -44,16 +38,14 @@ public class ReplayIO {
 		enabled = isEnabled();
 		debugMode = isDebugMode();
 		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
-		replayQueue = ReplayRequestQueue.newReplayRequestQueue(context, null);
+		replayQueue = new ReplayRequestQueue(replayAPIManager);
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayQueue.start();
 		try {
 			replayQueue.load(mContext);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		initialized = true;
@@ -61,7 +53,7 @@ public class ReplayIO {
 	}
 	
 	/**
-	 * Update API key 
+	 * Update API key
 	 * @param key
 	 */
 	public static void trackWithAPIKey(String key) {
@@ -77,12 +69,11 @@ public class ReplayIO {
 	public static void trackEvent(String eventName, final Map<String, String> data) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request;
+		ReplayRequest request;
 		try {
 			request = replayAPIManager.requestForEvent(eventName, data);
 			replayQueue.add(request);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -94,7 +85,7 @@ public class ReplayIO {
 	public static void updateAlias(String userAlias) {
 		checkInitialized();
 		if (!enabled) return;
-		Request<?> request;
+		ReplayRequest request;
 		try {
 			request = replayAPIManager.requestForAlias(userAlias);
 			replayQueue.add(request);
@@ -200,7 +191,6 @@ public class ReplayIO {
 		try {
 			replayQueue.persist(mContext);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ReplaySessionManager.endSession(mContext);
@@ -211,18 +201,16 @@ public class ReplayIO {
 	 */
 	public static void run() {
 		checkInitialized();
-		replayQueue = ReplayRequestQueue.newReplayRequestQueue(mContext, null);
-		//replayQueue.start();
+		replayQueue = new ReplayRequestQueue(replayAPIManager);
+		replayQueue.start();
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
 		
 		try {
 			replayQueue.load(mContext);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -242,6 +230,7 @@ public class ReplayIO {
 			return;
 		}
 	}
+	
 	/**
 	 * Get or generate a UUID as a the client UUID
 	 * @param context
@@ -267,6 +256,16 @@ public class ReplayIO {
 	public static void debugLog(String log) {
 		if (debugMode) {
 			Log.d("REPLAY_IO", log);
+		}
+	}
+	
+	/**
+	 * Print error log if debugMode is on
+	 * @param log
+	 */
+	public static void errorLog(String log) {
+		if (debugMode) {
+			Log.e("REPLAY_IO", log);
 		}
 	}
 }
