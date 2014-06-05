@@ -20,7 +20,106 @@ public class ReplayRequestDispatcherTest extends AndroidTestCase {
 		apiManager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
 	}
 	
-	public void testSetDispatcherInterval() throws NoSuchFieldException, IllegalAccessException, 
+	public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException, 
+			IllegalArgumentException, JSONException, InterruptedException {
+		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
+		queue.start();
+		
+		ReplayRequestDispatcher dispatcher = getDispatcher(queue);
+		
+		Field dispatchIntervalField = ReplayRequestDispatcher.class.getDeclaredField("dispatchInterval");
+		dispatchIntervalField.setAccessible(true);
+		
+		// interval should be 0 by default
+		assertEquals(0, (int) dispatchIntervalField.get(dispatcher));
+		
+		// make sure dispatch not start at beginning
+		Field dispatchingField = ReplayRequestDispatcher.class.getDeclaredField("dispatching");
+		dispatchingField.setAccessible(true);
+		dispatchingField.setBoolean(dispatcher, false);
+		
+		// the queue should be empty at start
+		assertEquals(0, getQueueSize(queue));
+		
+		queue.add(apiManager.requestForEvent("event", null));
+		queue.add(apiManager.requestForEvent("event", null));
+		queue.add(apiManager.requestForEvent("event", null));
+		// the queue should not be empty when request is added
+		
+		assertEquals(3, getQueueSize(queue));
+		
+		int waited = 0;
+		while (true) {
+			Thread.sleep(100);
+			waited += 100;
+			
+			// the queue should be empty immediately
+			if (waited >= 1500) {
+				assertEquals(0, getQueueSize(queue));
+				break;
+			}
+		}
+	}
+	
+	public void testSetDispatcherIntervalMinus() throws NoSuchFieldException, IllegalAccessException, 
+			IllegalArgumentException, JSONException, InterruptedException {
+		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
+		queue.start();
+		
+		ReplayRequestDispatcher dispatcher = getDispatcher(queue);
+		
+		Field dispatchIntervalField = ReplayRequestDispatcher.class.getDeclaredField("dispatchInterval");
+		dispatchIntervalField.setAccessible(true);
+		
+		// interval should be 0 by default
+		assertEquals(0, (int) dispatchIntervalField.get(dispatcher));
+		
+		// interval should be what it was set to
+		queue.setDispatchInterval(-1);
+		assertEquals(-1, (int) dispatchIntervalField.get(dispatcher));
+		
+		// make sure dispatch not start at beginning
+		Field dispatchingField = ReplayRequestDispatcher.class.getDeclaredField("dispatching");
+		dispatchingField.setAccessible(true);
+		dispatchingField.setBoolean(dispatcher, false);
+		
+		// the queue should be empty at start
+		assertEquals(0, getQueueSize(queue));
+		
+		queue.add(apiManager.requestForEvent("event", null));
+		queue.add(apiManager.requestForEvent("event", null));
+		queue.add(apiManager.requestForEvent("event", null));
+		
+		// the queue should not be empty when request is added
+		assertEquals(3, getQueueSize(queue));
+		
+		int waited = 0;
+		boolean dispatchOnce = false;
+		while (true) {
+			Thread.sleep(100);
+			waited += 100;
+			
+			// the queue should not be dispatched before manually dispatch
+			if (waited < 3000) {
+				assertEquals(3, getQueueSize(queue));
+			} else {
+				if (!dispatchOnce) {
+					queue.dispatchNow();
+					assertEquals(true, (boolean) dispatchingField.get(dispatcher));
+					dispatchOnce = true;
+				}
+				
+				// the queue should be empty shortly after dispatch
+				if (waited >= 4500) {
+					assertEquals(0, getQueueSize(queue));
+					break;
+				}
+			}
+		}
+	}
+	
+	
+	public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
 		queue.start();
@@ -46,9 +145,11 @@ public class ReplayRequestDispatcherTest extends AndroidTestCase {
 		assertEquals(0, getQueueSize(queue));
 		
 		queue.add(apiManager.requestForEvent("event", null));
-		// the queue should not be empty when request is added
+		queue.add(apiManager.requestForEvent("event", null));
+		queue.add(apiManager.requestForEvent("event", null));
 		
-		assertEquals(1, getQueueSize(queue));
+		// the queue should not be empty when request is added
+		assertEquals(3, getQueueSize(queue));
 
 		int waited = 0;
 		while (true) {
@@ -57,63 +158,13 @@ public class ReplayRequestDispatcherTest extends AndroidTestCase {
 			
 			// the queue should not be empty when the dispatch interval is not ended
 			if (waited < 5000) {
-				assertEquals(1, getQueueSize(queue));
+				assertEquals(3, getQueueSize(queue));
 			}
 			
 			// the queue should be empty shortly after dispatch
-			if (waited >= 6000) {
+			if (waited >= 6500) {
 				assertEquals(0, getQueueSize(queue));
 				break;
-			}
-		}
-	}
-	
-	public void testDispatchNow() throws NoSuchFieldException, IllegalAccessException, 
-			IllegalArgumentException, JSONException, InterruptedException {
-		ReplayRequestQueue queue = new ReplayRequestQueue(apiManager);
-		queue.start();
-		
-		// Dispatcher is recreated when start queue
-		ReplayRequestDispatcher dispatcher = getDispatcher(queue);
-		
-		Field dispatchingField = ReplayRequestDispatcher.class.getDeclaredField("dispatching");
-		dispatchingField.setAccessible(true);
-		dispatchingField.setBoolean(dispatcher, false);
-		assertEquals(false, (boolean) dispatchingField.get(dispatcher));
-		
-		queue.setDispatchInterval(5);
-		
-		// the queue should be empty at start
-		assertEquals(0, getQueueSize(queue));
-		
-		queue.add(apiManager.requestForEvent("event", null));
-		queue.add(apiManager.requestForEvent("event", null));
-		queue.add(apiManager.requestForEvent("event", null));
-		
-		// the queue should not be empty when request is added
-		assertEquals(3, getQueueSize(queue));
-		
-		int waited = 0;
-		boolean dispatchOnce = false;
-		while (true) {
-			Thread.sleep(100);
-			waited += 100;
-			
-			// the queue should not be empty when the dispatch interval is not ended
-			if (waited < 3000) {
-				assertEquals(3, getQueueSize(queue));
-			} else {
-				if (!dispatchOnce) {
-					queue.dispatchNow();
-					assertEquals(true, (boolean) dispatchingField.get(dispatcher));
-					dispatchOnce = true;
-				}
-				
-				// the queue should be empty shortly after dispatch
-				if (waited >= 5000) {
-					assertEquals(0, getQueueSize(queue));
-					break;
-				}
 			}
 		}
 	}

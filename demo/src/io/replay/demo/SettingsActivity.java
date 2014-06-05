@@ -66,9 +66,13 @@ public class SettingsActivity extends Activity {
 			public void afterTextChanged(Editable s) {
 				// TODO Auto-generated method stub
 				if (s.length() != 0) {
-					int value = Integer.valueOf(s.toString());
-					Log.d("Demo", "new value: "+value);
-					ReplayIO.setDispatchInterval(value);
+					try {
+						int value = Integer.valueOf(s.toString());
+						Log.d("Demo", "new value: "+value);
+						ReplayIO.setDispatchInterval(value);
+					} catch (NumberFormatException e) {
+						
+					}
 				}
 			}
 			

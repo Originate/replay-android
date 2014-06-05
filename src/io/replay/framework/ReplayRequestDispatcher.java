@@ -42,52 +42,94 @@ public class ReplayRequestDispatcher extends Thread {
 		
 		int waited = 0;
 		while (true) {
-			// check if the queue is empty for this dispatch, wait if empty
-			synchronized (mQueue) {
-	        	if (dispatching && mQueue.isEmpty()) {
-	        		dispatching = false;
-	        	}
-			}
-
-        	// sleep for a interval time
-        	if (!dispatching && dispatchInterval >= 0) {
-    			try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// We may have been interrupted because it was time to quit.
-					if (mQuit) {
-	                    return;
-	                }
-	                continue;
+			// interval < 0, wait for manual dispatch
+			if (dispatchInterval < 0) {
+				if (!dispatching) {
+					// wait for a while and check for dispatching signal again
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// We may have been interrupted because it was time to quit.
+						if (mQuit) {
+		                    return;
+		                }
+		                continue;
+					}
+				} else {
+	            	request = mQueue.poll();
+	            	
+	            	if (null == request) {
+	            		// wait for the next manual dispatch
+	            		dispatching = false;
+	            		continue;
+	            	} else {
+	            		executeRequest(request);
+	            	}
 				}
-    			waited += 100;
-    			
-        		if (waited < dispatchInterval * 1000) {
-        			// get back to wait again
-        			continue;
-        		} else {
-        			// time to dispatch 
-        			waited = 0;
-        			dispatching = true;
-        		}
-        	}
-        	
-            try {
-            	request = mQueue.poll();
-            	
-            	if (null == request) {
-            		// wait for the next interval if no request to dispatch
-            		continue;
-            	}
-            	
-	            boolean success = mManager.doPost(request);
-	            
-	            if (success) {
-	            	mDelivery.successPost(request);
-	            }
-			} catch (Exception e) {
-				ReplayIO.errorLog(e.getMessage());
 			}
+			// dispatch immediately when there's request in the queue
+			else if (dispatchInterval == 0) {
+    			try {
+					request = mQueue.take();
+					
+					executeRequest(request);
+				} catch (InterruptedException e) {
+					if (mQuit) {
+						return;
+					}
+					continue;
+				}
+        	}
+			// dispatchInterval > 0, wait for interval time
+			else {
+				if (!dispatching) {
+					// sleep 100 milliseconds a time
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// We may have been interrupted because it was time to quit.
+						if (mQuit) {
+		                    return;
+		                }
+		                continue;
+					}
+	    			waited += 100;
+
+	        		if (waited < dispatchInterval * 1000) {
+	        			// get back to wait again
+	        			continue;
+	        		} else {
+	        			// time to dispatch 
+	        			waited = 0;
+	        			dispatching = true;
+	        			continue;
+	        			// will be dispatching in the next loop
+	        		}
+				} else {
+					request = mQueue.poll();
+		        	
+					// wait for the next interval if no request to dispatch
+		        	if (null == request) {
+		        		// stop dispatching for this interval
+		        		dispatching = false;
+		        		continue;
+		        	} else {
+		        		executeRequest(request);
+		        	}
+				}
+			}
+		}
+	}
+	
+	private void executeRequest(ReplayRequest request) {
+		try {
+			boolean success = mManager.doPost(request);
+            
+            if (success) {
+            	mDelivery.successPost(request);
+            }
+		} catch (Exception e) {
+			ReplayIO.errorLog(e.getMessage());
 		}
 	}
 }
