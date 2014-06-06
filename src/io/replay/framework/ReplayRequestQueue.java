@@ -19,23 +19,37 @@ import android.os.Looper;
 
 public class ReplayRequestQueue {
 
+	/** Directory name persisted requests will be saved to */
 	private static final String PERSIST_DIR = "persist";
+	
+	/** Indicates if the queue is running */
 	private volatile boolean isRunning;
 	
+	/** All requests that current in queue */
 	private final Set<ReplayRequest> mCurrentRequests = new LinkedHashSet<ReplayRequest>();
 	
+	/** Dispatcher */
 	private ReplayRequestDispatcher mDispatcher;
 	
+	/** The actual queue of requests */
 	private final LinkedBlockingQueue<ReplayRequest> mWaittingQueue = new LinkedBlockingQueue<ReplayRequest>();
 	
+	/** API helper */
 	private ReplayAPIManager mManager;
 	
+	/**
+	 * Constructs the queue and gets the dispatcher ready.
+	 * @param manager The API manager dealing with requests.
+	 */
 	public ReplayRequestQueue(ReplayAPIManager manager) {
 		mManager = manager;
 		mDispatcher = new ReplayRequestDispatcher(mWaittingQueue, mManager, 
 				new ReplayRequestDelivery(new Handler(Looper.getMainLooper())));
 	}
 	
+	/**
+	 * Get the queue running and start the dispatcher.
+	 */
 	public void start() {
 		stop();
 		
@@ -46,6 +60,9 @@ public class ReplayRequestQueue {
 		isRunning = true;
 	}
 	
+	/**
+	 * Stop the running queue and the dispatcher.
+	 */
 	public void stop() {
 		if (mDispatcher != null) {
 			mDispatcher.quit();
@@ -54,6 +71,11 @@ public class ReplayRequestQueue {
 		isRunning = false;
 	}
 	
+	/**
+	 * Add request to the queue.
+	 * @param request The request waiting to be posted.
+	 * @return The same request.
+	 */
 	public ReplayRequest add(ReplayRequest request) {
 		request.setRequestQueue(this);
 		
@@ -66,26 +88,41 @@ public class ReplayRequestQueue {
 		return request;
 	}
 	
+	/**
+	 * Called when a request is finish, remove it from the Set of current requests.
+	 * @param request The request that is finished.
+	 */
 	public void finish(ReplayRequest request) {
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.remove(request);
 		}
 	}
 	
+	/**
+	 * Set the dispatch interval.
+	 * @param interval The dispatch interval in seconds.
+	 */
 	public void setDispatchInterval(int interval) {
 		mDispatcher.setDispatchInterval(interval);
 	}
 	
+	/**
+	 * Tell the dispatcher to start working.
+	 */
 	public void dispatchNow() {
 		mDispatcher.dipatchNow();
 	}
 	
+	/**
+	 * Tell if the {@link ReplayRequestQueue} is running.
+	 * @return True if running, false otherwise.
+	 */
 	public boolean isRunning() {
 		return isRunning;
 	}
 	
     /**
-     * Store the events in queue to disk
+     * Store the request in queue to disk.
      * @throws IOException 
      */
 	public void persist(Context context) throws IOException {
@@ -123,7 +160,7 @@ public class ReplayRequestQueue {
 	}
 	
     /**
-     * Load the stored events into queue  
+     * Load the stored events into queue.
      * @throws IOException 
      * @throws JSONException 
      */
