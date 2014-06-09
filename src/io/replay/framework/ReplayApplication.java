@@ -19,7 +19,7 @@ import android.app.Application;
  * </pre>
  * 
  * <p>Note: This feature is based on {@link Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)},
- * it is available since Android API level 14 (Ice Cream Sandwich). So, devices earlier than this will not be able to benefit 
+ * it is available since Android API level 14 (Ice Cream Sandwich). So, devices earlier than this will not benefit 
  * from this, the feature of persisting queuing request do disk and loading persisted requests into queue will not work.</p>
  * 
  * @author richard

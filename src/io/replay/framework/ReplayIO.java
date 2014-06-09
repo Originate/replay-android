@@ -244,6 +244,9 @@ public class ReplayIO {
 		return replayQueue.isRunning();
 	}
 	
+	/**
+	 * Stop if ReplayIO is not initialized.
+	 */
 	private static void checkInitialized() {
 		if (!initialized) {
 			debugLog("ReplayIO not initialized");

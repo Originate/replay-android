@@ -13,7 +13,16 @@ public class ReplayRequestDispatcher extends Thread {
 	private final BlockingQueue<ReplayRequest> mQueue;
 	private final ReplayAPIManager mManager;
 	private final ReplayRequestDelivery mDelivery;
-	
+
+	/**
+	 * The dispatcher that controls the processing of requests in the queue.
+	 * <br>
+	 * There are three different approach for different value of interval. If dispatch interval is negative,
+	 * the dispatcher will wait for a dispatching signal, once got, process all requests in queue. If zero,
+	 * the dispatcher will wait for requests to be add to the queue, process immediately once added. If positive
+	 * value is set, the dispatcher will wait that amount of seconds and produce a dispatching signal to process
+	 * all the request in queue. 
+	 */
 	public ReplayRequestDispatcher(BlockingQueue<ReplayRequest> queue, 
 			ReplayAPIManager manager, ReplayRequestDelivery delivery) {
 		mQueue = queue;
@@ -21,15 +30,25 @@ public class ReplayRequestDispatcher extends Thread {
 		mDelivery = delivery;
 	}
 	
+	/**
+	 * Stop the dispatcher by interrupt the thread.
+	 */
 	public void quit() {
 		mQuit = true;
 		interrupt();
 	}
 	
+	/**
+	 * Update the dispatcher interval.
+	 * @param interval The dispatch interval in seconds.
+	 */
 	public void setDispatchInterval(int interval) {
 		dispatchInterval = interval;
 	}
 	
+	/**
+	 * Set the dispatching signal to true.
+	 */
 	public void dipatchNow() {
 		dispatching = true;
 	}
