@@ -17,6 +17,10 @@ public class ReplayAPIManager implements ReplayConfig {
 	private String apiKey;
 	private String clientUUID;
 	private String sessionUUID;
+	
+	public enum Result {
+		CONNECTION_ERROR, FAILED, SUCCESS, UNKNOWN;
+	}
 
 	/**
 	 * ReplayAPIManager is a wrapper of HttpURLConnection, it provides easier way to send requests.
@@ -69,10 +73,12 @@ public class ReplayAPIManager implements ReplayConfig {
 	 * Post the request to server.
 	 * 
 	 * @param request The request to be sent.
-	 * @return True if request is successfully posted, false otherwise.
+	 * @return {@link Result#SUCCESS} if request is successfully posted, {@link Result#CONNECTION_ERROR} 
+	 * if there's a connection issue, {@link Result#FAILED} if server returns something other than 200, 
+	 * {@link Result#UNKNOWN} otherwise.
 	 */
-	public boolean doPost(ReplayRequest request) {
-		boolean success = false;
+	public Result doPost(ReplayRequest request) {
+		Result result = Result.UNKNOWN;
 		HttpURLConnection connection = null;
 		URL url;
 		try {
@@ -105,24 +111,27 @@ public class ReplayAPIManager implements ReplayConfig {
 				
 				ReplayIO.debugLog(""+sb.toString());*/
 				
-				success = true;
+				result = Result.SUCCESS;
 			} else {
+				result = Result.FAILED;
 				ReplayIO.errorLog(connection.getResponseMessage());
 			}
 			
 		} catch (MalformedURLException e) {
+			result = Result.CONNECTION_ERROR;
 			e.printStackTrace();
 		} catch (ProtocolException e) {
+			result = Result.CONNECTION_ERROR;
 			e.printStackTrace();
 		} catch (IOException e) {
-			//e.printStackTrace();
+			result = Result.CONNECTION_ERROR;
 		} finally {
 			if (connection != null) {
 				connection.disconnect();
 			}
 		}
 		
-		return success;
+		return result;
 	}
 	
 	/**

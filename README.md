@@ -20,9 +20,9 @@ ReplaySessionManager is in charge of the sessions. A new should be created at th
 
 ReplayAPIManager help dealing with the event requests sending to server.
 
-### ReplayRequestQueue
+### ReplayQueue
 
-This class queues the URL requests created by ReplayAPIManager. All requests to be sent out are enqueued by ReplayRequestQueue and dequeued according to the `dispatchInterval`.
+This class queues the URL requests created by ReplayAPIManager. All requests to be sent out are enqueued by ReplayQueue and dequeued according to the `dispatchInterval`.
 
 | t < 0           | t = 0              | t > 0          |
 |-----------------|--------------------|----------------|

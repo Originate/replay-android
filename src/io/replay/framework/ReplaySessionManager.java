@@ -9,7 +9,7 @@ public class ReplaySessionManager implements ReplayConfig {
 
 	/**
 	 * Get or generate a session UUID.  Generated session UUID will be saved.
-	 * @param context The {@link ApplicationContext}
+	 * @param context The {@link Context#getApplicationContext}
 	 * @return The session UUID.
 	 */
 	public static String sessionUUID(Context context) {
@@ -25,7 +25,7 @@ public class ReplaySessionManager implements ReplayConfig {
 	
 	/**
 	 * Delete the current session UUID.
-	 * @param context The {@link ApplicationContext}
+	 * @param context The {@link Context#getApplicationContext}
 	 */
 	public static void endSession(Context context) {
 		ReplayIO.debugLog("Session ended");

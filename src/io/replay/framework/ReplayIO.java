@@ -16,7 +16,7 @@ public class ReplayIO {
 	private static String clientUUID;
 	private static boolean enabled;
 	private static ReplayAPIManager replayAPIManager;
-	private static ReplayRequestQueue replayQueue;
+	private static ReplayQueue replayQueue;
 	private static ReplayIO mInstance;
 	private static Context mContext;
 	private static boolean initialized;
@@ -36,7 +36,7 @@ public class ReplayIO {
 	/**
 	 * Initializes ReplayIO client.  Previous state of enable/disable 
 	 * and debugMode are loaded. Previous value of dispatchInterval is loaded, too. 
-	 * {@link ReplayRequestQueue} is initialized and started. If there are persisted requests 
+	 * {@link ReplayQueue} is initialized and started. If there are persisted requests 
 	 * on disk, load them into queue.
 	 * 
 	 * @param context The application context.
@@ -51,11 +51,11 @@ public class ReplayIO {
 		enabled = isEnabled();
 		debugMode = isDebugMode();
 		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
-		replayQueue = new ReplayRequestQueue(replayAPIManager);
+		replayQueue = new ReplayQueue(replayAPIManager);
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayQueue.start();
 		try {
-			replayQueue.load(mContext);
+			replayQueue.loadQueueFromDisk(mContext);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -84,7 +84,7 @@ public class ReplayIO {
 		ReplayRequest request;
 		try {
 			request = replayAPIManager.requestForEvent(eventName, data);
-			replayQueue.add(request);
+			replayQueue.enqueue(request);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -100,7 +100,7 @@ public class ReplayIO {
 		ReplayRequest request;
 		try {
 			request = replayAPIManager.requestForAlias(userAlias);
-			replayQueue.add(request);
+			replayQueue.enqueue(request);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -139,7 +139,7 @@ public class ReplayIO {
 	public static void dispatch() {
 		checkInitialized();
 		if (!enabled) return;
-		replayQueue.dispatchNow();
+		replayQueue.dispatch();
 	}
 	
 	/**
@@ -178,7 +178,7 @@ public class ReplayIO {
 	
 	/**
 	 * Set debug mode.  When debug mode is on, logs will be printed.
-	 * @param debugMode Boolean value to set to.
+	 * @param debug Boolean value to set to.
 	 */
 	public static void setDebugMode(boolean debug) {
 		checkInitialized();
@@ -191,7 +191,7 @@ public class ReplayIO {
 	
 	/**
 	 * Tell if debug mode is enabled.
-	 * @return True if is enabled, false otherwise.
+	 * @return True if enabled, false otherwise.
 	 */
 	public static boolean isDebugMode() {
 		checkInitialized();
@@ -200,7 +200,7 @@ public class ReplayIO {
 	}
 	
 	/** 
-	 * Call from {@link ReplayApplication} when the app entered background.  {@link ReplayRequestQueue}
+	 * Call from {@link ReplayApplication} when the app entered background.  {@link ReplayQueue}
 	 * will stop running, request in queue will be saved on disk. Session will be ended, too. 
 	 */
 	public static void stop() {
@@ -208,7 +208,7 @@ public class ReplayIO {
 		replayQueue.stop();
 		
 		try {
-			replayQueue.persist(mContext);
+			replayQueue.saveQueueToDisk(mContext);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -216,18 +216,18 @@ public class ReplayIO {
 	}
 	
 	/**
-	 * Call from {@link ReplayApplication} when the app entered foreground.  {@link ReplayRequestQueue}
+	 * Call from {@link ReplayApplication} when the app entered foreground.  {@link ReplayQueue}
 	 * will be restarted. A new session is started. If there are persisted requests, load them into queue.
 	 */
 	public static void run() {
 		checkInitialized();
-		replayQueue = new ReplayRequestQueue(replayAPIManager);
+		replayQueue = new ReplayQueue(replayAPIManager);
 		replayQueue.start();
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
 		
 		try {
-			replayQueue.load(mContext);
+			replayQueue.loadQueueFromDisk(mContext);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -236,7 +236,7 @@ public class ReplayIO {
 	}
 	
 	/**
-	 * Tell if the ReplayIO is running, ie. ReplayRequestQueue is running. 
+	 * Tell if the ReplayIO is running, ie. ReplayQueue is running. 
 	 * @return True if it is running, false otherwise.
 	 */
 	public static boolean isRunning() {
