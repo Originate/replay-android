@@ -7,6 +7,11 @@ import android.content.SharedPreferences;
 
 public class ReplaySessionManager implements ReplayConfig {
 
+	/**
+	 * Get or generate a session UUID.  Generated session UUID will be saved.
+	 * @param context The {@link Context#getApplicationContext}
+	 * @return The session UUID.
+	 */
 	public static String sessionUUID(Context context) {
 		SharedPreferences mPrefs = context.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
 		if(!mPrefs.contains(KEY_SESSION_ID)) {
@@ -18,6 +23,10 @@ public class ReplaySessionManager implements ReplayConfig {
 		return mPrefs.getString(KEY_SESSION_ID, "");
 	}
 	
+	/**
+	 * Delete the current session UUID.
+	 * @param context The {@link Context#getApplicationContext}
+	 */
 	public static void endSession(Context context) {
 		ReplayIO.debugLog("Session ended");
 		SharedPreferences mPrefs = context.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);

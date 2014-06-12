@@ -69,7 +69,7 @@
         android:layout_alignLeft="@+id/toggleButton2"
         android:layout_alignRight="@+id/toggleButton2"
         android:ems="10"
-        android:inputType="numberDecimal" >
+        android:inputType="numberSigned" >
 
     </EditText>
 
