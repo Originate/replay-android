@@ -25,8 +25,8 @@ public class ReplayQueueTest extends AndroidTestCase {
 		
 		// add 101 request, so it will goes into two files
 		queue = new ReplayQueue(apiManager);
-		queue.stop(); // stop dispatcher actually
-		
+		queue.setDispatchInterval(-1);
+
 		for (int i=0; i < 101; i++) {
 			queue.enqueue(newRequest("event"+i));
 		}
@@ -87,7 +87,16 @@ public class ReplayQueueTest extends AndroidTestCase {
 		}
 		
 	}
-	
+
+    /**
+     * Test setDispatcherInterval(0), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
@@ -122,6 +131,15 @@ public class ReplayQueueTest extends AndroidTestCase {
 		}
 	}
 
+    /**
+     * Test setDispatcherInterval(-1), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherIntervalMinus() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
@@ -170,7 +188,16 @@ public class ReplayQueueTest extends AndroidTestCase {
 			}
 		}
 	}
-		
+
+    /**
+     * Test setDispatcherInterval(5), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
