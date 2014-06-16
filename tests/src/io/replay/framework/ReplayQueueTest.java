@@ -25,8 +25,8 @@ public class ReplayQueueTest extends AndroidTestCase {
 		
 		// add 101 request, so it will goes into two files
 		queue = new ReplayQueue(apiManager);
-		queue.stop(); // stop dispatcher actually
-		
+		queue.setDispatchInterval(-1);
+
 		for (int i=0; i < 101; i++) {
 			queue.enqueue(newRequest("event"+i));
 		}
@@ -61,7 +61,8 @@ public class ReplayQueueTest extends AndroidTestCase {
     	assertEquals(101, count);
 	}
 	
-	public void testLoad() throws IOException, JSONException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
+	public void testLoad() throws IOException, JSONException, NoSuchFieldException,
+            IllegalAccessException, IllegalArgumentException {
 		queue.saveQueueToDisk(getContext());
 
 		Field mRequests = ReplayQueue.class.getDeclaredField("mRequests");
@@ -86,7 +87,16 @@ public class ReplayQueueTest extends AndroidTestCase {
 		}
 		
 	}
-	
+
+    /**
+     * Test setDispatcherInterval(0), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
@@ -96,7 +106,7 @@ public class ReplayQueueTest extends AndroidTestCase {
 		dispatchIntervalField.setAccessible(true);
 		
 		// interval should be 0 by default
-		assertEquals(0, (int) dispatchIntervalField.get(queue));
+		assertEquals(0, ((Integer) dispatchIntervalField.get(queue)).intValue());
 		
 		// the queue should be empty at start
 		assertEquals(0, getQueueSize(queue));
@@ -114,13 +124,22 @@ public class ReplayQueueTest extends AndroidTestCase {
 			waited += 100;
 			
 			// the queue should be empty immediately
-			if (waited >= 1500) {
+			if (waited >= 2000) {
 				assertEquals(0, getQueueSize(queue));
 				break;
 			}
 		}
 	}
 
+    /**
+     * Test setDispatcherInterval(-1), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherIntervalMinus() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
@@ -130,11 +149,11 @@ public class ReplayQueueTest extends AndroidTestCase {
 		dispatchIntervalField.setAccessible(true);
 		
 		// interval should be 0 by default
-		assertEquals(0, (int) dispatchIntervalField.get(queue));
+		assertEquals(0, ((Integer) dispatchIntervalField.get(queue)).intValue());
 		
 		// interval should be what it was set to
 		queue.setDispatchInterval(-1);
-		assertEquals(-1, (int) dispatchIntervalField.get(queue));
+		assertEquals(-1, ((Integer) dispatchIntervalField.get(queue)).intValue());
 		
 		// the queue should be empty at start
 		assertEquals(0, getQueueSize(queue));
@@ -162,14 +181,23 @@ public class ReplayQueueTest extends AndroidTestCase {
 				}
 				
 				// the queue should be empty shortly after dispatch
-				if (waited >= 4500) {
+				if (waited >= 5000) {
 					assertEquals(0, getQueueSize(queue));
 					break;
 				}
 			}
 		}
 	}
-		
+
+    /**
+     * Test setDispatcherInterval(5), this will fail if server side is not on.
+     * Slow network connection will cause failure, too.
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws JSONException
+     * @throws InterruptedException
+     */
 	public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException, 
 			IllegalArgumentException, JSONException, InterruptedException {
 		ReplayQueue queue = new ReplayQueue(apiManager);
@@ -179,11 +207,11 @@ public class ReplayQueueTest extends AndroidTestCase {
 		dispatchIntervalField.setAccessible(true);
 		
 		// interval should be 0 by default
-		assertEquals(0, (int) dispatchIntervalField.get(queue));
+		assertEquals(0, ((Integer) dispatchIntervalField.get(queue)).intValue());
 		
 		// interval should be what it was set to
 		queue.setDispatchInterval(5);
-		assertEquals(5, (int) dispatchIntervalField.get(queue));
+		assertEquals(5, ((Integer) dispatchIntervalField.get(queue)).intValue());
 		
 		// the queue should be empty at start
 		assertEquals(0, getQueueSize(queue));
@@ -206,7 +234,7 @@ public class ReplayQueueTest extends AndroidTestCase {
 			}
 			
 			// the queue should be empty shortly after dispatch
-			if (waited >= 6500) {
+			if (waited >= 7000) {
 				assertEquals(0, getQueueSize(queue));
 				break;
 			}

@@ -107,7 +107,7 @@ public class ReplayQueue {
     }
     
     /**
-     * Process the requests in queue.
+     * Process the requests in queue, send the requests asynchronously.
      */
     private void dequeue() {
     	ReplayIO.debugLog("Dequeueing requests...");
@@ -120,10 +120,10 @@ public class ReplayQueue {
     		stopTimerIfUnneeded();
     		
     		if (dequeueing) {
-    			ReplayIO.debugLog("  |-- Can't dequeue - request already in progress");
+    			ReplayIO.debugLog("  ├── Can't dequeue - request already in progress");
     		}
     		if (mRequests.size() == 0) {
-    			ReplayIO.debugLog("  |-- Empty queue");
+    			ReplayIO.debugLog("  ├── Empty queue");
     		}
     	}
     }
@@ -161,12 +161,18 @@ public class ReplayQueue {
     		dequeue();
     	}
     }
-    
+
+    /**
+     * Stop timer, by remove delayed runnable from Handler.
+     */
     private void stopTimer() {
     	mHandler.removeCallbacks(runnable);
     	timing = false;
     }
-    
+
+    /**
+     * Stop timer if dispatchInterval is negative or requests queue is empty.
+     */
     private void stopTimerIfUnneeded() {
     	if (dispatchInterval <= 0 || mRequests.size() == 0) {
     		stopTimer();
@@ -271,10 +277,11 @@ public class ReplayQueue {
 			}
 			// failure - wait for Reachability notification to call dequeue
 			else {
-				ReplayIO.debugLog("  │    └── Sent failure ("+mRequests.size()+" left)");
+				ReplayIO.debugLog("  │    └── Sent failure "+result+" ("+mRequests.size()+" left)");
 			}
 			
 			dequeueing = false;
+			timing = false;
 		}
     	
     }
