@@ -21,6 +21,12 @@ public class ReplayIO {
 	private static Context mContext;
 	private static boolean initialized;
 	private static SharedPreferences mPrefs;
+
+    private static int started;
+    private static int resumed;
+    @SuppressWarnings("unused")
+    private static int paused;
+    private static int stopped;
 	
 	/**
 	 * Private constructor to create an instance.
@@ -291,4 +297,60 @@ public class ReplayIO {
 			Log.e("REPLAY_IO", log);
 		}
 	}
+
+    /**
+     * Call this in your Activity's onStart() method, to track the status of your app.
+     */
+    public static void activityStart() {
+        started ++;
+
+        checkAppVisibility();
+    }
+
+    /**
+     * Call this in your Activity's onResume() method, to track the status of your app.
+     */
+    public static void activityResume() {
+        resumed ++;
+
+        checkAppVisibility();
+    }
+
+    /**
+     * Call this in your Activity's onPause() method, tracking the status of your app.
+     */
+    public static void activityPause() {
+        paused ++;
+    }
+
+    /**
+     * Call this in your Activity's onStop() method, tracking the status of your app.
+     */
+    public static void activityStop() {
+        stopped ++;
+
+        checkAppVisibility();
+    }
+
+    private static boolean isApplicationVisible() {
+        return started > stopped;
+    }
+
+    private static boolean isApplicationInForeground() {
+        return resumed > stopped;
+    }
+
+    private static void checkAppVisibility() {
+        if (!isApplicationVisible()) {
+            if (ReplayIO.isRunning()) {
+                ReplayIO.debugLog("App goes to background. Stop!");
+                ReplayIO.stop();
+            }
+        } else {
+            if (!ReplayIO.isRunning()) {
+                ReplayIO.debugLog("App goes to foreground. Run!");
+                ReplayIO.run();
+            }
+        }
+    }
 }
