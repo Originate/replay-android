@@ -206,8 +206,10 @@ public class ReplayIO {
 	}
 	
 	/** 
-	 * Call from {@link ReplayApplication} when the app entered background.  {@link ReplayQueue}
-	 * will stop running, request in queue will be saved on disk. Session will be ended, too. 
+	 * Called when the app entered background.  {@link ReplayQueue}
+	 * will stop running, requests in queue will be saved to disk. Session will be ended, too.
+     *
+     * @see ReplayApplication
 	 */
 	public static void stop() {
 		checkInitialized();
@@ -222,8 +224,10 @@ public class ReplayIO {
 	}
 	
 	/**
-	 * Call from {@link ReplayApplication} when the app entered foreground.  {@link ReplayQueue}
+	 * Called when the app entered foreground.  {@link ReplayQueue}
 	 * will be restarted. A new session is started. If there are persisted requests, load them into queue.
+     *
+     * @see ReplayApplication
 	 */
 	public static void run() {
 		checkInitialized();
