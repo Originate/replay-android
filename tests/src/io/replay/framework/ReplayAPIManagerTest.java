@@ -15,8 +15,8 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		super.setUp();
 	}
 	
-	public void testRepalyAPIManager() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
+	public void testReplayAPIManager() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
+		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		Field apiKey = ReplayAPIManager.class.getDeclaredField("apiKey");
 		apiKey.setAccessible(true);
@@ -32,10 +32,15 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
 		assertEquals("session_uuid", sessionUUIDValue);
+
+        Field distinctId = ReplayAPIManager.class.getDeclaredField("distinctId");
+        distinctId.setAccessible(true);
+        String distinctIdValue = (String) distinctId.get(manager);
+        assertEquals("distinct_id", distinctIdValue);
 	}
 	
 	public void testUpdateSessionUUID() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
+		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		manager.updateSessionUUID("new_session_uuid");
 		
@@ -46,7 +51,7 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 	}
 	
 	public void testRequestForEvent() throws JSONException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
+		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		HashMap<String, String> map = new HashMap<String,String>();
 		map.put("color", "green");
 		
@@ -66,6 +71,9 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		
 		assertTrue(json.has(ReplayConfig.KEY_SESSION_ID));
 		assertEquals("session_uuid", json.getString(ReplayConfig.KEY_SESSION_ID));
+
+        assertTrue(json.has(ReplayConfig.KEY_DISTINCT_ID));
+        assertEquals("distinct_id", json.getString(ReplayConfig.KEY_DISTINCT_ID));
 		
 		assertTrue(json.has(ReplayConfig.KEY_DATA));
 		
@@ -78,7 +86,7 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 	}
 	
 	public void testRequestForAlias() throws JSONException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
+		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		ReplayRequest request = manager.requestForAlias("new_alias");
 		assertNotNull(request);
@@ -99,22 +107,4 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 		assertTrue(json.has("alias"));
 		assertEquals("new_alias", json.getString("alias"));
 	}
-	
-/*	public void testRequest() throws JSONException {
-		JSONObject json = new JSONObject();
-		json.put("test", true);
-		
-		ReplayRequest request = ReplayAPIManager.request("testType", json);
-		JSONObject body = new JSONObject(new String(request.getBody()));
-		assertNotNull(body);
-		// can not compare JSONObject directly
-		//assertEquals(json, body);
-		
-		assertTrue(body.has("test"));
-		assertEquals(true, body.getBoolean("test"));
-		
-		assertEquals(ReplayConfig.REPLAY_URL+"testType", request.getUrl());
-		
-	}*/
-	
 }

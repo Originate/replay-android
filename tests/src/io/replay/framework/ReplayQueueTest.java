@@ -21,7 +21,7 @@ public class ReplayQueueTest extends AndroidTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		apiManager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid");
+		apiManager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		// add 101 request, so it will goes into two files
 		queue = new ReplayQueue(apiManager);
@@ -242,8 +242,8 @@ public class ReplayQueueTest extends AndroidTestCase {
 	}
 		
 	/**
-	* Get the size of the underlying queue size of ReplayQueue
-	* @return
+	* Get the size of the underlying queue size of ReplayQueue.
+	* @return Size of the queue.
 	* @throws NoSuchFieldException
 	* @throws IllegalAccessException
 	* @throws IllegalArgumentException

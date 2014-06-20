@@ -13,6 +13,7 @@ import android.util.Log;
 public class ReplayIO {
 
 	private static boolean debugMode;
+    private static String apiKey;
 	private static String clientUUID;
 	private static boolean enabled;
 	private static ReplayAPIManager replayAPIManager;
@@ -52,11 +53,12 @@ public class ReplayIO {
 	public static ReplayIO init(Context context, String apiKey) {
 		if (mInstance == null) {
 			mInstance = new ReplayIO(context);
+            mInstance.apiKey = apiKey;
 		}
-		
 		enabled = isEnabled();
 		debugMode = isDebugMode();
-		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context), ReplaySessionManager.sessionUUID(context));
+		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(context),
+                ReplaySessionManager.sessionUUID(context), getDistinctId());
 		replayQueue = new ReplayQueue(replayAPIManager);
 		replayQueue.setDispatchInterval(getDispatchInterval());
 		replayQueue.start();
@@ -76,7 +78,9 @@ public class ReplayIO {
 	 * @param apiKey The API key from <a href="http://replay.io>replay.io</a>.
 	 */
 	public static void trackWithAPIKey(String apiKey) {
-		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(mContext), ReplaySessionManager.sessionUUID(mContext));
+        mInstance.apiKey = apiKey;
+		replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(mContext),
+                ReplaySessionManager.sessionUUID(mContext), getDistinctId());
 	}
 	
 	/**
@@ -356,5 +360,44 @@ public class ReplayIO {
                 ReplayIO.run();
             }
         }
+    }
+
+    /**
+     * Set the distinct ID to the value passed in.
+     *
+     * @param distinctId New ID.
+     */
+    public static void identify(String distinctId) {
+        checkInitialized();
+        SharedPreferences.Editor editor = mPrefs.edit();
+        editor.putString(ReplayConfig.PREF_DISTINCT_ID, distinctId);
+        editor.commit();
+
+        replayAPIManager = new ReplayAPIManager(apiKey, getClientUUID(mContext),
+                ReplaySessionManager.sessionUUID(mContext), distinctId);
+    }
+
+    /**
+     * Clear the saved distinct ID.
+     */
+    public static void identify() {
+        checkInitialized();
+        if (mPrefs.contains(ReplayConfig.PREF_DISTINCT_ID)) {
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.remove(ReplayConfig.PREF_DISTINCT_ID);
+            editor.commit();
+        }
+    }
+
+    /**
+     * Get the distinct ID.
+     * @return The distinct ID.
+     */
+    private static String getDistinctId() {
+        checkInitialized();
+        if (mPrefs.contains(ReplayConfig.PREF_DISTINCT_ID)) {
+            return mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, "");
+        }
+        return "";
     }
 }

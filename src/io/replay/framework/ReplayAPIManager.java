@@ -14,9 +14,10 @@ import org.json.JSONObject;
 
 public class ReplayAPIManager implements ReplayConfig {
 
-	private String apiKey;
+    private String apiKey;
 	private String clientUUID;
 	private String sessionUUID;
+    private String distinctId;
 	
 	public enum Result {
 		CONNECTION_ERROR, FAILED, SUCCESS, UNKNOWN;
@@ -28,12 +29,15 @@ public class ReplayAPIManager implements ReplayConfig {
 	 * @param apiKey The Replay.IO API key.
 	 * @param clientUUID The client UUID.
 	 * @param sessionUUID The session UUID.
+     * @param distinctId The distinct identity.
 	 */
-	public ReplayAPIManager(String apiKey, String clientUUID, String sessionUUID) {
+	public ReplayAPIManager(String apiKey, String clientUUID, String sessionUUID, String distinctId) {
 		this.apiKey = apiKey;
 		this.clientUUID = clientUUID;
 		this.sessionUUID = sessionUUID;
-		ReplayIO.debugLog("Tracking with { API Key: "+apiKey+", Client UUID: "+clientUUID+", Session UUID: "+sessionUUID);
+        this.distinctId = distinctId;
+		ReplayIO.debugLog("Tracking with { API Key: "+apiKey+", Client UUID: "+clientUUID
+                +", Session UUID: "+sessionUUID+", Distinct ID:"+distinctId);
 	}
 	
 	/**
@@ -147,6 +151,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		json.put(KEY_REPLAY_KEY, apiKey);
 		json.put(KEY_CLIENT_ID, clientUUID);
 		json.put(KEY_SESSION_ID, sessionUUID);
+        json.put(KEY_DISTINCT_ID, distinctId);
 		if (null == data) {
 			data = new HashMap<String, String>();
 		}
@@ -166,6 +171,7 @@ public class ReplayAPIManager implements ReplayConfig {
 		JSONObject json = new JSONObject();
 		json.put(KEY_REPLAY_KEY, apiKey);
 		json.put(KEY_CLIENT_ID, clientUUID);
+        json.put(KEY_DISTINCT_ID, distinctId);
 		json.put("alias", alias);
 		return json;
 	}

@@ -70,5 +70,14 @@ public class ReplayIOTest extends AndroidTestCase {
 		ReplayIO.setDebugMode(false);
 		assertFalse(ReplayIO.isDebugMode());
 	}
-	
+
+    public void testIdentify() {
+        //ReplayIO.identify("new_identity");
+        SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+        //assertEquals("", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID,""));
+
+        ReplayIO.init(mContext, "api_key");
+        ReplayIO.identify("new_identity");
+        assertEquals("new_identity", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID,""));
+    }
 }
