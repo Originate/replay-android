@@ -69,16 +69,20 @@ public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
     }
     
     private void checkAppVisibility() {
-    	if (!isApplicationVisible()) {
-    		if (ReplayIO.isRunning()) {
-    			ReplayIO.debugLog("App goes to background. Stop!");
-    			ReplayIO.stop();
-    		}
-    	} else {
-    		if (!ReplayIO.isRunning()) {
-    			ReplayIO.debugLog("App goes to foreground. Run!");
-    			ReplayIO.run();
-    		}
-    	}
+        try {
+            if (!isApplicationVisible()) {
+                if (ReplayIO.isRunning()) {
+                    ReplayIO.debugLog("App goes to background. Stop!");
+                    ReplayIO.stop();
+                }
+            } else {
+                if (!ReplayIO.isRunning()) {
+                    ReplayIO.debugLog("App goes to foreground. Run!");
+                    ReplayIO.run();
+                }
+            }
+        } catch (ReplayIONotInitializedException e) {
+            ReplayIO.errorLog(e.getMessage());
+        }
     }
 }

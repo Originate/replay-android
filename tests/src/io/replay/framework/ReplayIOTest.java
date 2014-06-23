@@ -9,75 +9,95 @@ import android.test.AndroidTestCase;
 
 public class ReplayIOTest extends AndroidTestCase {
 
-	private ReplayIO replayIO;
-	
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
 
-	public void testGetClientUUID() {
-		// make sure no KEY_CLIENT_ID exist
-		SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-		mPrefs.contains(ReplayConfig.KEY_CLIENT_ID);
-		mPrefs.edit().remove(ReplayConfig.KEY_CLIENT_ID);
-		mPrefs.edit().commit();
+    @Override
+    public void tearDown() throws Exception {
+        Field initialized = ReplayIO.class.getDeclaredField("initialized");
+        initialized.setAccessible(true);
+        initialized.setBoolean(null, false);
 
-		// get/generate client UUID
-		String clientUUID = ReplayIO.getClientUUID(getContext());
-		assertNotNull(clientUUID);
-		assertEquals(UUID.fromString(clientUUID).toString(), clientUUID);
-		
-		
-		// should save to preferences
-		assertTrue(mPrefs.contains(ReplayConfig.KEY_CLIENT_ID));
-		assertEquals(mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, ""), clientUUID);
-		
-		// should not regenerate the UUID
-		assertEquals(ReplayIO.getClientUUID(getContext()), clientUUID);
-	}
-	
-	
-	public void testInit() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-		replayIO = ReplayIO.init(getContext(), "api_key");
-		
-		Field initialized = ReplayIO.class.getDeclaredField("initialized");
-		initialized.setAccessible(true);
-		assertTrue(initialized.getBoolean(replayIO));
-		
-		assertTrue(ReplayIO.isEnabled());
-		assertFalse(ReplayIO.isDebugMode());
-		assertTrue(ReplayIO.isRunning());
-	}
-	
-	public void testDisable() {
-		ReplayIO.init(mContext, "api_key");
-		ReplayIO.disable();
-		assertFalse(ReplayIO.isEnabled());
-	}
-	
-	public void testEnable() {
-		ReplayIO.init(mContext, "api_key");
-		ReplayIO.enable();
-		assertTrue(ReplayIO.isEnabled());
-	}
-	
-	public void testSetDebugMode() {
-		ReplayIO.init(mContext, "api_key");
-		ReplayIO.setDebugMode(true);
-		assertTrue(ReplayIO.isDebugMode());
-		
-		ReplayIO.setDebugMode(false);
-		assertFalse(ReplayIO.isDebugMode());
-	}
+        super.tearDown();
+    }
 
-    public void testIdentify() {
-        //ReplayIO.identify("new_identity");
+    public void testInit() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
+        ReplayIO.init(getContext(), "api_key");
+
+        Field initialized = ReplayIO.class.getDeclaredField("initialized");
+        initialized.setAccessible(true);
+        assertTrue(initialized.getBoolean(null));
+
+        assertTrue(ReplayIO.isEnabled());
+        assertFalse(ReplayIO.isDebugMode());
+        assertTrue(ReplayIO.isRunning());
+    }
+
+    public void testGetClientUUID() throws ReplayIONotInitializedException {
+        // make sure no KEY_CLIENT_ID exist
         SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-        //assertEquals("", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID,""));
+        mPrefs.contains(ReplayConfig.KEY_CLIENT_ID);
+        mPrefs.edit().remove(ReplayConfig.KEY_CLIENT_ID);
+        mPrefs.edit().commit();
+
+        // get/generate client UUID
+        String clientUUID = ReplayIO.getClientUUID();
+        assertNotNull(clientUUID);
+        assertEquals(UUID.fromString(clientUUID).toString(), clientUUID);
+
+
+        // should save to preferences
+        assertTrue(mPrefs.contains(ReplayConfig.KEY_CLIENT_ID));
+        assertEquals(mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, ""), clientUUID);
+
+        // should not regenerate the UUID
+        assertEquals(ReplayIO.getClientUUID(), clientUUID);
+    }
+
+    public void testDisable() throws ReplayIONotInitializedException {
+        ReplayIO.init(mContext, "api_key");
+        ReplayIO.disable();
+        assertFalse(ReplayIO.isEnabled());
+    }
+
+    public void testEnable() throws ReplayIONotInitializedException {
+        ReplayIO.init(mContext, "api_key");
+        ReplayIO.enable();
+        assertTrue(ReplayIO.isEnabled());
+    }
+
+    public void testSetDebugMode() throws ReplayIONotInitializedException {
+        ReplayIO.init(mContext, "api_key");
+        ReplayIO.setDebugMode(true);
+        assertTrue(ReplayIO.isDebugMode());
+
+        ReplayIO.setDebugMode(false);
+        assertFalse(ReplayIO.isDebugMode());
+    }
+
+    public void testIdentify() throws ReplayIONotInitializedException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
+        SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+        // make sure DISTINCT_ID is not set at the begining
+        if (mPrefs.contains(ReplayConfig.PREF_DISTINCT_ID)) {
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.remove(ReplayConfig.PREF_DISTINCT_ID);
+            editor.commit();
+        }
+
+        // should not be able to set identity before  initialized
+        try {
+            ReplayIO.identify("new_identity");
+            fail("Should have thrown exception.");
+        } catch (ReplayIONotInitializedException e) {
+            assertTrue(true);
+        }
+
+        assertEquals("", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
 
         ReplayIO.init(mContext, "api_key");
         ReplayIO.identify("new_identity");
-        assertEquals("new_identity", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID,""));
+        assertEquals("new_identity", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
     }
 }
