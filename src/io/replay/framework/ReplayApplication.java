@@ -10,48 +10,45 @@ import android.app.Application;
  * <br>
  * In order to make this work, third party applications must reference the ReplayApplication
  * in the android:name attribute of the application tag in AndroidManifest.xml.
- * 
+ * <p/>
  * <pre>
  * {@code
- *  <application
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:name="io.replay.framework.ReplayApplication">
-   }
+ *   <application
+ *        android:icon="@drawable/ic_launcher"
+ *        android:label="@string/app_name"
+ *        android:name="io.replay.framework.ReplayApplication">
+ * }
  * </pre>
- * 
- * <p>Note: This feature rely on {@link Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)},
+ * <p/>
+ * <p>Note: This feature rely on {@link android.app.Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)},
  * it is available since Android API level 14 (Ice Cream Sandwich). So, devices earlier than this will have to
  * use the following ways.</p>
- *
+ * <p/>
  * 1, Implement your Activitys by extends {@link ReplayActivity}, it enables ReplayIO tracking the status of your application. <br>
- * 2. Manually track the status of your application, by overriding {@link Activity#onStart()}, {@link Activity#onResume()},
- *  {@link Activity#onPause()} and  {@link Activity#onStop()}:
+ * 2. Manually track the status of your application, by overriding {@link android.app.Activity#onStart()}, {@link android.app.Activity#onResume()},
+ * {@link android.app.Activity#onPause()} and  {@link android.app.Activity#onStop()}:
  *
-        @Override
-        public void onStart(){
-            super.onStart();
-            ReplayIO.activityStart();
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            ReplayIO.activityResume();
-        }
-
-        @Override
-        public void onPause() {
-            ReplayIO.activityPause();
-            super.onPause();
-        }
-
-        @Override
-        public void onStop() {
-            ReplayIO.activityStop();
-            super.onStop();
-        }
+ * <pre>
+ * @Override public void onStart(){
+ *     super.onStart();
+ *     ReplayIO.activityStart();
+ * }
  *
+ * @Override public void onResume() {
+ *     super.onResume();
+ *     ReplayIO.activityResume();
+ * }
+ *
+ * @Override public void onPause() {
+ *     ReplayIO.activityPause();
+ *     super.onPause();
+ * }
+ *
+ * @Override public void onStop() {
+ *     ReplayIO.activityStop();
+ *     super.onStop();
+ * }
+ * </pre>
  * @see ReplayActivity
  * @see ReplayIO#activityStart
  * @see ReplayIO#activityResume
@@ -60,13 +57,13 @@ import android.app.Application;
  */
 public class ReplayApplication extends Application {
 
-	/**
-	 * Overridden {@link Application#onCreate()} to register ActivityLifecycleCallbacks at start. 
-	 */
-	@SuppressLint("NewApi")
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
-	}
+    /**
+     * Overridden {@link android.app.Application#onCreate()} to register ActivityLifecycleCallbacks at start.
+     */
+    @SuppressLint("NewApi")
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
+    }
 }

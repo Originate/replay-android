@@ -1,14 +1,14 @@
 package io.replay.framework;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-
-import org.json.JSONException;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 public class ReplayIO {
 
@@ -43,11 +43,12 @@ public class ReplayIO {
 
     /**
      * Initializes ReplayIO client.  Previous state of enable/disable
-     * and debugMode are loaded. Previous value of dispatchInterval is loaded, too.
-     * {@link ReplayQueue} is initialized and started. If there are persisted requests
+     * and debugMode are loaded. {@link ReplayQueue} is initialized and started.
+     * Previous value of dispatchInterval is loaded, too. If there are persisted requests
      * on disk, load them into queue.
      *
-     * @param context The application context.
+     * @param context The application context.  Use application context instead of activity context
+     *                to avoid the risk of memory leak.
      * @param apiKey  The API key from <a href="http://replay.io">replay.io</a>.
      * @return An initialized ReplayIO object.
      */
@@ -56,14 +57,20 @@ public class ReplayIO {
             mInstance = new ReplayIO(context);
             replayApiKey = apiKey;
         }
+        // load the default settings
         enabled = mPrefs.getBoolean(ReplayConfig.PREF_ENABLED, true);
         debugMode = mPrefs.getBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, false);
+
+        // initialize ReplayAPIManager
         replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
                 ReplaySessionManager.sessionUUID(context),
                 mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
+
+        // initialize ReplayQueue
         replayQueue = new ReplayQueue(replayAPIManager);
         replayQueue.setDispatchInterval(mPrefs.getInt(ReplayConfig.PREF_DISPATCH_INTERVAL, 0));
         replayQueue.start();
+
         try {
             replayQueue.loadQueueFromDisk(mContext);
         } catch (IOException e) {
@@ -79,7 +86,7 @@ public class ReplayIO {
      * Update the API key.  The {@link ReplayAPIManager} instance will be updated, too.
      *
      * @param apiKey The API key from <a href="http://replay.io>replay.io</a>.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void trackWithAPIKey(String apiKey) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -93,7 +100,7 @@ public class ReplayIO {
      *
      * @param eventName Name of the event.
      * @param data      {@link Map} object stores key-value pairs.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void trackEvent(String eventName, final Map<String, String> data) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -111,7 +118,7 @@ public class ReplayIO {
      * Update alias.  Send a alias request to server side.
      *
      * @param userAlias New alias.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void updateAlias(String userAlias) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -126,16 +133,13 @@ public class ReplayIO {
     }
 
     /**
-     * Set interval for dispatches.
-     * <br>
-     * When interval is set to negative, dispatcher will wait for manual {@link ReplayIO#dispatch()}.
-     * <br>
-     * When interval is set to 0, dispatcher will send the newly added requests immediately.
-     * <br>
+     * Set interval for dispatches.  <br>
+     * When interval is set to negative, dispatcher will wait for manual {@link ReplayIO#dispatch()}.<br>
+     * When interval is set to 0, dispatcher will send the newly added requests immediately.<br>
      * When interval is set to positive, dispatcher will work periodically.
      *
      * @param interval Interval in seconds.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void setDispatchInterval(int interval) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -150,7 +154,7 @@ public class ReplayIO {
      * Get interval for dispatches.
      *
      * @return Dispatch interval in seconds.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static int getDispatchInterval() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -160,7 +164,7 @@ public class ReplayIO {
     /**
      * Dispatch immediately.  When triggered, all request in queue will be sent.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void dispatch() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -171,7 +175,7 @@ public class ReplayIO {
     /**
      * Enable ReplayIO.  Allow sending requests.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}}.
      */
     public static void enable() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -185,7 +189,7 @@ public class ReplayIO {
     /**
      * Disable ReplayIO.  Disallow sending requests.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void disable() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -200,7 +204,7 @@ public class ReplayIO {
      * Tell if ReplayIO is enabled.
      *
      * @return True if is enabled, false otherwise.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static boolean isEnabled() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -212,7 +216,7 @@ public class ReplayIO {
      * Set debug mode.  When debug mode is on, logs will be printed.
      *
      * @param debug Boolean value to set to.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void setDebugMode(boolean debug) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -227,7 +231,7 @@ public class ReplayIO {
      * Tell if debug mode is enabled.
      *
      * @return True if enabled, false otherwise.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static boolean isDebugMode() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -236,10 +240,10 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered background.  {@link ReplayQueue}
-     * will stop running, requests in queue will be saved to disk. Session will be ended, too.
+     * Called when the app entered background.  {@link ReplayQueue} will stop running,
+     * requests in queue will be saved to disk. Session will be ended, too.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      * @see ReplayApplication
      */
     public static void stop() throws ReplayIONotInitializedException {
@@ -255,10 +259,10 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered foreground.  {@link ReplayQueue}
-     * will be restarted. A new session is started. If there are persisted requests, load them into queue.
+     * Called when the app entered foreground.  {@link ReplayQueue} will be restarted.
+     * A new session is started. If there are persisted requests, load them into queue.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      * @see ReplayApplication
      */
     public static void run() throws ReplayIONotInitializedException {
@@ -292,7 +296,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {
@@ -304,7 +308,7 @@ public class ReplayIO {
      * Get or generate a UUID as the client UUID.  Generated client UUID will be saved.
      *
      * @return Client UUID.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static String getClientUUID() throws ReplayIONotInitializedException {
         if (null == mPrefs) {
@@ -413,7 +417,7 @@ public class ReplayIO {
      * Set the distinct ID to the value passed in.
      *
      * @param distinctId New ID.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void identify(String distinctId) throws ReplayIONotInitializedException {
         checkInitialized();
@@ -428,7 +432,7 @@ public class ReplayIO {
     /**
      * Clear the saved distinct ID.
      *
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     public static void identify() throws ReplayIONotInitializedException {
         checkInitialized();
@@ -443,7 +447,7 @@ public class ReplayIO {
      * Get the distinct ID.
      *
      * @return The distinct ID.
-     * @throws ReplayIONotInitializedException when called before {@link init(Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
      */
     private static String getDistinctId() throws ReplayIONotInitializedException {
         checkInitialized();
