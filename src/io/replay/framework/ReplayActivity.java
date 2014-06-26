@@ -8,22 +8,26 @@ import android.app.Activity;
  * {@link Activity#onStart()}, {@link Activity#onResume()}, {@link Activity#onPause()} and
  * {@link Activity#onStop()}:
  * <pre>
- * @Override public void onStart(){
+ * {@literal @}Override
+ * public void onStart(){
  *     super.onStart();
  *     ReplayIO.activityStart();
  * }
  *
- * @Override public void onResume() {
+ * {@literal @}Override
+ * public void onResume() {
  *     super.onResume();
  *     ReplayIO.activityResume();
  * }
  *
- * @Override public void onPause() {
+ * {@literal @}Override
+ * public void onPause() {
  *     ReplayIO.activityPause();
  *     super.onPause();
  * }
  *
- * @Override public void onStop() {
+ * {@literal @}Override
+ * public void onStop() {
  *     ReplayIO.activityStop();
  *     super.onStop();
  * }

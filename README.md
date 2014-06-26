@@ -25,7 +25,8 @@ dependencies {
 
 ### ReplayIO
 
-ReplayIO is the client. Initialize it with ReplayIO.init(Context context, String apiKey). The context object passed in should be ApplicationContext to avoid memory leak.
+ReplayIO is the client. Initialize it with ReplayIO.init(Context context, String apiKey). The Context object passed in should be application's context to avoid memory leak.
+Calling any static method that involves context before initializing ReplayIO first will throw ReplayIONotInitializedException.
 
 ### ReplaySessionManager
 
@@ -33,7 +34,7 @@ ReplaySessionManager is in charge of the sessions. A new session UUID should be 
 
 ### ReplayAPIManager
 
-ReplayAPIManager help dealing with the event requests sending to server.
+ReplayAPIManager helps generating the requests and sending them to server.
 
 ### ReplayQueue
 
@@ -103,6 +104,6 @@ ReplayIO.dispatchNow();            // dispatch manually
 ```
 
 ```java
-ReplayIO.setDispatchInterval(0);   // dispatch immedially (default)
+ReplayIO.setDispatchInterval(0);   // dispatch immediately (default)
 ```
 

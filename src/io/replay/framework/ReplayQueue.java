@@ -298,7 +298,6 @@ public class ReplayQueue {
             // success - remove request from queue and process next item
             if (result == ReplayAPIManager.Result.SUCCESS) {
                 boolean success = mRequests.remove(request);
-                ReplayIO.debugLog("Remove success? " + success);
                 stopTimerIfUnneeded();
                 ReplayIO.debugLog("  │    └── Sent successfully (" + mRequests.size() + " left)");
 
