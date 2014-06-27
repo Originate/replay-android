@@ -48,3 +48,17 @@ android {
     buildTypes {
     }
 }
+
+
+task clearJar(type: Delete) {
+    delete 'build/libs/replay-android.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/libs/')
+    include('classes.jar')
+    rename('classes.jar', 'replay-android.jar')
+}
+
+makeJar.dependsOn(clearJar, build)

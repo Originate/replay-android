@@ -7,8 +7,8 @@ Building this project will produce `replay-android.jar`, which can then be distr
 ### How to build the framework
 
 The project don't depend on other projects, but you will use it as a library project. <br>
-If you are using ADT Bundle or eclipse, import ReplayIO to your workspace, open the properties window, Android tab, check "Is Library".<br>
-If you are using Android Studio, import the project by selecting build.gradle.
+* If you are using ADT Bundle or eclipse, import ReplayIO to your workspace, open the properties window, Android tab, check "Is Library".<br>
+* If you are using Android Studio, import the project by selecting build.gradle.
 In your app project, in file `settings.gradle`:
 
 ```java
@@ -22,6 +22,7 @@ dependencies {
     ...
 }
 ```
+* If you need a JAR file, run `./gradlew makeJar` in project root directory and a `replay-android.jar` will be created under `./build/libs/`
 
 ### ReplayIO
 
