@@ -12,7 +12,7 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+		mPrefs = getContext().getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
 	}
 
 	public void testSessionUUID() {

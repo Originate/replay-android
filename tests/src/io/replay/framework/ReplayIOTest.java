@@ -37,7 +37,7 @@ public class ReplayIOTest extends AndroidTestCase {
 
     public void testGetClientUUID() throws ReplayIONotInitializedException {
         // make sure no KEY_CLIENT_ID exist
-        SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+        SharedPreferences mPrefs = getContext().getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
         mPrefs.contains(ReplayConfig.KEY_CLIENT_ID);
         mPrefs.edit().remove(ReplayConfig.KEY_CLIENT_ID);
         mPrefs.edit().commit();
@@ -78,8 +78,8 @@ public class ReplayIOTest extends AndroidTestCase {
     }
 
     public void testIdentify() throws ReplayIONotInitializedException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-        SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-        // make sure DISTINCT_ID is not set at the begining
+        SharedPreferences mPrefs = getContext().getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
+        // make sure DISTINCT_ID is not set at the beginning
         if (mPrefs.contains(ReplayConfig.PREF_DISTINCT_ID)) {
             SharedPreferences.Editor editor = mPrefs.edit();
             editor.remove(ReplayConfig.PREF_DISTINCT_ID);

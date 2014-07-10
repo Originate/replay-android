@@ -38,7 +38,7 @@ public class ReplayIO {
         mContext = context;
         initialized = false;
 
-        mPrefs = mContext.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
+        mPrefs = mContext.getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
     }
 
     /**
