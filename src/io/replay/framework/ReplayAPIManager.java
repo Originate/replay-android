@@ -152,7 +152,9 @@ public class ReplayAPIManager implements ReplayConfig {
         json.put(KEY_REPLAY_KEY, apiKey);
         json.put(KEY_CLIENT_ID, clientUUID);
         json.put(KEY_SESSION_ID, sessionUUID);
-        json.put(KEY_DISTINCT_ID, distinctId);
+        if (distinctId != null && !distinctId.equals("")) {
+            json.put(KEY_DISTINCT_ID, distinctId);
+        }
         json.put(KEY_EVENT_NAME, event);
         if (null == data) {
             data = new HashMap<String, String>();

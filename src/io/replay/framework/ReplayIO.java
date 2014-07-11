@@ -409,6 +409,7 @@ public class ReplayIO {
 
         replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
                 ReplaySessionManager.sessionUUID(mContext), distinctId);
+        replayQueue.setReplayAPIManager(replayAPIManager);
     }
 
     /**
@@ -421,6 +422,9 @@ public class ReplayIO {
             editor.remove(ReplayConfig.PREF_DISTINCT_ID);
             editor.commit();
         }
+        replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
+                ReplaySessionManager.sessionUUID(mContext), "");
+        replayQueue.setReplayAPIManager(replayAPIManager);
     }
 
     /**

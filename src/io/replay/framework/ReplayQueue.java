@@ -68,6 +68,10 @@ public class ReplayQueue {
         mHandler = new Handler(Looper.getMainLooper());
     }
 
+    protected void setReplayAPIManager(ReplayAPIManager manager) {
+        mManager = manager;
+    }
+
     /**
      * Get the a dispatch pending.
      */
@@ -290,6 +294,7 @@ public class ReplayQueue {
         @Override
         protected Result doInBackground(ReplayRequest... params) {
             request = params[0];
+            ReplayIO.debugLog("event: "+request.getJson().toString());
             return mManager.doPost(request);
         }
 
