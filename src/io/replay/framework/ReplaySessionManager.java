@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import java.util.UUID;
 
+import io.replay.framework.util.ReplayPrefs;
+
 public class ReplaySessionManager implements ReplayConfig {
 
     /**
@@ -14,14 +16,12 @@ public class ReplaySessionManager implements ReplayConfig {
      * @return The session UUID.
      */
     public static String sessionUUID(Context context) {
-        SharedPreferences mPrefs = context.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-        if (!mPrefs.contains(KEY_SESSION_ID)) {
-            SharedPreferences.Editor editor = mPrefs.edit();
-            editor.putString(KEY_SESSION_ID, UUID.randomUUID().toString());
-            editor.commit();
+        ReplayPrefs mPrefs = ReplayPrefs.get(context);
+        if (!(mPrefs.getSessionID().length() == 0)) {
+            mPrefs.setSessionID(UUID.randomUUID().toString());
             ReplayIO.debugLog("Generated new session uuid");
         }
-        return mPrefs.getString(KEY_SESSION_ID, "");
+        return mPrefs.getSessionID();
     }
 
     /**
@@ -31,9 +31,6 @@ public class ReplaySessionManager implements ReplayConfig {
      */
     public static void endSession(Context context) {
         ReplayIO.debugLog("Session ended");
-        SharedPreferences mPrefs = context.getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.remove(KEY_SESSION_ID);
-        editor.commit();
+        ReplayPrefs.get(context).setSessionID("");
     }
 }

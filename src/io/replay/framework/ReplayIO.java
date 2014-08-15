@@ -1,7 +1,6 @@
 package io.replay.framework;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -9,6 +8,9 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+
+import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayIO {
 
@@ -21,13 +23,14 @@ public class ReplayIO {
     private static ReplayIO mInstance;
     private static Context mContext;
     private static boolean initialized;
-    private static SharedPreferences mPrefs;
+    private static ReplayPrefs mPrefs;
 
     private static int started;
     private static int resumed;
     @SuppressWarnings("unused")
     private static int paused;
     private static int stopped;
+    private static ReplayRequestFactory requestFactory;
 
     /**
      * Private constructor to create an instance.
@@ -38,7 +41,7 @@ public class ReplayIO {
         mContext = context;
         initialized = false;
 
-        mPrefs = mContext.getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
+        mPrefs = ReplayPrefs.get(context.getApplicationContext());
     }
 
     /**
@@ -58,17 +61,20 @@ public class ReplayIO {
             replayApiKey = apiKey;
         }
         // load the default settings
-        enabled = mPrefs.getBoolean(ReplayConfig.PREF_ENABLED, true);
-        debugMode = mPrefs.getBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, false);
+        enabled = mPrefs.getEnabled();
+        debugMode = mPrefs.getDebugMode();
+
+        mPrefs.setClientUUID(getOrGenerateClientUUID());
+        mPrefs.setDistinctID("");
 
         // initialize ReplayAPIManager
-        replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
-                ReplaySessionManager.sessionUUID(context),
-                mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
+        mPrefs.setAPIKey(replayApiKey);
+        replayAPIManager = new ReplayAPIManager();
+        requestFactory = ReplayRequestFactory.get(context);
 
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(replayAPIManager);
-        replayQueue.setDispatchInterval(mPrefs.getInt(ReplayConfig.PREF_DISPATCH_INTERVAL, 0));
+        replayQueue.setDispatchInterval(mPrefs.getDispatchInterval());
         replayQueue.start();
 
         try {
@@ -90,8 +96,8 @@ public class ReplayIO {
     public static void trackWithAPIKey(String apiKey) {
         checkInitialized();
         replayApiKey = apiKey;
-        replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
-                ReplaySessionManager.sessionUUID(mContext), getDistinctId());
+        mPrefs.setAPIKey(apiKey);
+        replayAPIManager = new ReplayAPIManager();
     }
 
     /**
@@ -105,7 +111,7 @@ public class ReplayIO {
         if (!enabled) return;
         ReplayRequest request;
         try {
-            request = replayAPIManager.requestForEvent(eventName, data);
+            request = requestFactory.requestForEvent(eventName, data);
             replayQueue.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -122,7 +128,7 @@ public class ReplayIO {
         if (!enabled) return;
         ReplayRequest request;
         try {
-            request = replayAPIManager.requestForAlias(userAlias);
+            request = requestFactory.requestForAlias(userAlias);
             replayQueue.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -141,19 +147,7 @@ public class ReplayIO {
         checkInitialized();
         replayQueue.setDispatchInterval(interval);
 
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.putInt(ReplayConfig.PREF_DISPATCH_INTERVAL, interval);
-        editor.commit();
-    }
-
-    /**
-     * Get interval for dispatches.
-     *
-     * @return Dispatch interval in seconds.
-     */
-    public static int getDispatchInterval() {
-        checkInitialized();
-        return mPrefs.getInt(ReplayConfig.PREF_DISPATCH_INTERVAL, 0);
+       mPrefs.setDispatchInterval(interval);
     }
 
     /**
@@ -172,9 +166,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = true;
 
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.putBoolean(ReplayConfig.PREF_ENABLED, true);
-        editor.commit();
+       mPrefs.setEnabled(enabled);
     }
 
     /**
@@ -184,9 +176,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = false;
 
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.putBoolean(ReplayConfig.PREF_ENABLED, false);
-        editor.commit();
+       mPrefs.setEnabled(enabled);
     }
 
     /**
@@ -196,8 +186,7 @@ public class ReplayIO {
      */
     public static boolean isEnabled() {
         checkInitialized();
-        enabled = mPrefs.getBoolean(ReplayConfig.PREF_ENABLED, true);
-        return enabled;
+        return mPrefs.getEnabled();
     }
 
     /**
@@ -209,9 +198,7 @@ public class ReplayIO {
         checkInitialized();
         debugMode = debug;
 
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.putBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, debugMode);
-        editor.commit();
+        mPrefs.setDebugMode(debug);
     }
 
     /**
@@ -220,9 +207,7 @@ public class ReplayIO {
      * @return True if enabled, false otherwise.
      */
     public static boolean isDebugMode() {
-        checkInitialized();
-        debugMode = mPrefs.getBoolean(ReplayConfig.PREF_DEBUG_MODE_ENABLED, false);
-        return debugMode;
+       return mPrefs.getDebugMode();
     }
 
     /**
@@ -253,8 +238,8 @@ public class ReplayIO {
         checkInitialized();
         replayQueue = new ReplayQueue(replayAPIManager);
         replayQueue.start();
-        replayQueue.setDispatchInterval(getDispatchInterval());
-        replayAPIManager.updateSessionUUID(ReplaySessionManager.sessionUUID(mContext));
+        replayQueue.setDispatchInterval(mPrefs.getDispatchInterval());
+        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
 
         try {
             replayQueue.loadQueueFromDisk(mContext);
@@ -297,19 +282,16 @@ public class ReplayIO {
         if (null == mPrefs) {
             throw new ReplayIONotInitializedException();
         }
-
         return getOrGenerateClientUUID();
     }
 
     private static String getOrGenerateClientUUID() {
         if (clientUUID == null) {
-            if (!mPrefs.contains(ReplayConfig.KEY_CLIENT_ID)) {
-                SharedPreferences.Editor editor = mPrefs.edit();
-                editor.putString(ReplayConfig.KEY_CLIENT_ID, UUID.randomUUID().toString());
-                editor.commit();
+            if (mPrefs.getClientUUID().length() == 0) {
+                mPrefs.setClientUUID(UUID.randomUUID().toString());
                 ReplayIO.debugLog("Generated new client uuid");
             }
-            return mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, "");
+            return mPrefs.getClientUUID();
         }
         return clientUUID;
     }
@@ -403,28 +385,14 @@ public class ReplayIO {
      */
     public static void identify(String distinctId) {
         checkInitialized();
-        SharedPreferences.Editor editor = mPrefs.edit();
-        editor.putString(ReplayConfig.PREF_DISTINCT_ID, distinctId);
-        editor.commit();
-
-        replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
-                ReplaySessionManager.sessionUUID(mContext), distinctId);
-        replayQueue.setReplayAPIManager(replayAPIManager);
+        mPrefs.setDistinctID(distinctId);
     }
 
     /**
      * Clear the saved distinct ID.
      */
     public static void identify() {
-        checkInitialized();
-        if (mPrefs.contains(ReplayConfig.PREF_DISTINCT_ID)) {
-            SharedPreferences.Editor editor = mPrefs.edit();
-            editor.remove(ReplayConfig.PREF_DISTINCT_ID);
-            editor.commit();
-        }
-        replayAPIManager = new ReplayAPIManager(replayApiKey, getOrGenerateClientUUID(),
-                ReplaySessionManager.sessionUUID(mContext), "");
-        replayQueue.setReplayAPIManager(replayAPIManager);
+        identify("");
     }
 
     /**
@@ -434,7 +402,7 @@ public class ReplayIO {
      */
     private static String getDistinctId() {
         checkInitialized();
-        return mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, "");
+        return mPrefs.getDistinctID();
     }
 
 }
