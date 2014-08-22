@@ -49,7 +49,8 @@ android {
     }
     defaultConfig {
         targetSdkVersion 19
-        testApplicationId 'io.replay.framework.tests'
+        //commenting out tests because of the various changes we've made (Parth - Aug 22, 2014)
+      //  testApplicationId 'io.replay.framework.tests'
     }
     productFlavors {
     }

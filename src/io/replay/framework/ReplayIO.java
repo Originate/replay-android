@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayIO {
@@ -288,7 +289,8 @@ public class ReplayIO {
     private static String getOrGenerateClientUUID() {
         if (clientUUID == null) {
             if (mPrefs.getClientUUID().length() == 0) {
-                mPrefs.setClientUUID(UUID.randomUUID().toString());
+                mPrefs.setClientUUID(UUID.randomUUID()
+                                         .toString());
                 ReplayIO.debugLog("Generated new client uuid");
             }
             return mPrefs.getClientUUID();
@@ -303,7 +305,7 @@ public class ReplayIO {
      */
     public static void debugLog(String log) {
         if (debugMode) {
-            Log.d("REPLAY_IO", log);
+            ReplayLogger.d("REPLAY_IO", log);
         }
     }
 
@@ -314,7 +316,7 @@ public class ReplayIO {
      */
     public static void errorLog(String log) {
         if (debugMode) {
-            Log.e("REPLAY_IO", log);
+            ReplayLogger.e("REPLAY_IO", log);
         }
     }
 
