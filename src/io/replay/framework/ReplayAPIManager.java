@@ -1,77 +1,18 @@
 package io.replay.framework;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+
+import io.replay.framework.network.ReplayRequestFactory;
 
 public class ReplayAPIManager implements ReplayConfig {
 
-    private String apiKey;
-    private String clientUUID;
-    private String sessionUUID;
-    private String distinctId;
-
     public enum Result {
         CONNECTION_ERROR, FAILED, SUCCESS, UNKNOWN;
-    }
-
-    /**
-     * ReplayAPIManager is a wrapper of HttpURLConnection, it provides easier way to send requests.
-     *
-     * @param apiKey      The Replay.IO API key.
-     * @param clientUUID  The client UUID.
-     * @param sessionUUID The session UUID.
-     * @param distinctId  The distinct identity.
-     */
-    public ReplayAPIManager(String apiKey, String clientUUID, String sessionUUID, String distinctId) {
-        this.apiKey = apiKey;
-        this.clientUUID = clientUUID;
-        this.sessionUUID = sessionUUID;
-        this.distinctId = distinctId;
-        ReplayIO.debugLog("Tracking with { API Key: " + apiKey + ", Client UUID: " + clientUUID
-                + ", Session UUID: " + sessionUUID + ", Distinct ID:" + distinctId);
-    }
-
-    /**
-     * Update the session UUID.
-     *
-     * @param sessionUUID The session UUID.
-     */
-    public void updateSessionUUID(String sessionUUID) {
-        this.sessionUUID = sessionUUID;
-        ReplayIO.debugLog("Session UUID: " + sessionUUID);
-    }
-
-    /**
-     * Build the ReplayRequest object for an event request.
-     *
-     * @param event The event name.
-     * @param data  The name-value paired data.
-     * @return ReplayRequest object.
-     * @throws JSONException
-     */
-    public ReplayRequest requestForEvent(String event, Map<String, String> data) throws JSONException {
-        return new ReplayRequest(REQUEST_TYPE_EVENTS, jsonForEvent(event, data));
-
-    }
-
-    /**
-     * Build the ReplayRequest object for an alias request.
-     *
-     * @param alias The alias.
-     * @return ReplayRequest object.
-     * @throws JSONException
-     */
-    public ReplayRequest requestForAlias(String alias) throws JSONException {
-        return new ReplayRequest(REQUEST_TYPE_ALIAS, jsonForAlias(alias));
     }
 
     /**
@@ -137,46 +78,5 @@ public class ReplayAPIManager implements ReplayConfig {
         }
 
         return result;
-    }
-
-    /**
-     * Generate the JSONObject for a event request.
-     *
-     * @param event The event name.
-     * @param data  The name-value paired data.
-     * @return The JSONObject of data.
-     * @throws JSONException
-     */
-    private JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put(KEY_REPLAY_KEY, apiKey);
-        json.put(KEY_CLIENT_ID, clientUUID);
-        json.put(KEY_SESSION_ID, sessionUUID);
-        if (distinctId != null && !distinctId.equals("")) {
-            json.put(KEY_DISTINCT_ID, distinctId);
-        }
-        json.put(KEY_EVENT_NAME, event);
-        if (null == data) {
-            data = new HashMap<String, String>();
-        }
-        data.put(KEY_EVENT_NAME, event);
-        json.put(KEY_DATA, new JSONObject(data));
-        return json;
-    }
-
-    /**
-     * Generate the JSONObject for a alias request.
-     *
-     * @param alias The alias.
-     * @return The JSONObject of data.
-     * @throws JSONException
-     */
-    private JSONObject jsonForAlias(String alias) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put(KEY_REPLAY_KEY, apiKey);
-        json.put(KEY_CLIENT_ID, clientUUID);
-        json.put(KEY_DISTINCT_ID, distinctId);
-        json.put("alias", alias);
-        return json;
     }
 }
