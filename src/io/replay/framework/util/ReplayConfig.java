@@ -1,0 +1,82 @@
+package io.replay.framework.util;
+
+import android.content.Context;
+import android.content.res.Resources;
+
+/**
+ * Created by arichunter on 8/25/14.
+ */
+public class ReplayConfig {
+
+    private static final String STRING_RESOURCE_KEY = "string";
+    private static final String INTEGER_RESOURCE_KEY = "integer";
+
+    private static final String prefsName = "ReplayIOPreferences";
+
+    public static final String CLIENT_ID = "client_id";
+    public static final String SESSION_ID = "session_id";
+
+    private static final String DISPATCH_INTERVAL = "dispatchInterval";
+    private static final String ENABLED = "enabled";
+    private static final String DEBUG_MODE_ENABLED = "debugMode";
+    private static final String DISTINCT_ID = "distinctId";
+    private static final String API_KEY = "apiKey";
+
+    public static Config getOptions(Context context) {
+        Config options = new Config();
+
+        Boolean enabled = getBoolean(context, ENABLED);
+        if (enabled != null) options.setEnabled(enabled);
+
+        Boolean debug = getBoolean(context, DEBUG_MODE_ENABLED);
+        if (debug != null) options.setDebug(debug);
+
+        String apiKey = getString(context, API_KEY);
+        if (apiKey != null) options.setApiKey(apiKey);
+
+        String sessionId = getString(context, SESSION_ID);
+        if (sessionId != null) options.setSessionId(sessionId);
+
+        String clientId = getString(context, CLIENT_ID);
+        if (clientId != null) options.setClientId(clientId);
+
+        String distinctId = getString(context, DISTINCT_ID);
+        if (distinctId != null) options.setDistinctId(distinctId);
+
+        Integer dispatchInterval = getInteger(context, DISPATCH_INTERVAL);
+        if (dispatchInterval != null) options.setDispatchInterval(dispatchInterval);
+
+        return options;
+    }
+
+    private static String getString(Context context, String key) {
+        Resources resources = context.getResources();
+        int id = resources.getIdentifier(key, STRING_RESOURCE_KEY, context.getPackageName());
+        if (id > 0) {
+            return context.getResources().getString(id);
+        } else {
+            return null;
+        }
+    }
+
+    private static Integer getInteger(Context context, String key) {
+        Resources resources = context.getResources();
+        int id = resources.getIdentifier(key, INTEGER_RESOURCE_KEY, context.getPackageName());
+        if (id > 0) {
+            return context.getResources().getInteger(id);
+        } else {
+            return null;
+        }
+    }
+
+    private static Boolean getBoolean(Context context, String key) {
+        Resources resources = context.getResources();
+        int id = resources.getIdentifier(key, STRING_RESOURCE_KEY, context.getPackageName());
+        if (id > 0) {
+            return Boolean.parseBoolean(context.getResources().getString(id));
+        } else {
+            return null;
+        }
+    }
+
+}

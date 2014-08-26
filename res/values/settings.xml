@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--The maximum amount of analytics events to queue before dropping to conserve memory-->
+    <integer name="dispatch_interval">0</integer>
+
+    <!--Flush to the server after receiving this many messages-->
+    <string name="enabled">true</string>
+
+    <!--Flush to the server after receiving this many messages-->
+    <string name="debug_mode_enabled">true</string>
+
+</resources>
