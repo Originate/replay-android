@@ -32,13 +32,13 @@ public class Config {
            String api_key, String session_id, String client_id, String distinct_id,
            Integer dispatch_interval) {
 
-        setDebug(debug_mode_enabled);
-        setEnabled(enabled);
-        setApiKey(api_key);
-        setSessionId(session_id);
-        setClientId(client_id);
-        setDistinctId(distinct_id);
-        setDispatchInterval(dispatch_interval);
+        this.debug_mode_enabled = debug_mode_enabled;
+        this.enabled = enabled;
+        this.api_key = api_key;
+        this.session_id = session_id;
+        this.client_id = client_id;
+        this.distinct_id = distinct_id;
+        this.dispatch_interval = dispatch_interval;
     }
 
     public boolean isDebug() {

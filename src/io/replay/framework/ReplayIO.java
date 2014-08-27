@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import io.replay.framework.network.ReplayRequestFactory;
 import io.replay.framework.util.ReplayLogger;
-import io.replay.framework.util.ReplayConfig;
+import io.replay.framework.util.ReplayParams;
 import io.replay.framework.util.Config;
 
 public class ReplayIO {
@@ -43,7 +43,7 @@ public class ReplayIO {
         mContext = context;
         initialized = false;
 
-        mConfig = ReplayConfig.getOptions(context.getApplicationContext());
+        mConfig = ReplayParams.getOptions(context.getApplicationContext());
     }
 
     /**

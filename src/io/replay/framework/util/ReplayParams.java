@@ -6,7 +6,7 @@ import android.content.res.Resources;
 /**
  * Created by arichunter on 8/25/14.
  */
-public class ReplayConfig {
+public class ReplayParams {
 
     private static final String STRING_RESOURCE_KEY = "string";
     private static final String INTEGER_RESOURCE_KEY = "integer";
