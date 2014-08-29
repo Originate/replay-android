@@ -1,4 +1,4 @@
-package io.replay.framework.threads;
+package io.replay.framework.util;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -9,7 +9,7 @@ import io.replay.framework.ReplayIO;
  * Created by parthpadgaonkar on 8/13/14.
  */
 public class LooperThreadWithHandler extends Thread {
-    private Handler handler;
+    protected Handler handler;
 
     private void waitForReady() {
         while (this.handler == null) {
@@ -33,19 +33,14 @@ public class LooperThreadWithHandler extends Thread {
         Looper.loop();
     }
 
-    /**
-     * Gets this thread's handler
-     */
+    /** Gets this thread's handler */
     public Handler handler() {
         waitForReady();
         return handler;
     }
 
-    /**
-     * Quits the current looping thread
-     */
+    /** Quits the current looping thread */
     public void quit() {
-        Looper.myLooper()
-              .quit();
+        Looper.myLooper().quit();
     }
 }

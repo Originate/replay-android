@@ -13,6 +13,9 @@ import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
+import io.replay.framework.queue.ReplayQueue;
+import io.replay.framework.model.ReplayRequest;
+
 public class ReplayQueueTest extends AndroidTestCase {
 
 	private ReplayAPIManager apiManager;

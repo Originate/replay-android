@@ -1,8 +1,14 @@
-package io.replay.framework;
+package io.replay.framework.model;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ReplayRequest {
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+public class ReplayRequest implements Serializable {
 
     private String type;
     private JSONObject json;
@@ -55,5 +61,15 @@ public class ReplayRequest {
      */
     public byte[] getBody() {
         return json.toString().getBytes();
+    }
+
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.writeUTF(type);
+        oos.writeUTF(json.toString());
+
+    }
+    private void readObject(ObjectInputStream ois) throws IOException, JSONException {
+        type = ois.readUTF();
+        json = new JSONObject(ois.readUTF());
     }
 }

@@ -1,15 +1,16 @@
 package io.replay.framework;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.model.ReplayRequestFactory;
+import io.replay.framework.queue.QueueLayer;
+import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.ReplayPrefs;
 
@@ -20,8 +21,6 @@ public class ReplayIO {
     private static String clientUUID;
     private static boolean enabled;
     private static ReplayAPIManager replayAPIManager;
-    private static ReplayQueue replayQueue;
-    private static ReplayIO mInstance;
     private static Context mContext;
     private static boolean initialized;
     private static ReplayPrefs mPrefs;
@@ -32,73 +31,42 @@ public class ReplayIO {
     private static int paused;
     private static int stopped;
     private static ReplayRequestFactory requestFactory;
-
-    /**
-     * Private constructor to create an instance.
-     *
-     * @param context The application context.
-     */
-    private ReplayIO(Context context) {
-        mContext = context;
-        initialized = false;
-
-        mPrefs = ReplayPrefs.get(context.getApplicationContext());
-    }
+    private static QueueLayer queueLayer;
+    private static ReplayQueue replayQueue;
 
     /**
      * Initializes ReplayIO client.  Previous state of enable/disable
-     * and debugMode are loaded. {@link ReplayQueue} is initialized and started.
+     * and debugMode are loaded. {@link io.replay.framework.queue.QueueLayer} is initialized and started.
      * Previous value of dispatchInterval is loaded, too. If there are persisted requests
      * on disk, load them into queue.
      *
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
      * @param apiKey  The API key from <a href="http://replay.io">replay.io</a>.
-     * @return An initialized ReplayIO object.
      */
-    public static ReplayIO init(Context context, String apiKey) {
-        if (mInstance == null) {
-            mInstance = new ReplayIO(context);
+    public static void init(Context context, String apiKey) {
+        final Context appContext = context.getApplicationContext();
+        mPrefs = ReplayPrefs.get(appContext);
+        mContext = appContext;
             replayApiKey = apiKey;
-        }
+
         // load the default settings
         enabled = mPrefs.getEnabled();
         debugMode = mPrefs.getDebugMode();
 
-        mPrefs.setClientUUID(getOrGenerateClientUUID());
+        mPrefs.setClientUUID(getClientUUID());
         mPrefs.setDistinctID("");
 
         // initialize ReplayAPIManager
         mPrefs.setAPIKey(replayApiKey);
         replayAPIManager = new ReplayAPIManager();
-        requestFactory = ReplayRequestFactory.get(context);
+        requestFactory = ReplayRequestFactory.get(appContext);
 
         // initialize ReplayQueue
-        replayQueue = new ReplayQueue(replayAPIManager);
-        replayQueue.setDispatchInterval(mPrefs.getDispatchInterval());
-        replayQueue.start();
+        replayQueue = new ReplayQueue(context);
+        queueLayer = new QueueLayer(appContext, replayQueue);
 
-        try {
-            replayQueue.loadQueueFromDisk(mContext);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         initialized = true;
-        return mInstance;
-    }
-
-    /**
-     * Update the API key.  The {@link ReplayAPIManager} instance will be updated, too.
-     *
-     * @param apiKey The API key from <a href="http://replay.io>replay.io</a>.
-     */
-    public static void trackWithAPIKey(String apiKey) {
-        checkInitialized();
-        replayApiKey = apiKey;
-        mPrefs.setAPIKey(apiKey);
-        replayAPIManager = new ReplayAPIManager();
     }
 
     /**

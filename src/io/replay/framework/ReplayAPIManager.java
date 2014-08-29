@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.model.ReplayRequest;
 
 public class ReplayAPIManager implements ReplayConfig {
 

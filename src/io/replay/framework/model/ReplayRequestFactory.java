@@ -1,4 +1,4 @@
-package io.replay.framework.network;
+package io.replay.framework.model;
 
 import android.content.Context;
 
@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.replay.framework.ReplayAPIManager;
-import io.replay.framework.ReplayRequest;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayRequestFactory {
@@ -64,6 +63,7 @@ public class ReplayRequestFactory {
         json.put(ReplayAPIManager.KEY_REPLAY_KEY, mPrefs.getAPIKey());
         json.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
         json.put(ReplayPrefs.KEY_SESSION_ID, mPrefs.getSessionID());
+
         if (mPrefs.getDistinctID() != null && !(mPrefs.getDistinctID().length() == 0)) {
             json.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
         }
