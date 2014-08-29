@@ -2,11 +2,15 @@ apply plugin: 'com.android.library'
 
 repositories {
     mavenCentral()
+    flatDir{
+        dirs 'libs'
+    }
 }
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.3'
+    //compile 'com.google.code.gson:gson:2.3'
     compile fileTree(dir: 'libs', include: '*.jar')
+    compile(name:'jobqueue', ext:'aar')
 }
 
 buildscript {
@@ -14,7 +18,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
     }
 }
 
