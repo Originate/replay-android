@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.replay.framework.ReplayAPIManager;
+import io.replay.framework.ReplayConfig;
+import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayRequestFactory {
@@ -21,8 +23,13 @@ public class ReplayRequestFactory {
         return instance == null ? instance = new ReplayRequestFactory(context) : instance;
     }
 
+    private final static Map<String, String> base = new HashMap<String, String>(4);
+
     public ReplayRequestFactory(Context context) {
         mPrefs = ReplayPrefs.get(context);
+        base.put(ReplayConfig.KEY_REPLAY_KEY, mPrefs.getAPIKey());
+        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
+        base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
     }
 
 
@@ -34,8 +41,8 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      * @throws org.json.JSONException
      */
-    public ReplayRequest requestForEvent(String event, Map<String, String> data) throws JSONException {
-        return new ReplayRequest(ReplayAPIManager.REQUEST_TYPE_EVENTS, jsonForEvent(event, data, mPrefs));
+    public static ReplayRequest requestForEvent(String event, Map<String, String> data) throws JSONException {
+        return new ReplayRequest(RequestType.EVENTS, jsonForEvent(event, data));
     }
 
     /**
@@ -45,8 +52,8 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      * @throws org.json.JSONException
      */
-    public ReplayRequest requestForAlias(String alias) throws JSONException {
-        return new ReplayRequest(ReplayAPIManager.REQUEST_TYPE_ALIAS, jsonForAlias(alias, mPrefs));
+    public static ReplayRequest requestForAlias(String alias) throws JSONException {
+        return new ReplayRequest(RequestType.ALIAS, jsonForAlias(alias));
     }
 
     /**
@@ -54,20 +61,12 @@ public class ReplayRequestFactory {
      *
      * @param event The event name.
      * @param data  The name-value paired data.
-     * @param mPrefs
      * @return The JSONObject of data.
      * @throws org.json.JSONException
      */
-    private static JSONObject jsonForEvent(String event, Map<String, String> data, ReplayPrefs mPrefs) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put(ReplayAPIManager.KEY_REPLAY_KEY, mPrefs.getAPIKey());
-        json.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
-        json.put(ReplayPrefs.KEY_SESSION_ID, mPrefs.getSessionID());
+    private static JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
+        JSONObject json = new JSONObject(base);
 
-        if (mPrefs.getDistinctID() != null && !(mPrefs.getDistinctID().length() == 0)) {
-            json.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
-        }
-        json.put(KEY_EVENT_NAME, event);
         if (null == data) {
             data = new HashMap<String, String>();
         }
@@ -80,16 +79,12 @@ public class ReplayRequestFactory {
      * Generate the JSONObject for a alias request.
      *
      * @param alias The alias.
-     * @param mPrefs
      * @return The JSONObject of data.
      * @throws org.json.JSONException
      */
-    private static JSONObject jsonForAlias(String alias, ReplayPrefs mPrefs) throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put(ReplayAPIManager.KEY_REPLAY_KEY, mPrefs.getAPIKey());
-        json.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
-        json.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
-        json.put("alias", alias);
+    private static JSONObject jsonForAlias(String alias) throws JSONException {
+        JSONObject json = new JSONObject(base);
+        json.put(RequestType.ALIAS.toString(), alias);
         return json;
     }
 

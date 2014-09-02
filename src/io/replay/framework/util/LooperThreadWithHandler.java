@@ -11,18 +11,6 @@ import io.replay.framework.ReplayIO;
 public class LooperThreadWithHandler extends Thread {
     protected Handler handler;
 
-    private void waitForReady() {
-        while (this.handler == null) {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    ReplayIO.errorLog("Failed while waiting for singleton thread ready.");
-                }
-            }
-        }
-    }
-
     @Override
     public void run() {
         Looper.prepare();
@@ -37,6 +25,18 @@ public class LooperThreadWithHandler extends Thread {
     public Handler handler() {
         waitForReady();
         return handler;
+    }
+
+    private void waitForReady() {
+        while (this.handler == null) {
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    ReplayIO.errorLog("Failed while waiting for singleton thread ready.");
+                }
+            }
+        }
     }
 
     /** Quits the current looping thread */

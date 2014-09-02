@@ -34,12 +34,5 @@ public class QueueLayer extends LooperThreadWithHandler {
             }
         });
     }
-
-    @Override
-    public void quit() {
-        queue.stop();
-        super.quit();
-    }
-
 }
 

@@ -8,51 +8,31 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import io.replay.framework.ReplayConfig.RequestType;
+
 public class ReplayRequest implements Serializable {
 
-    private String type;
+    private RequestType type;
     private JSONObject json;
 
     /**
      * ReplayRequest represent a request that's ready to be sent to replay.io server.
-     * @param type The data type of the request, it can either be {@value io.replay.framework.ReplayConfig#REQUEST_TYPE_ALIAS} or {@value io.replay.framework.ReplayConfig#REQUEST_TYPE_EVENTS}.
+     * @param type The data type of the request, it can either be {@link RequestType#ALIAS} or {@link RequestType#EVENTS}.
      * @param json The JSON data to be sent.
      */
-    public ReplayRequest(String type, JSONObject json) {
+    public ReplayRequest(RequestType type, JSONObject json) {
         this.type = type;
         this.json = json;
     }
 
-    /**
-     *
-     * @return The type of request data.
-     */
-    public String getType() {
+    /** @return The type of request data. */
+    public RequestType getType() {
         return type;
     }
 
-    /**
-     *
-     * @param type The type of request data.  {@value io.replay.framework.ReplayConfig#REQUEST_TYPE_ALIAS} or {@value io.replay.framework.ReplayConfig#REQUEST_TYPE_EVENTS}.
-     */
-    public void setType(String type) {
+    /**  @param type The type of request data. {@link RequestType#ALIAS} or {@link RequestType#EVENTS}.  */
+    public void setType(RequestType type) {
         this.type = type;
-    }
-
-    /**
-     *
-     * @return The json data to be sent.
-     */
-    public JSONObject getJson() {
-        return json;
-    }
-
-    /**
-     *
-     * @param json The json data to be sent.
-     */
-    public void setJson(JSONObject json) {
-        this.json = json;
     }
 
     /**
@@ -64,12 +44,12 @@ public class ReplayRequest implements Serializable {
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeUTF(type);
+        oos.writeObject(type);
         oos.writeUTF(json.toString());
 
     }
-    private void readObject(ObjectInputStream ois) throws IOException, JSONException {
-        type = ois.readUTF();
+    private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
+        type = (RequestType) ois.readObject();
         json = new JSONObject(ois.readUTF());
     }
 }

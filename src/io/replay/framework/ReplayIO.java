@@ -251,7 +251,6 @@ public class ReplayIO {
      */
     public static void activityStart() {
         started++;
-
         checkAppVisibility();
     }
 
@@ -260,7 +259,6 @@ public class ReplayIO {
      */
     public static void activityResume() {
         resumed++;
-
         checkAppVisibility();
     }
 
@@ -324,16 +322,6 @@ public class ReplayIO {
      */
     public static void identify() {
         identify("");
-    }
-
-    /**
-     * Get the distinct ID.
-     *
-     * @return The distinct ID.
-     */
-    private static String getDistinctId() {
-        checkInitialized();
-        return mPrefs.getDistinctID();
     }
 
 }
