@@ -49,16 +49,14 @@ public class ReplayQueue {
                 ReplayLogger.e(text, args);
             }
         };
-        Configuration config =
-              new Builder(context)
-                    .minConsumerCount(1)
-                    .maxConsumerCount(1) //we only want 1 thread executing jobs
-                    .consumerKeepAlive(120) //2 min kill-time on the thread
-                    .flushAt(40) //TODO this should be from Options
-                    .customLogger(logger)
-                    .dispatchTimer(DispatchTimerFactory.createTimer(300000, true)) //TODO dispatch time should be from Options
-                    .build();
-        return config;
+        return new Builder(context)
+              .minConsumerCount(1)
+              .maxConsumerCount(1) //we only want 1 thread executing jobs
+              .consumerKeepAlive(120) //2 min kill-time on the thread
+              .flushAt(40) //TODO this should be from Options
+              .customLogger(logger)
+              .dispatchTimer(DispatchTimerFactory.createTimer(300000, true)) //TODO dispatch time should be from Options
+              .build();
     }
 
     public void start() {

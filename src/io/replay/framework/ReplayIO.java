@@ -27,10 +27,8 @@ public class ReplayIO {
 
     private static int started;
     private static int resumed;
-    @SuppressWarnings("unused")
     private static int paused;
     private static int stopped;
-    private static ReplayRequestFactory requestFactory;
     private static QueueLayer queueLayer;
     private static ReplayQueue replayQueue;
 
@@ -53,6 +51,7 @@ public class ReplayIO {
         // load the default settings
         enabled = mPrefs.getEnabled();
         debugMode = mPrefs.getDebugMode();
+        ReplayLogger.setLogging(debugMode);
 
         mPrefs.setClientUUID(getClientUUID());
         mPrefs.setDistinctID("");
@@ -60,7 +59,7 @@ public class ReplayIO {
         // initialize ReplayAPIManager
         mPrefs.setAPIKey(replayApiKey);
         replayAPIManager = new ReplayAPIManager();
-        requestFactory = ReplayRequestFactory.get(appContext);
+        ReplayRequestFactory.init(appContext);
 
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(context);
@@ -80,7 +79,7 @@ public class ReplayIO {
         if (!enabled) return;
         ReplayRequest request;
         try {
-            request = requestFactory.requestForEvent(eventName, data);
+            request = ReplayRequestFactory.requestForEvent(eventName, data);
             queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -97,7 +96,7 @@ public class ReplayIO {
         if (!enabled) return;
         ReplayRequest request;
         try {
-            request = requestFactory.requestForAlias(userAlias);
+            request = ReplayRequestFactory.requestForAlias(userAlias);
             queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();

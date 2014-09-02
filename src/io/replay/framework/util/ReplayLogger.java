@@ -5,15 +5,14 @@ import android.util.Log;
 /**
  * {@link android.util.Log} wrapper.
  *
- * Generates a tag dynamically.
+ * Can generate a tag dynamically.
  *
  * <p>Created by parthpadgaonkar on 8/22/14.</p>
  */
 public final class ReplayLogger {
 
     private static volatile boolean logEnabled;
-    
-    
+
     public static boolean isLogEnabled(){
         return logEnabled;
     }
@@ -63,19 +62,19 @@ public final class ReplayLogger {
     }
 
     public static void v(String tag, String format, Object... args) {
-        log(Log.VERBOSE, format, args);
+        log(Log.VERBOSE, tag, format, args);
     }
 
     public static void d(String tag, String format, Object... args) {
-        log(Log.DEBUG, format, args);
+        log(Log.DEBUG, tag, format, args);
     }
 
     public static void i(String tag, String format, Object... args) {
-        log(Log.INFO, format, args);
+        log(Log.INFO, tag, format, args);
     }
 
     public static void w(String tag, String format, Object... args) {
-        log(Log.WARN, format, args);
+        log(Log.WARN, tag, format, args);
     }
 
 

@@ -21,13 +21,13 @@ public class DispatchTimerFactory {
     public static DispatchTimer createTimer(long dispatchInMs, boolean resetAfterComplete) {
         if (dispatchInMs > 0L) {
             return new DispatchTimer(dispatchInMs, resetAfterComplete);
-        } else { //(dispatchInMs <=0){
+        } else { //dispatchInMs <=0
             return new ZeroDispatchTimer();
         }
     }
 
     /**
-     * Implementation is very similar to {@link android.os.CountDownTimer}, but since that class marks many of its
+     * Implementation is very similar to {@link android.os.CountDownTimer}, but since that class marks most of its
      * implemented methods as <code>final</code>, it is infeasible to use.
      * <p>Unlike CountDownTimer, this class does not provide the option to "tick" multiple times; it "ticks" once
      * - when {@link #onFinish()} is called.
@@ -117,25 +117,34 @@ public class DispatchTimerFactory {
      * where the user wants no timer. A call to {@link #start()} will immediately call {@link #onFinish()}.
      */
     private static class ZeroDispatchTimer extends DispatchTimer {
-        /** */
         public ZeroDispatchTimer() {
             super(0, false);
         }
 
+        /**Immediately calls {@link #onFinish()}.
+         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#start()
+         */
         @Override
         public synchronized void start() {
             onFinish();
         }
 
+        /** Does nothing.
+         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#cancel()
+         */
         @Override
         public synchronized void cancel() {
         } //do nothing
 
+        /**Immediately calls {@link #onFinish()}.
+         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#reset()
+         */
         @Override
         public synchronized void reset() {
             onFinish();
         }
 
+        /**returns <code>false</code>; ZeroDispatchTimer is never actively running. */
         @Override
         public synchronized boolean isRunning() {
             return false; //the zero-timer is never actively running.

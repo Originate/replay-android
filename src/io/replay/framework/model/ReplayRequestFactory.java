@@ -17,16 +17,15 @@ public class ReplayRequestFactory {
 
     private static final String KEY_EVENT_NAME = "event_name";
     private static ReplayRequestFactory instance;
-    private final ReplayPrefs mPrefs;
 
-    public static ReplayRequestFactory get(Context context) {
+    public static ReplayRequestFactory init(Context context) {
         return instance == null ? instance = new ReplayRequestFactory(context) : instance;
     }
 
-    private final static Map<String, String> base = new HashMap<String, String>(4);
+    private final static Map<String, String> base = new HashMap<String, String>(3);
 
     public ReplayRequestFactory(Context context) {
-        mPrefs = ReplayPrefs.get(context);
+        ReplayPrefs mPrefs = ReplayPrefs.get(context);
         base.put(ReplayConfig.KEY_REPLAY_KEY, mPrefs.getAPIKey());
         base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
         base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());

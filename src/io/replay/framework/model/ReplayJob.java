@@ -8,10 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import io.replay.framework.util.ReplayLogger;
+
 /**
  * Created by parthpadgaonkar on 8/27/14.
  */
 public class ReplayJob extends Job implements Serializable {
+    private final static String TAG = ReplayJob.class.getSimpleName();
     private static final Params params = new Params(1).persist().groupBy("replayJob").requireNetwork();
     private ReplayRequest request;
 
@@ -21,8 +24,9 @@ public class ReplayJob extends Job implements Serializable {
     }
 
     @Override
-    public void onAdded() {} //do nothing
-    //TODO perhaps call Logger onAdded?
+    public void onAdded() {
+        ReplayLogger.d(TAG, "Added %s to queue", request.toString());
+    }
 
     @Override
     public void onRun() throws Throwable {
@@ -30,8 +34,8 @@ public class ReplayJob extends Job implements Serializable {
     }
 
     @Override
-    protected void onCancel() {
-   //TODO
+    public void onCancel() {
+        ReplayLogger.d(TAG, "Cancelled %s", request.toString());
     }
 
     @Override

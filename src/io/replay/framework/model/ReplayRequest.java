@@ -52,4 +52,9 @@ public class ReplayRequest implements Serializable {
         type = (RequestType) ois.readObject();
         json = new JSONObject(ois.readUTF());
     }
+
+    @Override
+    public String toString() {
+        return "ReplayRequest{" +"type=" + type +", json=" + json +'}';
+    }
 }
