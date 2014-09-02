@@ -32,8 +32,8 @@ public class ReplayIO {
     @SuppressWarnings("unused")
     private static int paused;
     private static int stopped;
+    private static int dropped;
     private static ReplayRequestFactory requestFactory;
-
     /**
      * Private constructor to create an instance.
      *
@@ -54,14 +54,19 @@ public class ReplayIO {
      *
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
-     * @param apiKey  The API key from <a href="http://replay.io">replay.io</a>.
      * @return An initialized ReplayIO object.
      */
-    public static ReplayIO init(Context context, String apiKey) {
+    public static ReplayIO init(Context context) throws ReplayIONoKeyException {
+        //Make sure they have an APIKey
+        if (mConfig.getApiKey().equals("")){
+            throw new ReplayIONoKeyException();
+        }
+
         if (mInstance == null) {
             mInstance = new ReplayIO(context);
-            replayApiKey = apiKey;
+            replayApiKey = mConfig.getApiKey();
         }
+
         // load the default settings
         enabled = mConfig.isEnabled();
         debugMode = mConfig.isDebug();
@@ -70,7 +75,6 @@ public class ReplayIO {
         mConfig.setDistinctId("");
 
         // initialize ReplayAPIManager
-        mConfig.setApiKey(replayApiKey);
         replayAPIManager = new ReplayAPIManager();
         requestFactory = ReplayRequestFactory.get(context);
 
@@ -114,7 +118,18 @@ public class ReplayIO {
         ReplayRequest request;
         try {
             request = requestFactory.requestForEvent(eventName, data);
-            replayQueue.enqueue(request);
+            if (replayQueue.numRequests() < mConfig.getMaxQueue()) {
+                replayQueue.enqueue(request);
+            }
+            else{
+                ReplayIO.debugLog("Request was dropped because max_queue size has been reached.");
+                dropped++;
+            }
+
+            if (replayQueue.numRequests() >= mConfig.getFlushAt()){
+                ReplayIO.debugLog("Requests are being sent to server because 'flush_at' number of requests are in the queue");
+                dispatch();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -149,7 +164,7 @@ public class ReplayIO {
         checkInitialized();
         replayQueue.setDispatchInterval(interval);
 
-       mConfig.setDispatchInterval(interval);
+        mConfig.setDispatchInterval(interval);
     }
 
     /**
@@ -168,7 +183,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = true;
 
-       mConfig.setEnabled(enabled);
+        mConfig.setEnabled(enabled);
     }
 
     /**
@@ -178,7 +193,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = false;
 
-       mConfig.setEnabled(enabled);
+        mConfig.setEnabled(enabled);
     }
 
     /**
@@ -209,7 +224,7 @@ public class ReplayIO {
      * @return True if enabled, false otherwise.
      */
     public static boolean isDebugMode() {
-       return mConfig.isDebug();
+        return mConfig.isDebug();
     }
 
     /**
@@ -267,7 +282,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {
@@ -291,7 +306,7 @@ public class ReplayIO {
         if (clientUUID == null) {
             if (mConfig.getClientId().length() == 0) {
                 mConfig.setClientId(UUID.randomUUID()
-                                         .toString());
+                        .toString());
                 ReplayIO.debugLog("Generated new client uuid");
             }
             return mConfig.getClientId();

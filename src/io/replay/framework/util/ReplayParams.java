@@ -16,11 +16,13 @@ public class ReplayParams {
     public static final String CLIENT_ID = "client_id";
     public static final String SESSION_ID = "session_id";
 
-    private static final String DISPATCH_INTERVAL = "dispatchInterval";
+    private static final String DISPATCH_INTERVAL = "dispatch_interval";
+    private static final String MAX_QUEUE = "max_queue";
+    private static final String FLUSH_AT = "flush_at";
     private static final String ENABLED = "enabled";
-    private static final String DEBUG_MODE_ENABLED = "debugMode";
-    private static final String DISTINCT_ID = "distinctId";
-    private static final String API_KEY = "apiKey";
+    private static final String DEBUG_MODE_ENABLED = "debug_mode_enabled";
+    private static final String DISTINCT_ID = "distinct_id";
+    private static final String API_KEY = "api_key";
 
     public static Config getOptions(Context context) {
         Config options = new Config();
@@ -45,6 +47,12 @@ public class ReplayParams {
 
         Integer dispatchInterval = getInteger(context, DISPATCH_INTERVAL);
         if (dispatchInterval != null) options.setDispatchInterval(dispatchInterval);
+
+        Integer maxQueue = getInteger(context, MAX_QUEUE);
+        if (maxQueue != null) options.setMaxQueue(maxQueue);
+
+        Integer flushAt = getInteger(context, FLUSH_AT);
+        if (flushAt != null) options.setFlushAt(flushAt);
 
         return options;
     }

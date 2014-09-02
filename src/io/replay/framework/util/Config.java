@@ -11,10 +11,12 @@ public class Config {
     private boolean debug_mode_enabled;
     private boolean enabled;
     private String api_key;
+    private String distinct_id;
     private String session_id;
     private String client_id;
-    private String distinct_id;
     private Integer dispatch_interval;
+    private Integer flush_at;
+    private Integer max_queue;
 
     /**
      * Creates a default options
@@ -22,7 +24,7 @@ public class Config {
     public Config() {
         this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED,
                 Defaults.API_KEY, Defaults.SESSION_ID, Defaults.CLIENT_ID, Defaults.DISTINCT_ID,
-                Defaults.DISPATCH_INTERVAL);
+                Defaults.DISPATCH_INTERVAL, Defaults.FLUSH_AT, Defaults.MAX_QUEUE);
     }
 
     /**
@@ -30,15 +32,17 @@ public class Config {
      */
     Config(boolean debug_mode_enabled, boolean enabled,
            String api_key, String session_id, String client_id, String distinct_id,
-           Integer dispatch_interval) {
+           Integer dispatch_interval, Integer flush_at, Integer max_queue) {
 
         this.debug_mode_enabled = debug_mode_enabled;
         this.enabled = enabled;
         this.api_key = api_key;
-        this.session_id = session_id;
         this.client_id = client_id;
+        this.session_id = session_id;
         this.distinct_id = distinct_id;
         this.dispatch_interval = dispatch_interval;
+        this.flush_at = flush_at;
+        this.max_queue = max_queue;
     }
 
     public boolean isDebug() {
@@ -101,6 +105,24 @@ public class Config {
 
     public Config setDispatchInterval(Integer dispatchInterval){
         this.dispatch_interval = dispatchInterval;
+        return this;
+    }
+
+    public Integer getFlushAt() {
+        return flush_at;
+    }
+
+    public Config setFlushAt(Integer flushAt){
+        this.flush_at = flushAt;
+        return this;
+    }
+
+    public Integer getMaxQueue() {
+        return max_queue;
+    }
+
+    public Config setMaxQueue(Integer maxQueue){
+        this.max_queue = maxQueue;
         return this;
     }
 }
