@@ -56,16 +56,23 @@ public class ReplayIO {
      *                to avoid the risk of memory leak.
      * @return An initialized ReplayIO object.
      */
-    public static ReplayIO init(Context context) throws ReplayIONoKeyException {
-        //Make sure they have an APIKey
-        if (mConfig.getApiKey().equals("")){
+    public static ReplayIO init(Context context, String apiKey) throws ReplayIONoKeyException {
+
+        //If no api key is passed in, use the one specified in config
+        if (apiKey.equals("")){
+            apiKey = mConfig.getApiKey();
+        }
+        //Make sure the api key isn't empty
+        if (apiKey.equals("")){
             throw new ReplayIONoKeyException();
         }
 
         if (mInstance == null) {
             mInstance = new ReplayIO(context);
-            replayApiKey = mConfig.getApiKey();
+            replayApiKey = apiKey;
         }
+
+
 
         // load the default settings
         enabled = mConfig.isEnabled();
@@ -94,17 +101,6 @@ public class ReplayIO {
         return mInstance;
     }
 
-    /**
-     * Update the API key.  The {@link ReplayAPIManager} instance will be updated, too.
-     *
-     * @param apiKey The API key from <a href="http://replay.io>replay.io</a>.
-     */
-    public static void trackWithAPIKey(String apiKey) {
-        checkInitialized();
-        replayApiKey = apiKey;
-        mConfig.setApiKey(apiKey);
-        replayAPIManager = new ReplayAPIManager();
-    }
 
     /**
      * Send event with data to server.
@@ -282,7 +278,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, java.lang.String)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {

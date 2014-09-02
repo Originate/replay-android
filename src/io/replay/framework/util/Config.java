@@ -23,7 +23,7 @@ public class Config {
      */
     public Config() {
         this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED,
-                Defaults.API_KEY, Defaults.SESSION_ID, Defaults.CLIENT_ID, Defaults.DISTINCT_ID,
+                Defaults.API_KEY,
                 Defaults.DISPATCH_INTERVAL, Defaults.FLUSH_AT, Defaults.MAX_QUEUE);
     }
 
@@ -31,15 +31,12 @@ public class Config {
      * Creates an option with the provided settings
      */
     Config(boolean debug_mode_enabled, boolean enabled,
-           String api_key, String session_id, String client_id, String distinct_id,
+           String api_key,
            Integer dispatch_interval, Integer flush_at, Integer max_queue) {
 
         this.debug_mode_enabled = debug_mode_enabled;
         this.enabled = enabled;
         this.api_key = api_key;
-        this.client_id = client_id;
-        this.session_id = session_id;
-        this.distinct_id = distinct_id;
         this.dispatch_interval = dispatch_interval;
         this.flush_at = flush_at;
         this.max_queue = max_queue;

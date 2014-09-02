@@ -10,8 +10,8 @@ public class ReplayParams {
 
     private static final String STRING_RESOURCE_KEY = "string";
     private static final String INTEGER_RESOURCE_KEY = "integer";
+    private static final String BOOLEAN_RESOURCE_KEY = "boolean";
 
-    private static final String prefsName = "ReplayIOPreferences";
 
     public static final String CLIENT_ID = "client_id";
     public static final String SESSION_ID = "session_id";
@@ -79,9 +79,9 @@ public class ReplayParams {
 
     private static Boolean getBoolean(Context context, String key) {
         Resources resources = context.getResources();
-        int id = resources.getIdentifier(key, STRING_RESOURCE_KEY, context.getPackageName());
+        int id = resources.getIdentifier(key, BOOLEAN_RESOURCE_KEY, context.getPackageName());
         if (id > 0) {
-            return Boolean.parseBoolean(context.getResources().getString(id));
+            return resources.getBoolean(id);
         } else {
             return null;
         }
