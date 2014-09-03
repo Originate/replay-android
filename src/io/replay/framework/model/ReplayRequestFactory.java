@@ -11,6 +11,7 @@ import java.util.Map;
 import io.replay.framework.ReplayAPIManager;
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayConfig.RequestType;
+import io.replay.framework.ReplayIO;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayRequestFactory {
@@ -26,8 +27,8 @@ public class ReplayRequestFactory {
 
     public ReplayRequestFactory(Context context) {
         ReplayPrefs mPrefs = ReplayPrefs.get(context);
-        base.put(ReplayConfig.KEY_REPLAY_KEY, mPrefs.getAPIKey());
-        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientUUID());
+        base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
+        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
         base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
     }
 
@@ -65,7 +66,6 @@ public class ReplayRequestFactory {
      */
     private static JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
         JSONObject json = new JSONObject(base);
-
         if (null == data) {
             data = new HashMap<String, String>();
         }
