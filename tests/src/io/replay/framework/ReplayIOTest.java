@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
+import io.replay.framework.error.ReplayIONotInitializedException;
+
 public class ReplayIOTest extends AndroidTestCase {
 
     @Override

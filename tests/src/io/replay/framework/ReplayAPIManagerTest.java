@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
+import io.replay.framework.model.ReplayRequest;
+
 public class ReplayAPIManagerTest extends AndroidTestCase {
 
 	@Override

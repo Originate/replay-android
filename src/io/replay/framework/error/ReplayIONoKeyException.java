@@ -1,4 +1,4 @@
-package io.replay.framework;
+package io.replay.framework.error;
 
 /**
  * Exception that throws when static methods are called before ReplayIO is initialized.

@@ -75,7 +75,7 @@ public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
     }
 
     private void checkAppVisibility() {
-        try {
+        /*try {
             if (!isApplicationVisible()) {
                 if (ReplayIO.isRunning()) {
                     ReplayIO.debugLog("App goes to background. Stop!");
@@ -89,6 +89,6 @@ public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
             }
         } catch (ReplayIONotInitializedException e) {
             ReplayIO.errorLog(e.getMessage());
-        }
+        }*/
     }
 }

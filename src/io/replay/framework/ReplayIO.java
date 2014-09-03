@@ -4,11 +4,15 @@ import android.content.Context;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.error.ReplayIONoKeyException;
+import io.replay.framework.error.ReplayIONotInitializedException;
+import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.model.ReplayRequestFactory;
+import io.replay.framework.queue.QueueLayer;
+import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
 import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.ReplayParams;
@@ -18,23 +22,18 @@ import io.replay.framework.util.Util;
 public class ReplayIO {
 
     private static boolean debugMode;
-    private static String replayApiKey;
-    private static String clientUUID;
     private static boolean enabled;
-    private static ReplayAPIManager replayAPIManager;
-    private static ReplayQueue replayQueue;
     private static Context mContext;
     private static boolean initialized;
     private static Config mConfig;
 
     private static int started;
     private static int resumed;
-    @SuppressWarnings("unused")
     private static int paused;
     private static int stopped;
-    private static int dropped;
-    private static ReplayRequestFactory requestFactory;
     private static ReplayPrefs mPrefs;
+    private static ReplayQueue replayQueue;
+    private static QueueLayer queueLayer;
 
 
     /**
@@ -88,12 +87,11 @@ public class ReplayIO {
             throw new IllegalArgumentException(String.format(detailMessage, "context", "null"));
         }
 
-        mContext = context.getApplicationContext();
-
         if(Util.isNullOrEmpty(options.getApiKey())){
             throw new IllegalArgumentException(String.format(detailMessage, "API key", "null or empty"));
         }
 
+        mContext = context.getApplicationContext();
         Context appContext = context.getApplicationContext(); //cache locally for performance reasons
 
         // load the default settings
@@ -102,28 +100,19 @@ public class ReplayIO {
 
         mPrefs = ReplayPrefs.get(appContext);
 
-        mPrefs.setClientID(getOrGenerateClientUUID());
+        mPrefs.setClientID(getClientUUID());
         mPrefs.setDistinctID("");
 
         // initialize ReplayAPIManager
-        replayAPIManager = new ReplayAPIManager();
-        requestFactory = ReplayRequestFactory.get(context);
+        ReplayRequestFactory.init(appContext);
 
         // initialize ReplayQueue
-        replayQueue = new ReplayQueue(replayAPIManager);
-        replayQueue.setDispatchInterval(mConfig.getDispatchInterval());
+        replayQueue = new ReplayQueue(context, mConfig);
+        queueLayer = new QueueLayer(replayQueue);
         replayQueue.start();
 
-        try {
-            replayQueue.loadQueueFromDisk(mContext);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         initialized = true;
     }
-
 
     /**
      * Send event with data to server.
@@ -134,60 +123,37 @@ public class ReplayIO {
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        ReplayRequest request;
         try {
-            request = requestFactory.requestForEvent(eventName, data);
-            if (replayQueue.numRequests() < mConfig.getMaxQueue()) {
-                replayQueue.enqueue(request);
-            }
-            else{
-                ReplayIO.debugLog("Request was dropped because max_queue size has been reached.");
-                dropped++;
-            }
+            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, data);
+            queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Update alias.  Send a alias request to server side.
+     * Update alias. Send a alias request to server side.
      *
      * @param userAlias New alias.
      */
     public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
-        ReplayRequest request;
         try {
-            request = requestFactory.requestForAlias(userAlias);
-            replayQueue.enqueue(request);
+            ReplayRequest request = ReplayRequestFactory.requestForAlias(userAlias);
+            queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Set interval for dispatches.  <br>
-     * When interval is set to negative, dispatcher will wait for manual {@link ReplayIO#dispatch()}.<br>
-     * When interval is set to 0, dispatcher will send the newly added requests immediately.<br>
-     * When interval is set to positive, dispatcher will work periodically.
-     *
-     * @param interval Interval in seconds.
-     */
-    public static void setDispatchInterval(int interval) {
-        checkInitialized();
-        replayQueue.setDispatchInterval(interval);
-
-        mConfig.setDispatchInterval(interval);
-    }
-
-    /**
-     * Dispatch immediately.  When triggered, all request in queue will be sent.
+     * Dispatch immediately.  When triggered, all requests in queue will be sent.
      */
     public static void dispatch() {
         checkInitialized();
         if (!enabled) return;
-        replayQueue.dispatch();
+        queueLayer.sendFlush();
     }
 
     /**
@@ -197,7 +163,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = true;
 
-        mConfig.setEnabled(enabled);
+        mConfig.setEnabled(true);
     }
 
     /**
@@ -206,8 +172,7 @@ public class ReplayIO {
     public static void disable() {
         checkInitialized();
         enabled = false;
-
-        mConfig.setEnabled(enabled);
+        mConfig.setEnabled(false);
     }
 
     /**
@@ -251,11 +216,6 @@ public class ReplayIO {
         checkInitialized();
         replayQueue.stop();
 
-        try {
-            replayQueue.saveQueueToDisk(mContext);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         ReplaySessionManager.endSession(mContext);
     }
 
@@ -267,36 +227,20 @@ public class ReplayIO {
      */
     public static void run() {
         checkInitialized();
-        replayQueue = new ReplayQueue(replayAPIManager);
-        replayQueue.start();
-        replayQueue.setDispatchInterval(mConfig.getDispatchInterval());
+        if(replayQueue == null){
+            replayQueue = new ReplayQueue(mContext, mConfig);
+        }else {
+            replayQueue.start();
         mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
-
-        try {
-            replayQueue.loadQueueFromDisk(mContext);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
-    }
 
-    /**
-     * Tell if the ReplayIO is running, ie. ReplayQueue is running.
-     *
-     * @return True if it is running, false otherwise.
-     */
-    public static boolean isRunning() {
-        if (!initialized) {
-            return false;
-        }
-        return replayQueue.isRunning();
+        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
     }
 
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
+     * @throws io.replay.framework.error.ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {
@@ -313,19 +257,11 @@ public class ReplayIO {
         if (null == mConfig || !initialized) {
             throw new ReplayIONotInitializedException();
         }
-        return getOrGenerateClientUUID();
-    }
-
-    private static String getOrGenerateClientUUID() {
-        if (clientUUID == null) {
-            if (Util.isNullOrEmpty(mPrefs.getClientID())) {
-                mPrefs.setClientID(UUID.randomUUID()
-                        .toString());
-                ReplayIO.debugLog("Generated new client uuid");
-            }
-            return mPrefs.getClientID();
+        if (Util.isNullOrEmpty(mPrefs.getClientID())) {
+            mPrefs.setClientID(UUID.randomUUID().toString());
+            ReplayIO.debugLog("Generated new client UUID");
         }
-        return clientUUID;
+        return mPrefs.getClientID();
     }
 
     /**
@@ -355,7 +291,6 @@ public class ReplayIO {
      */
     public static void activityStart() {
         started++;
-
         checkAppVisibility();
     }
 
@@ -364,7 +299,6 @@ public class ReplayIO {
      */
     public static void activityResume() {
         resumed++;
-
         checkAppVisibility();
     }
 
@@ -393,7 +327,7 @@ public class ReplayIO {
     }
 
     private static void checkAppVisibility() {
-        try {
+       /* try {
             if (!isApplicationVisible()) {
                 if (ReplayIO.isRunning()) {
                     ReplayIO.debugLog("App goes to background. Stop!");
@@ -407,7 +341,10 @@ public class ReplayIO {
             }
         } catch (ReplayIONotInitializedException e) {
             ReplayIO.errorLog(e.getMessage());
-        }
+        }*/
+        /*TODO this shouldn't be using a integers to keep track of app state - however,
+          it's out of scope for this particular branch. */
+        //TODO this is duplicated in ReplayLifecycleHandler
     }
 
     /**
