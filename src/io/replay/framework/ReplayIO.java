@@ -65,6 +65,7 @@ public class ReplayIO {
         //Make sure the api key isn't empty
         if (apiKey.equals("")){
             throw new ReplayIONoKeyException();
+        mConfig.setApiKey(apiKey);
         }
 
         if (mInstance == null) {

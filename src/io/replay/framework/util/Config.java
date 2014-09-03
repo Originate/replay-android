@@ -8,46 +8,44 @@ public class Config {
     /**
      * Whether or not debug logging is enabled to ADT logcat
      */
-    private boolean debug_mode_enabled;
+    private boolean debugModeEnabled;
     private boolean enabled;
-    private String api_key;
     private String distinct_id;
     private String session_id;
     private String client_id;
-    private Integer dispatch_interval;
-    private Integer flush_at;
-    private Integer max_queue;
+    private String apiKey;
+    private int dispatchInterval;
+    private int flushAt;
+    private int maxQueue;
 
     /**
      * Creates a default options
      */
     public Config() {
-        this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED,
-                Defaults.API_KEY,
+        this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED, Defaults.API_KEY,
                 Defaults.DISPATCH_INTERVAL, Defaults.FLUSH_AT, Defaults.MAX_QUEUE);
     }
 
     /**
      * Creates an option with the provided settings
      */
-    Config(boolean debug_mode_enabled, boolean enabled,
-           String api_key,
-           Integer dispatch_interval, Integer flush_at, Integer max_queue) {
+    Config(boolean debugModeEnabled, boolean enabled, String apiKey,
+           int dispatchInterval, int flushAt, int maxQueue) {
 
-        this.debug_mode_enabled = debug_mode_enabled;
+        this.debugModeEnabled = debugModeEnabled;
         this.enabled = enabled;
-        this.api_key = api_key;
-        this.dispatch_interval = dispatch_interval;
-        this.flush_at = flush_at;
-        this.max_queue = max_queue;
+        this.apiKey = apiKey;
+        this.dispatchInterval = dispatchInterval;
+        this.flushAt = flushAt;
+        this.maxQueue = maxQueue;
     }
 
     public boolean isDebug() {
-        return debug_mode_enabled;
+        return debugModeEnabled;
     }
 
     public Config setDebug(boolean debug){
-        this.debug_mode_enabled = debug;
+        this.debugModeEnabled = debug;
         return this;
     }
 
@@ -61,14 +59,10 @@ public class Config {
     }
 
     public String getApiKey() {
-        return api_key;
+        return apiKey;
     }
 
     public Config setApiKey(String apiKey){
-        this.api_key = apiKey;
-        return this;
-    }
-
     public String getSessionId() {
         return session_id;
     }
@@ -93,33 +87,34 @@ public class Config {
 
     public Config setDistinctId(String distinctId){
         this.distinct_id = distinctId;
+        this.apiKey = apiKey;
         return this;
     }
 
-    public Integer getDispatchInterval() {
-        return dispatch_interval;
+    public int getDispatchInterval() {
+        return dispatchInterval;
     }
 
-    public Config setDispatchInterval(Integer dispatchInterval){
-        this.dispatch_interval = dispatchInterval;
+    public Config setDispatchInterval(int dispatchInterval){
+        this.dispatchInterval = dispatchInterval;
         return this;
     }
 
-    public Integer getFlushAt() {
-        return flush_at;
+    public int getFlushAt() {
+        return flushAt;
     }
 
-    public Config setFlushAt(Integer flushAt){
-        this.flush_at = flushAt;
+    public Config setFlushAt(int flushAt){
+        this.flushAt = flushAt;
         return this;
     }
 
-    public Integer getMaxQueue() {
-        return max_queue;
+    public int getMaxQueue() {
+        return maxQueue;
     }
 
-    public Config setMaxQueue(Integer maxQueue){
-        this.max_queue = maxQueue;
+    public Config setMaxQueue(int maxQueue){
+        this.maxQueue = maxQueue;
         return this;
     }
 }
