@@ -7,6 +7,8 @@ import org.json.JSONException;
 import java.util.Map;
 import java.util.UUID;
 
+import io.replay.framework.error.ReplayIONoKeyException;
+import io.replay.framework.error.ReplayIONotInitializedException;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
@@ -29,7 +31,6 @@ public class ReplayIO {
     private static int resumed;
     private static int paused;
     private static int stopped;
-    private static int dropped;
     private static ReplayPrefs mPrefs;
     private static ReplayQueue replayQueue;
     private static QueueLayer queueLayer;
@@ -86,7 +87,6 @@ public class ReplayIO {
             throw new IllegalArgumentException(String.format(detailMessage, "context", "null"));
         }
 
-
         if(Util.isNullOrEmpty(options.getApiKey())){
             throw new IllegalArgumentException(String.format(detailMessage, "API key", "null or empty"));
         }
@@ -108,7 +108,7 @@ public class ReplayIO {
 
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(context, mConfig);
-        queueLayer = new QueueLayer(appContext, replayQueue);
+        queueLayer = new QueueLayer(replayQueue);
         replayQueue.start();
 
         initialized = true;
@@ -123,32 +123,8 @@ public class ReplayIO {
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        ReplayRequest request;
         try {
-            request = ReplayRequestFactory.requestForEvent(eventName, data);
-            if (replayQueue.numRequests() < mConfig.getMaxQueue()) {
-                replayQueue.enqueue(request);
-            }
-            else{
-                ReplayIO.debugLog("Request was dropped because max_queue size has been reached.");
-                dropped++;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Update alias.  Send a alias request to server side.
-     *
-     * @param userAlias New alias.
-     */
-    public static void updateAlias(String userAlias) {
-        checkInitialized();
-        if (!enabled) return;
-        ReplayRequest request;
-        try {
-            request = ReplayRequestFactory.requestForAlias(userAlias);
+            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, data);
             queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -156,7 +132,23 @@ public class ReplayIO {
     }
 
     /**
-     * Dispatch immediately.  When triggered, all request in queue will be sent.
+     * Update alias. Send a alias request to server side.
+     *
+     * @param userAlias New alias.
+     */
+    public static void updateAlias(String userAlias) {
+        checkInitialized();
+        if (!enabled) return;
+        try {
+            ReplayRequest request = ReplayRequestFactory.requestForAlias(userAlias);
+            queueLayer.enqueue(request);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Dispatch immediately.  When triggered, all requests in queue will be sent.
      */
     public static void dispatch() {
         checkInitialized();
@@ -248,7 +240,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
+     * @throws io.replay.framework.error.ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {

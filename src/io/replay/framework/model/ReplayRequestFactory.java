@@ -26,7 +26,7 @@ public class ReplayRequestFactory {
     private final static Map<String, String> base = new HashMap<String, String>(3);
 
     public ReplayRequestFactory(Context context) {
-        ReplayPrefs mPrefs = ReplayPrefs.get(context);
+        ReplayPrefs mPrefs = ReplayPrefs.get(context.getApplicationContext());
         base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
         base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
         base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
@@ -60,7 +60,7 @@ public class ReplayRequestFactory {
      * Generate the JSONObject for a event request.
      *
      * @param event The event name.
-     * @param data  The name-value paired data.
+     * @param data  The name-value paired data. Can be null.
      * @return The JSONObject of data.
      * @throws org.json.JSONException
      */

@@ -30,13 +30,7 @@ public class ReplayRequest implements Serializable {
         return type;
     }
 
-    /**  @param type The type of request data. {@link RequestType#ALIAS} or {@link RequestType#EVENTS}.  */
-    public void setType(RequestType type) {
-        this.type = type;
-    }
-
     /**
-     *
      * @return The json data to be sent, in byte array.
      */
     public byte[] getBody() {

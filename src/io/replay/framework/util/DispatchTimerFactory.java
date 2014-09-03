@@ -31,7 +31,7 @@ public class DispatchTimerFactory {
      * implemented methods as <code>final</code>, it is infeasible to use.
      * <p>Unlike CountDownTimer, this class does not provide the option to "tick" multiple times; it "ticks" once
      * - when {@link #onFinish()} is called.
-     * <p>Most notably, this class can reset itself (boolean in the constructor) upon completion of the countdown, creating a loop that will be called until
+     * <p>Most notably, this class can reset itself ({@link #resetAfterComplete}) upon completion of the countdown, creating a loop that will be called until
      * {@link #cancel()} is called.
      */
     public static class DispatchTimer implements DispatchTimerInterface { //extends CountDownTimer

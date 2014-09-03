@@ -10,9 +10,9 @@ import com.path.android.jobqueue.log.CustomLogger;
 
 import io.replay.framework.model.ReplayJob;
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.util.Config;
 import io.replay.framework.util.DispatchTimerFactory;
 import io.replay.framework.util.ReplayLogger;
-import io.replay.framework.util.ReplayPrefs;
 
 /**
  * Created by parthpadgaonkar on 8/28/14.
@@ -21,17 +21,17 @@ public class ReplayQueue {
     private final JobManager jobqueue;
     private final DispatchTimerInterface dispatchTimer;
 
-    public ReplayQueue(Context context) {
-        Configuration config = getJobQueueConfig(context);
-        jobqueue = new JobManager(context, config);
-        dispatchTimer = config.getDispatchTimer();
+    public ReplayQueue(Context context, Config replayOptions) {
+        Configuration queueOptions = getJobQueueConfig(context, replayOptions);
+        jobqueue = new JobManager(context, queueOptions);
+        dispatchTimer = queueOptions.getDispatchTimer();
     }
 
-    private static Configuration getJobQueueConfig(final Context context) {
+    private static Configuration getJobQueueConfig(final Context context, final Config replayOptions) {
         CustomLogger logger = new CustomLogger() {
             @Override
             public boolean isDebugEnabled() {
-                return ReplayPrefs.get(context).getDebugMode();
+                return replayOptions.isDebug();
             }
 
             @Override
@@ -51,11 +51,11 @@ public class ReplayQueue {
         };
         return new Builder(context)
               .minConsumerCount(1)
-              .maxConsumerCount(1) //we only want 1 thread executing jobs
-              .consumerKeepAlive(120) //2 min kill-time on the thread
-              .flushAt(40) //TODO this should be from Options
+              .maxConsumerCount(1)      // we only want 1 thread executing jobs
+              .consumerKeepAlive(120)   // 2 min kill-time on the thread
+              .flushAt(replayOptions.getFlushAt())
               .customLogger(logger)
-              .dispatchTimer(DispatchTimerFactory.createTimer(300000, true)) //TODO dispatch time should be from Options
+              .dispatchTimer(DispatchTimerFactory.createTimer(replayOptions.getDispatchInterval(), true))
               .build();
     }
 

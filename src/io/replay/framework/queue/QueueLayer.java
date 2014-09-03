@@ -1,7 +1,6 @@
 package io.replay.framework.queue;
 
-import android.content.Context;
-
+import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.util.LooperThreadWithHandler;
 
@@ -10,9 +9,10 @@ import io.replay.framework.util.LooperThreadWithHandler;
  */
 public class QueueLayer extends LooperThreadWithHandler {
 
+    private static final int MAX_QUEUE = ReplayIO.getConfig().getMaxQueue();
     private ReplayQueue queue;
 
-    public QueueLayer(Context context, ReplayQueue queue) {
+    public QueueLayer(ReplayQueue queue) {
         this.queue = queue;
         queue.start();
     }
@@ -21,7 +21,11 @@ public class QueueLayer extends LooperThreadWithHandler {
         handler().post(new Runnable() {
             @Override
             public void run() {
-                queue.enqueue(data);
+                if(queue.count() < MAX_QUEUE){
+                    queue.enqueue(data);
+                }else {
+                    ReplayIO.debugLog("Request was dropped because event queue's max size has been reached.");
+                }
             }
         });
     }
