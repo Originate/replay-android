@@ -34,43 +34,67 @@ public class ReplayIO {
     private static int stopped;
     private static int dropped;
     private static ReplayRequestFactory requestFactory;
+    private static ReplayPrefs mPrefs;
+
+
     /**
-     * Private constructor to create an instance.
+     * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
+     * including the Replay API key, which is required to be present in order to communicate with the server.
      *
-     * @param context The application context.
-     */
-    private ReplayIO(Context context) {
-        mContext = context;
-        initialized = false;
-
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-    }
-
-    /**
-     * Initializes ReplayIO client.  Previous state of enable/disable
-     * and debugMode are loaded. {@link ReplayQueue} is initialized and started.
-     * Previous value of dispatchInterval is loaded, too. If there are persisted requests
-     * on disk, load them into queue.
+     * It is acceptable to call this class from the main UI thread.
      *
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
-     * @return An initialized ReplayIO object.
      */
-    public static ReplayIO init(Context context, String apiKey) throws ReplayIONoKeyException {
+    public static void init(Context context){
+        if(initialized) return;
 
-        //If no api key is passed in, use the one specified in config
-        if (apiKey.equals("")){
-            apiKey = mConfig.getApiKey();
-        }
-        //Make sure the api key isn't empty
-        if (apiKey.equals("")){
-            throw new ReplayIONoKeyException();
+        mConfig = ReplayParams.getOptions(context.getApplicationContext());
+        init(context, mConfig);
+    }
+
+    /**
+     * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
+     * including the Replay API key, which is required to be present in order to communicate with the server.
+     *
+     * It is acceptable to call this class from the main UI thread.
+     *
+     * @param context The application context.  Use application context instead of activity context
+     *                to avoid the risk of memory leak.
+     * @param apiKey  the Replay API key
+     */
+    public static void init(Context context, String apiKey){
+        if(initialized) return;
+
+        mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey(apiKey);
+        init(context, mConfig);
+    }
+
+    /**
+     * Initializes the ReplayIO client. Loads the configuration parameters from the provided <code>options</code>
+     * object, including the Replay API key, which is required to be present in order to communicate with the server.
+     *
+     * It is acceptable to call this class from the main UI thread.
+     *
+     * @param context The application context.  Use application context instead of activity context
+     *                to avoid the risk of memory leak.
+     * @param options a full Config object that contains initialization parameters.
+     */
+    public static void init(Context context, Config options) throws ReplayIONoKeyException {
+        String detailMessage = "ReplayIO - %s should not be %s.";
+
+        if(context == null){
+            throw new IllegalArgumentException(String.format(detailMessage, "context", "null"));
         }
 
+        mContext = context.getApplicationContext();
+
+        if(Util.isNullOrEmpty(options.getApiKey())){
+            throw new IllegalArgumentException(String.format(detailMessage, "API key", "null or empty"));
         }
 
-
+        Context appContext = context.getApplicationContext(); //cache locally for performance reasons
 
         // load the default settings
         enabled = mConfig.isEnabled();
@@ -272,7 +296,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, java.lang.String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {

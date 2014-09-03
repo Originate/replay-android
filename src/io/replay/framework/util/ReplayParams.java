@@ -49,7 +49,7 @@ public class ReplayParams {
         Resources resources = context.getResources();
         int id = resources.getIdentifier(key, STRING_RESOURCE_KEY, context.getPackageName());
         if (id > 0) {
-            return context.getResources().getString(id);
+            return resources.getString(id);
         } else {
             return null;
         }
@@ -59,7 +59,7 @@ public class ReplayParams {
         Resources resources = context.getResources();
         int id = resources.getIdentifier(key, INTEGER_RESOURCE_KEY, context.getPackageName());
         if (id > 0) {
-            return context.getResources().getInteger(id);
+            return resources.getInteger(id);
         } else {
             return null;
         }
