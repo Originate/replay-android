@@ -209,6 +209,13 @@ public class ReplayQueue {
         }
     }
 
+    /**
+     * Return number of requests in the queue.
+     */
+    public Integer numRequests() {
+        return mRequests.size();
+    }
+
 
     /**
      * Store the request in queue to disk.

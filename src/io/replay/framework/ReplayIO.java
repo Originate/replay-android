@@ -1,7 +1,6 @@
 package io.replay.framework;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
 
@@ -10,8 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.util.Config;
 import io.replay.framework.util.ReplayLogger;
+import io.replay.framework.util.ReplayParams;
 import io.replay.framework.util.ReplayPrefs;
+import io.replay.framework.util.Util;
 
 public class ReplayIO {
 
@@ -21,61 +23,95 @@ public class ReplayIO {
     private static boolean enabled;
     private static ReplayAPIManager replayAPIManager;
     private static ReplayQueue replayQueue;
-    private static ReplayIO mInstance;
     private static Context mContext;
     private static boolean initialized;
-    private static ReplayPrefs mPrefs;
+    private static Config mConfig;
 
     private static int started;
     private static int resumed;
     @SuppressWarnings("unused")
     private static int paused;
     private static int stopped;
+    private static int dropped;
     private static ReplayRequestFactory requestFactory;
+    private static ReplayPrefs mPrefs;
+
 
     /**
-     * Private constructor to create an instance.
+     * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
+     * including the Replay API key, which is required to be present in order to communicate with the server.
      *
-     * @param context The application context.
-     */
-    private ReplayIO(Context context) {
-        mContext = context;
-        initialized = false;
-
-        mPrefs = ReplayPrefs.get(context.getApplicationContext());
-    }
-
-    /**
-     * Initializes ReplayIO client.  Previous state of enable/disable
-     * and debugMode are loaded. {@link ReplayQueue} is initialized and started.
-     * Previous value of dispatchInterval is loaded, too. If there are persisted requests
-     * on disk, load them into queue.
+     * It is acceptable to call this class from the main UI thread.
      *
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
-     * @param apiKey  The API key from <a href="http://replay.io">replay.io</a>.
-     * @return An initialized ReplayIO object.
      */
-    public static ReplayIO init(Context context, String apiKey) {
-        if (mInstance == null) {
-            mInstance = new ReplayIO(context);
-            replayApiKey = apiKey;
-        }
-        // load the default settings
-        enabled = mPrefs.getEnabled();
-        debugMode = mPrefs.getDebugMode();
+    public static void init(Context context){
+        if(initialized) return;
 
-        mPrefs.setClientUUID(getOrGenerateClientUUID());
+        mConfig = ReplayParams.getOptions(context.getApplicationContext());
+        init(context, mConfig);
+    }
+
+    /**
+     * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
+     * including the Replay API key, which is required to be present in order to communicate with the server.
+     *
+     * It is acceptable to call this class from the main UI thread.
+     *
+     * @param context The application context.  Use application context instead of activity context
+     *                to avoid the risk of memory leak.
+     * @param apiKey  the Replay API key
+     */
+    public static void init(Context context, String apiKey){
+        if(initialized) return;
+
+        mConfig = ReplayParams.getOptions(context.getApplicationContext());
+        mConfig.setApiKey(apiKey);
+        init(context, mConfig);
+    }
+
+    /**
+     * Initializes the ReplayIO client. Loads the configuration parameters from the provided <code>options</code>
+     * object, including the Replay API key, which is required to be present in order to communicate with the server.
+     *
+     * It is acceptable to call this class from the main UI thread.
+     *
+     * @param context The application context.  Use application context instead of activity context
+     *                to avoid the risk of memory leak.
+     * @param options a full Config object that contains initialization parameters.
+     */
+    public static void init(Context context, Config options) throws ReplayIONoKeyException {
+        String detailMessage = "ReplayIO - %s should not be %s.";
+
+        if(context == null){
+            throw new IllegalArgumentException(String.format(detailMessage, "context", "null"));
+        }
+
+        mContext = context.getApplicationContext();
+
+        if(Util.isNullOrEmpty(options.getApiKey())){
+            throw new IllegalArgumentException(String.format(detailMessage, "API key", "null or empty"));
+        }
+
+        Context appContext = context.getApplicationContext(); //cache locally for performance reasons
+
+        // load the default settings
+        enabled = mConfig.isEnabled();
+        debugMode = mConfig.isDebug();
+
+        mPrefs = ReplayPrefs.get(appContext);
+
+        mPrefs.setClientID(getOrGenerateClientUUID());
         mPrefs.setDistinctID("");
 
         // initialize ReplayAPIManager
-        mPrefs.setAPIKey(replayApiKey);
         replayAPIManager = new ReplayAPIManager();
         requestFactory = ReplayRequestFactory.get(context);
 
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(replayAPIManager);
-        replayQueue.setDispatchInterval(mPrefs.getDispatchInterval());
+        replayQueue.setDispatchInterval(mConfig.getDispatchInterval());
         replayQueue.start();
 
         try {
@@ -86,20 +122,8 @@ public class ReplayIO {
             e.printStackTrace();
         }
         initialized = true;
-        return mInstance;
     }
 
-    /**
-     * Update the API key.  The {@link ReplayAPIManager} instance will be updated, too.
-     *
-     * @param apiKey The API key from <a href="http://replay.io>replay.io</a>.
-     */
-    public static void trackWithAPIKey(String apiKey) {
-        checkInitialized();
-        replayApiKey = apiKey;
-        mPrefs.setAPIKey(apiKey);
-        replayAPIManager = new ReplayAPIManager();
-    }
 
     /**
      * Send event with data to server.
@@ -113,7 +137,13 @@ public class ReplayIO {
         ReplayRequest request;
         try {
             request = requestFactory.requestForEvent(eventName, data);
-            replayQueue.enqueue(request);
+            if (replayQueue.numRequests() < mConfig.getMaxQueue()) {
+                replayQueue.enqueue(request);
+            }
+            else{
+                ReplayIO.debugLog("Request was dropped because max_queue size has been reached.");
+                dropped++;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -148,7 +178,7 @@ public class ReplayIO {
         checkInitialized();
         replayQueue.setDispatchInterval(interval);
 
-       mPrefs.setDispatchInterval(interval);
+        mConfig.setDispatchInterval(interval);
     }
 
     /**
@@ -167,7 +197,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = true;
 
-       mPrefs.setEnabled(enabled);
+        mConfig.setEnabled(enabled);
     }
 
     /**
@@ -177,7 +207,7 @@ public class ReplayIO {
         checkInitialized();
         enabled = false;
 
-       mPrefs.setEnabled(enabled);
+        mConfig.setEnabled(enabled);
     }
 
     /**
@@ -187,7 +217,7 @@ public class ReplayIO {
      */
     public static boolean isEnabled() {
         checkInitialized();
-        return mPrefs.getEnabled();
+        return mConfig.isEnabled();
     }
 
     /**
@@ -199,7 +229,7 @@ public class ReplayIO {
         checkInitialized();
         debugMode = debug;
 
-        mPrefs.setDebugMode(debug);
+        mConfig.setDebug(debug);
     }
 
     /**
@@ -208,7 +238,7 @@ public class ReplayIO {
      * @return True if enabled, false otherwise.
      */
     public static boolean isDebugMode() {
-       return mPrefs.getDebugMode();
+        return mConfig.isDebug();
     }
 
     /**
@@ -239,7 +269,7 @@ public class ReplayIO {
         checkInitialized();
         replayQueue = new ReplayQueue(replayAPIManager);
         replayQueue.start();
-        replayQueue.setDispatchInterval(mPrefs.getDispatchInterval());
+        replayQueue.setDispatchInterval(mConfig.getDispatchInterval());
         mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
 
         try {
@@ -266,7 +296,7 @@ public class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, String)}.
+     * @throws ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {
@@ -280,7 +310,7 @@ public class ReplayIO {
      * @return Client UUID.
      */
     public static String getClientUUID() {
-        if (null == mPrefs) {
+        if (null == mConfig || !initialized) {
             throw new ReplayIONotInitializedException();
         }
         return getOrGenerateClientUUID();
@@ -288,12 +318,12 @@ public class ReplayIO {
 
     private static String getOrGenerateClientUUID() {
         if (clientUUID == null) {
-            if (mPrefs.getClientUUID().length() == 0) {
-                mPrefs.setClientUUID(UUID.randomUUID()
-                                         .toString());
+            if (Util.isNullOrEmpty(mPrefs.getClientID())) {
+                mPrefs.setClientID(UUID.randomUUID()
+                        .toString());
                 ReplayIO.debugLog("Generated new client uuid");
             }
-            return mPrefs.getClientUUID();
+            return mPrefs.getClientID();
         }
         return clientUUID;
     }
@@ -391,7 +421,7 @@ public class ReplayIO {
     }
 
     /**
-     * Clear the saved distinct ID.
+     * Clear the saved distinct ID. Convenience method for calling <code>ReplayIO.identify("");</code>.
      */
     public static void identify() {
         identify("");
@@ -405,6 +435,10 @@ public class ReplayIO {
     private static String getDistinctId() {
         checkInitialized();
         return mPrefs.getDistinctID();
+    }
+
+    public static Config getConfig(){
+        return mConfig;
     }
 
 }
