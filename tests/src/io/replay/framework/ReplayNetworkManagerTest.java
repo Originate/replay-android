@@ -9,8 +9,9 @@ import org.json.JSONObject;
 import android.test.AndroidTestCase;
 
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.network.ReplayNetworkManager;
 
-public class ReplayAPIManagerTest extends AndroidTestCase {
+public class ReplayNetworkManagerTest extends AndroidTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
@@ -18,42 +19,42 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 	}
 	
 	public void testReplayAPIManager() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
+		ReplayNetworkManager manager = new ReplayNetworkManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
-		Field apiKey = ReplayAPIManager.class.getDeclaredField("apiKey");
+		Field apiKey = ReplayNetworkManager.class.getDeclaredField("apiKey");
 		apiKey.setAccessible(true);
 		String apiKeyValue = (String) apiKey.get(manager);
 		assertEquals("api_key", apiKeyValue);
 		
-		Field clientUUID = ReplayAPIManager.class.getDeclaredField("clientUUID");
+		Field clientUUID = ReplayNetworkManager.class.getDeclaredField("clientUUID");
 		clientUUID.setAccessible(true);
 		String clientUUIDValue = (String) clientUUID.get(manager);
 		assertEquals("client_uuid", clientUUIDValue);
 		
-		Field sessionUUID = ReplayAPIManager.class.getDeclaredField("sessionUUID");
+		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("sessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
 		assertEquals("session_uuid", sessionUUIDValue);
 
-        Field distinctId = ReplayAPIManager.class.getDeclaredField("distinctId");
+        Field distinctId = ReplayNetworkManager.class.getDeclaredField("distinctId");
         distinctId.setAccessible(true);
         String distinctIdValue = (String) distinctId.get(manager);
         assertEquals("distinct_id", distinctIdValue);
 	}
 	
 	public void testUpdateSessionUUID() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
+		ReplayNetworkManager manager = new ReplayNetworkManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		manager.updateSessionUUID("new_session_uuid");
 		
-		Field sessionUUID = ReplayAPIManager.class.getDeclaredField("sessionUUID");
+		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("sessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
 		assertEquals("new_session_uuid", sessionUUIDValue);
 	}
 	
 	public void testRequestForEvent() throws JSONException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
+		ReplayNetworkManager manager = new ReplayNetworkManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		HashMap<String, String> map = new HashMap<String,String>();
 		map.put("color", "green");
 		
@@ -88,7 +89,7 @@ public class ReplayAPIManagerTest extends AndroidTestCase {
 	}
 	
 	public void testRequestForAlias() throws JSONException {
-		ReplayAPIManager manager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
+		ReplayNetworkManager manager = new ReplayNetworkManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		ReplayRequest request = manager.requestForAlias("new_alias");
 		assertNotNull(request);

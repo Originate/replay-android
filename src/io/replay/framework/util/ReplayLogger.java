@@ -16,66 +16,28 @@ public final class ReplayLogger {
     public static boolean isLogEnabled(){
         return logEnabled;
     }
-    
+
     public static void setLogging(boolean enable){
         logEnabled = enable;
     }
 
-    public static void v(String format, Object... args) {
-        log(Log.VERBOSE, format, args);
-    }
+    public static void e(String format, Object... args) { log(Log.ERROR,    format, args); }
+    public static void w(String format, Object... args) { log(Log.WARN,     format, args); }
+    public static void d(String format, Object... args) { log(Log.DEBUG,    format, args); }
+    public static void i(String format, Object... args) { log(Log.INFO,     format, args); }
+    public static void v(String format, Object... args) { log(Log.VERBOSE,  format, args); }
 
-    public static void v(Throwable throwable, String format, Object... args) {
-        log(Log.VERBOSE, throwable, format, args);
-    }
+    public static void e(Throwable throwable, String format, Object... args) { log(Log.ERROR,   throwable, format, args); }
+    public static void w(Throwable throwable, String format, Object... args) { log(Log.WARN,    throwable, format, args); }
+    public static void d(Throwable throwable, String format, Object... args) { log(Log.DEBUG,   throwable, format, args); }
+    public static void i(Throwable throwable, String format, Object... args) { log(Log.INFO,    throwable, format, args);}
+    public static void v(Throwable throwable, String format, Object... args) { log(Log.VERBOSE, throwable, format, args); }
 
-    public static void d(String format, Object... args) {
-        log(Log.DEBUG, format, args);
-    }
-
-    public static void d(Throwable throwable, String format, Object... args) {
-        log(Log.DEBUG, throwable, format, args);
-    }
-
-    public static void i(String format, Object... args) {
-        log(Log.INFO, format, args);
-    }
-
-    public static void i(Throwable throwable, String format, Object... args) {
-        log(Log.INFO, throwable, format, args);
-    }
-
-    public static void w(String format, Object... args) {
-        log(Log.WARN, format, args);
-    }
-
-    public static void w(Throwable throwable, String format, Object... args) {
-        log(Log.WARN, throwable, format, args);
-    }
-
-    public static void e(String format, Object... args) {
-        log(Log.ERROR, format, args);
-    }
-
-    public static void e(Throwable throwable, String format, Object... args) {
-        log(Log.ERROR, throwable, format, args);
-    }
-
-    public static void v(String tag, String format, Object... args) {
-        log(Log.VERBOSE, tag, format, args);
-    }
-
-    public static void d(String tag, String format, Object... args) {
-        log(Log.DEBUG, tag, format, args);
-    }
-
-    public static void i(String tag, String format, Object... args) {
-        log(Log.INFO, tag, format, args);
-    }
-
-    public static void w(String tag, String format, Object... args) {
-        log(Log.WARN, tag, format, args);
-    }
+    public static void e(String tag, String format, Object... args) { log(Log.ERROR,    tag, format, args); }
+    public static void w(String tag, String format, Object... args) { log(Log.WARN,     tag, format, args); }
+    public static void d(String tag, String format, Object... args) { log(Log.DEBUG,    tag, format, args); }
+    public static void i(String tag, String format, Object... args) { log(Log.INFO,     tag, format, args); }
+    public static void v(String tag, String format, Object... args) { log(Log.VERBOSE,  tag, format, args); }
 
 
     private static void log(int level, String tag, String format, Object[] args){

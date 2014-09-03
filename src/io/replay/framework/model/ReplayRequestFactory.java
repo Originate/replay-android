@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.replay.framework.ReplayAPIManager;
+import io.replay.framework.network.ReplayNetworkManager;
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.util.ReplayPrefs;
@@ -70,7 +70,7 @@ public class ReplayRequestFactory {
             data = new HashMap<String, String>();
         }
         data.put(KEY_EVENT_NAME, event);
-        json.put(ReplayAPIManager.KEY_DATA, new JSONObject(data));
+        json.put(ReplayNetworkManager.KEY_DATA, new JSONObject(data));
         return json;
     }
 

@@ -20,7 +20,6 @@ public class ReplayIO {
     private static String replayApiKey;
     private static String clientUUID;
     private static boolean enabled;
-    private static ReplayAPIManager replayAPIManager;
     private static Context mContext;
     private static boolean initialized;
     private static ReplayPrefs mPrefs;
@@ -58,7 +57,6 @@ public class ReplayIO {
 
         // initialize ReplayAPIManager
         mPrefs.setAPIKey(replayApiKey);
-        replayAPIManager = new ReplayAPIManager();
         ReplayRequestFactory.init(appContext);
 
         // initialize ReplayQueue
