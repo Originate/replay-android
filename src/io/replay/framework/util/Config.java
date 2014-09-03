@@ -10,9 +10,6 @@ public class Config {
      */
     private boolean debugModeEnabled;
     private boolean enabled;
-    private String distinct_id;
-    private String session_id;
-    private String client_id;
     private String apiKey;
     private int dispatchInterval;
     private int flushAt;
@@ -63,30 +60,6 @@ public class Config {
     }
 
     public Config setApiKey(String apiKey){
-    public String getSessionId() {
-        return session_id;
-    }
-
-    public Config setSessionId(String sessionId){
-        this.session_id = sessionId;
-        return this;
-    }
-
-    public String getClientId() {
-        return client_id;
-    }
-
-    public Config setClientId(String clientId){
-        this.client_id = clientId;
-        return this;
-    }
-
-    public String getDistinctId() {
-        return distinct_id;
-    }
-
-    public Config setDistinctId(String distinctId){
-        this.distinct_id = distinctId;
         this.apiKey = apiKey;
         return this;
     }

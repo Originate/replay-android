@@ -1,7 +1,6 @@
 package io.replay.framework;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONException;
 
@@ -10,9 +9,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.network.ReplayRequestFactory;
+import io.replay.framework.util.Config;
 import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.ReplayParams;
-import io.replay.framework.util.Config;
+import io.replay.framework.util.ReplayPrefs;
+import io.replay.framework.util.Util;
 
 public class ReplayIO {
 
@@ -22,7 +23,6 @@ public class ReplayIO {
     private static boolean enabled;
     private static ReplayAPIManager replayAPIManager;
     private static ReplayQueue replayQueue;
-    private static ReplayIO mInstance;
     private static Context mContext;
     private static boolean initialized;
     private static Config mConfig;
@@ -68,9 +68,6 @@ public class ReplayIO {
         mConfig.setApiKey(apiKey);
         }
 
-        if (mInstance == null) {
-            mInstance = new ReplayIO(context);
-            replayApiKey = apiKey;
         }
 
 
@@ -79,8 +76,10 @@ public class ReplayIO {
         enabled = mConfig.isEnabled();
         debugMode = mConfig.isDebug();
 
-        mConfig.setClientId(getOrGenerateClientUUID());
-        mConfig.setDistinctId("");
+        mPrefs = ReplayPrefs.get(appContext);
+
+        mPrefs.setClientID(getOrGenerateClientUUID());
+        mPrefs.setDistinctID("");
 
         // initialize ReplayAPIManager
         replayAPIManager = new ReplayAPIManager();
@@ -99,7 +98,6 @@ public class ReplayIO {
             e.printStackTrace();
         }
         initialized = true;
-        return mInstance;
     }
 
 
@@ -121,11 +119,6 @@ public class ReplayIO {
             else{
                 ReplayIO.debugLog("Request was dropped because max_queue size has been reached.");
                 dropped++;
-            }
-
-            if (replayQueue.numRequests() >= mConfig.getFlushAt()){
-                ReplayIO.debugLog("Requests are being sent to server because 'flush_at' number of requests are in the queue");
-                dispatch();
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -253,7 +246,7 @@ public class ReplayIO {
         replayQueue = new ReplayQueue(replayAPIManager);
         replayQueue.start();
         replayQueue.setDispatchInterval(mConfig.getDispatchInterval());
-        mConfig.setSessionId(ReplaySessionManager.sessionUUID(mContext));
+        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
 
         try {
             replayQueue.loadQueueFromDisk(mContext);
@@ -293,7 +286,7 @@ public class ReplayIO {
      * @return Client UUID.
      */
     public static String getClientUUID() {
-        if (null == mConfig) {
+        if (null == mConfig || !initialized) {
             throw new ReplayIONotInitializedException();
         }
         return getOrGenerateClientUUID();
@@ -301,12 +294,12 @@ public class ReplayIO {
 
     private static String getOrGenerateClientUUID() {
         if (clientUUID == null) {
-            if (mConfig.getClientId().length() == 0) {
-                mConfig.setClientId(UUID.randomUUID()
+            if (Util.isNullOrEmpty(mPrefs.getClientID())) {
+                mPrefs.setClientID(UUID.randomUUID()
                         .toString());
                 ReplayIO.debugLog("Generated new client uuid");
             }
-            return mConfig.getClientId();
+            return mPrefs.getClientID();
         }
         return clientUUID;
     }
@@ -400,11 +393,11 @@ public class ReplayIO {
      */
     public static void identify(String distinctId) {
         checkInitialized();
-        mConfig.setDistinctId(distinctId);
+        mPrefs.setDistinctID(distinctId);
     }
 
     /**
-     * Clear the saved distinct ID.
+     * Clear the saved distinct ID. Convenience method for calling <code>ReplayIO.identify("");</code>.
      */
     public static void identify() {
         identify("");
@@ -417,7 +410,11 @@ public class ReplayIO {
      */
     private static String getDistinctId() {
         checkInitialized();
-        return mConfig.getDistinctId();
+        return mPrefs.getDistinctID();
+    }
+
+    public static Config getConfig(){
+        return mConfig;
     }
 
 }
