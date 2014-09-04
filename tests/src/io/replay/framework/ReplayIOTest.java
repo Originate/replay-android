@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
+import io.replay.framework.error.ReplayIONotInitializedException;
+
 public class ReplayIOTest extends AndroidTestCase {
 
     @Override
@@ -24,7 +26,7 @@ public class ReplayIOTest extends AndroidTestCase {
     }
 
     public void testInit() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
-        ReplayIO.init(getContext(), "api_key");
+        ReplayIO.init(getContext(), "api_key", );
 
         Field initialized = ReplayIO.class.getDeclaredField("initialized");
         initialized.setAccessible(true);
@@ -57,19 +59,19 @@ public class ReplayIOTest extends AndroidTestCase {
     }
 
     public void testDisable() throws ReplayIONotInitializedException {
-        ReplayIO.init(mContext, "api_key");
+        ReplayIO.init(mContext, "api_key", );
         ReplayIO.disable();
         assertFalse(ReplayIO.isEnabled());
     }
 
     public void testEnable() throws ReplayIONotInitializedException {
-        ReplayIO.init(mContext, "api_key");
+        ReplayIO.init(mContext, "api_key", );
         ReplayIO.enable();
         assertTrue(ReplayIO.isEnabled());
     }
 
     public void testSetDebugMode() throws ReplayIONotInitializedException {
-        ReplayIO.init(mContext, "api_key");
+        ReplayIO.init(mContext, "api_key", );
         ReplayIO.setDebugMode(true);
         assertTrue(ReplayIO.isDebugMode());
 
@@ -96,7 +98,7 @@ public class ReplayIOTest extends AndroidTestCase {
 
         assertEquals("", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
 
-        ReplayIO.init(mContext, "api_key");
+        ReplayIO.init(mContext, "api_key", );
         ReplayIO.identify("new_identity");
         assertEquals("new_identity", mPrefs.getString(ReplayConfig.PREF_DISTINCT_ID, ""));
     }
