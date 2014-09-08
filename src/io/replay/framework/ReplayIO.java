@@ -136,7 +136,7 @@ public class ReplayIO {
             now.setToNow();
             data.put(TIME_KEY, now.toString());
 
-            LocationManager locationManager = getSystemService(context, Context.LOCATION_SERVICE);
+            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             Criteria crit = new Criteria();
             crit.setPowerRequirement(Criteria.POWER_LOW);
             crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
@@ -170,7 +170,7 @@ public class ReplayIO {
             NetworkInfo network = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             data.put(NETWORK_TYPE_KEY,network.getTypeName());
         }
-        catch (IOException e){
+        catch (Exception e){
             e.printStackTrace();
         }
         return data;
