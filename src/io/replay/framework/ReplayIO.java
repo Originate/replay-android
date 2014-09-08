@@ -1,11 +1,24 @@
 package io.replay.framework;
 
 import android.content.Context;
+import android.os.Build;
+import android.text.format.Time;
+import android.location.Geocoder;
+import android.location.Address;
+import android.location.Location;
+import android.location.LocationManager;
+import android.view.Display;
+import android.view.WindowManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Locale;
+import java.util.List;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
@@ -20,6 +33,14 @@ import io.replay.framework.util.ReplayPrefs;
 import io.replay.framework.util.Util;
 
 public class ReplayIO {
+
+    private static String MODEL_KEY="model";
+    private static String MANUFACTURE_KEY="manufacturer";
+    private static String NETWORK_TYPE_KEY="network_type";
+    private static String LOCATION_KEY="location";
+    private static String OS_KEY="os";
+    private static String DISPLAY_KEY="display";
+    private static String TIME_KEY="time";
 
     private static boolean debugMode;
     private static boolean enabled;
@@ -114,6 +135,38 @@ public class ReplayIO {
         initialized = true;
     }
 
+    public static Map<String,String> addPassiveData(Map<String,String> data){
+        try {
+            Time now = new Time();
+            now.setToNow();
+            data.put(TIME_KEY, now.toString());
+
+            LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            data.put(LOCATION_KEY,addresses.get(0).getPostalCode());
+
+            data.put(OS_KEY,Build.VERSION.RELEASE);
+
+            WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            Display display = window.getDefaultDisplay();
+            data.put(DISPLAY_KEY,display.getName());
+
+            data.put(MANUFACTURE_KEY, Build.MANUFACTURER);
+
+            data.put(MODEL_KEY, Build.MODEL);
+
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo network = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            data.put(NETWORK_TYPE_KEY,network.getTypeName());
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        return data;
+    }
+
     /**
      * Send event with data to server.
      *
@@ -122,9 +175,10 @@ public class ReplayIO {
      */
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
+        Map<String,String> newData = addPassiveData(data);
         if (!enabled) return;
         try {
-            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, data);
+            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, newData);
             queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
