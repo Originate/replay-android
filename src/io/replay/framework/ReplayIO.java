@@ -3,22 +3,18 @@ package io.replay.framework;
 import android.content.Context;
 import android.os.Build;
 import android.text.format.Time;
-import android.location.Geocoder;
-import android.location.Address;
-import android.location.Location;
 import android.location.LocationManager;
 import android.view.Display;
 import android.view.WindowManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.location.Criteria;
 
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Locale;
-import java.util.List;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
@@ -141,11 +137,25 @@ public class ReplayIO {
             now.setToNow();
             data.put(TIME_KEY, now.toString());
 
-            LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            data.put(LOCATION_KEY,addresses.get(0).getPostalCode());
+            LocationManager locationManager = getSystemService(context, Context.LOCATION_SERVICE);
+            Criteria crit = new Criteria();
+            crit.setPowerRequirement(Criteria.POWER_LOW);
+            crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
+            String provider = locationManager.getBestProvider(crit, true);
+
+            if (provider != null) {
+                android.location.Location location;
+                try {
+                    location = locationManager.getLastKnownLocation(provider); // this is a cached location
+                } catch (SecurityException ex) {
+                    //The application may not have permission to access location
+                    location = null;
+                }
+                if (location != null) {
+                    data.put("latitude", location.getLatitude()+"");
+                    data.put("longitude", location.getLongitude()+"");
+                }
+            }
 
             data.put(OS_KEY,Build.VERSION.RELEASE);
 
