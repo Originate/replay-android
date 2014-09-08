@@ -33,10 +33,9 @@ public class ReplayIO {
     private static String MODEL_KEY="model";
     private static String MANUFACTURE_KEY="manufacturer";
     private static String NETWORK_TYPE_KEY="network_type";
-    private static String LOCATION_KEY="location";
-    private static String OS_KEY="os";
+    private static String OS_KEY="client_os";
     private static String DISPLAY_KEY="display";
-    private static String TIME_KEY="time";
+    private static String TIME_KEY="timestamp";
 
     private static boolean debugMode;
     private static boolean enabled;
