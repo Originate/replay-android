@@ -10,6 +10,11 @@ import java.net.URL;
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.model.ReplayRequest;
 
+/**The ReplayNetworkManager is a simple wrapper around the Android/Java {@link java.net.HttpURLConnection}.
+ * Given a {@link io.replay.framework.model.ReplayRequest} object, this class will POST the JSON body to the
+ * appropriate endpoint.
+ *
+ */
 public class ReplayNetworkManager implements ReplayConfig {
 
     /**
@@ -21,12 +26,10 @@ public class ReplayNetworkManager implements ReplayConfig {
      * second being {@link java.net.HttpURLConnection#getResponseMessage()}
      */
     public static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
-        byte[] jsonBody = request.getBody();
+        final byte[] jsonBody = request.getBody();
 
-        HttpURLConnection connection = null;
-        URL url;
-        url = new URL(REPLAY_URL + request.getType());
-        connection = (HttpURLConnection) url.openConnection();
+        URL url = new URL(REPLAY_URL + request.getType());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setFixedLengthStreamingMode(jsonBody.length);
         connection.setInstanceFollowRedirects(false);
@@ -40,7 +43,6 @@ public class ReplayNetworkManager implements ReplayConfig {
         bos.write(jsonBody);
         bos.flush();
         bos.close();
-
-        return new Pair<Integer, String>(connection.getResponseCode(), connection.getResponseMessage());
+        return Pair.create(connection.getResponseCode(), connection.getResponseMessage());
     }
 }

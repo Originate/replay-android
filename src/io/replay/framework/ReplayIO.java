@@ -2,14 +2,11 @@ package io.replay.framework;
 
 import android.content.Context;
 
-import org.json.JSONException;
-
 import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
@@ -123,12 +120,7 @@ public class ReplayIO {
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        try {
-            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, data);
-            queueLayer.enqueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        queueLayer.createAndEnqueue(eventName, data);
     }
 
     /**
@@ -139,12 +131,7 @@ public class ReplayIO {
     public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
-        try {
-            ReplayRequest request = ReplayRequestFactory.requestForAlias(userAlias);
-            queueLayer.enqueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        queueLayer.createAndEnqueue(userAlias);
     }
 
     /**
@@ -162,7 +149,6 @@ public class ReplayIO {
     public static void enable() {
         checkInitialized();
         enabled = true;
-
         mConfig.setEnabled(true);
     }
 

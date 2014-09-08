@@ -52,6 +52,7 @@ android {
         release.setRoot('build-types/release')
     }
     defaultConfig {
+        minSdkVersion 8
         targetSdkVersion 19
         //commenting out tests because of the various changes we've made (Parth - Aug 22, 2014)
       //  testApplicationId 'io.replay.framework.tests'
