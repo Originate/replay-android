@@ -17,6 +17,7 @@ import io.replay.framework.util.ReplayPrefs;
 public class ReplayRequestFactory {
 
     private static final String KEY_EVENT_NAME = "event_name";
+    private static final String NETWORK_KEY = "network";
     private static ReplayRequestFactory instance;
 
     public static ReplayRequestFactory init(Context context) {
@@ -41,8 +42,8 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      * @throws org.json.JSONException
      */
-    public static ReplayRequest requestForEvent(String event, Map<String, String> data) throws JSONException {
-        return new ReplayRequest(RequestType.EVENTS, jsonForEvent(event, data));
+    public static ReplayRequest requestForEvent(String event, Map<String, String> data, Map<String,String> network) throws JSONException {
+        return new ReplayRequest(RequestType.EVENTS, jsonForEvent(event, data, network));
     }
 
     /**
@@ -64,13 +65,15 @@ public class ReplayRequestFactory {
      * @return The JSONObject of data.
      * @throws org.json.JSONException
      */
-    private static JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
+    private static JSONObject jsonForEvent(String event, Map<String, String> data, Map<String,String> network) throws JSONException {
         JSONObject json = new JSONObject(base);
         if (null == data) {
             data = new HashMap<String, String>();
         }
+        JSONObject properties = new JSONObject(data);
+        properties.put(NETWORK_KEY, new JSONObject(network));
         data.put(KEY_EVENT_NAME, event);
-        json.put(ReplayAPIManager.KEY_DATA, new JSONObject(data));
+        json.put(ReplayAPIManager.KEY_DATA, properties);
         return json;
     }
 
