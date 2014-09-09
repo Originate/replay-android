@@ -16,6 +16,7 @@ import org.json.JSONException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.Date;
 import java.util.Map;
@@ -37,10 +38,14 @@ public class ReplayIO {
 
     private static String MODEL_KEY="device_model";
     private static String MANUFACTURER_KEY="device_manufacturer";
-    private static String NETWORK_TYPE_KEY="network_type";
     private static String OS_KEY="client_os";
+    private static String SDK_KEY="client_sdk";
     private static String DISPLAY_KEY="display";
     private static String TIME_KEY="timestamp";
+    private static String MOBILE_KEY="mobile";
+    private static String WIFI_KEY="wifi";
+    private static String BLUETOOTH_KEY="bluetooth";
+    private static String CARRIER_KEY="carrier";
 
     private static boolean debugMode;
     private static boolean enabled;
@@ -135,6 +140,41 @@ public class ReplayIO {
         initialized = true;
     }
 
+    /**
+     * Create a dictionary of network properties .
+     *
+     */
+    public static Map<String,String> getNetworkData() {
+
+        Map<String,String> network = new HashMap<String, String>();
+
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        boolean usingWifi = networkInfo.isConnected();
+        network.put(WIFI_KEY,String.valueOf(usingWifi));
+
+        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
+        boolean usingBlueTooth = networkInfo.isConnected();
+        network.put(BLUETOOTH_KEY,String.valueOf(usingBlueTooth));
+
+        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        boolean usingCellular = networkInfo.isConnected();
+        network.put(MOBILE_KEY,String.valueOf(usingCellular));
+
+        final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        String carrier = telephonyManager.getNetworkOperatorName();
+        network.put(CARRIER_KEY,carrier);
+
+        return network;
+    }
+
+
+
+    /**
+     * Send additional properties that are automatically tracked .
+     *
+     * @param data      {@link Map} object stores key-value pairs.
+     */
     public static Map<String,String> addPassiveData(Map<String,String> data){
         try {
             Date currentTime = new Date();
@@ -164,6 +204,8 @@ public class ReplayIO {
 
             data.put(OS_KEY,Build.VERSION.RELEASE);
 
+            data.put(SDK_KEY,Build.VERSION.SDK);
+
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
             data.put(DISPLAY_KEY,display.getName());
@@ -171,21 +213,6 @@ public class ReplayIO {
             data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
 
             data.put(MODEL_KEY, Build.MODEL);
-
-            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo network = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            data.put(NETWORK_TYPE_KEY,network.getTypeName());
-            Boolean usingWifi = network.isConnected();
-
-            network = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
-            Boolean usingBlueTooth = network.isConnected();
-
-            network = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-            Boolean usingCellular = network.isConnected();
-
-            final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-            String carrier = telephonyManager.getNetworkOperatorName();
-
         }
         catch (Exception e){
             e.printStackTrace();
@@ -202,9 +229,10 @@ public class ReplayIO {
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
         Map<String,String> newData = addPassiveData(data);
+        Map<String,String> network = getNetworkData();
         if (!enabled) return;
         try {
-            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, newData);
+            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, newData, network);
             queueLayer.enqueue(request);
         } catch (JSONException e) {
             e.printStackTrace();
