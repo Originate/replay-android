@@ -9,10 +9,15 @@ import android.view.WindowManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.location.Criteria;
+import android.telephony.TelephonyManager;
 
 import org.json.JSONException;
 
-import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import java.util.TimeZone;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,8 +35,8 @@ import io.replay.framework.util.Util;
 
 public class ReplayIO {
 
-    private static String MODEL_KEY="model";
-    private static String MANUFACTURE_KEY="manufacturer";
+    private static String MODEL_KEY="device_model";
+    private static String MANUFACTURER_KEY="device_manufacturer";
     private static String NETWORK_TYPE_KEY="network_type";
     private static String OS_KEY="client_os";
     private static String DISPLAY_KEY="display";
@@ -132,9 +137,10 @@ public class ReplayIO {
 
     public static Map<String,String> addPassiveData(Map<String,String> data){
         try {
-            Time now = new Time();
-            now.setToNow();
-            data.put(TIME_KEY, now.toString());
+            Date currentTime = new Date();
+            DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+            ausFormat.setTimeZone(TimeZone.getTimeZone("Universal"));
+            data.put(TIME_KEY,ausFormat.format(currentTime));
 
             LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             Criteria crit = new Criteria();
@@ -151,8 +157,8 @@ public class ReplayIO {
                     location = null;
                 }
                 if (location != null) {
-                    data.put("latitude", location.getLatitude()+"");
-                    data.put("longitude", location.getLongitude()+"");
+                    data.put("latitude", String.valueOf(location.getLatitude()));
+                    data.put("longitude", String.valueOf(location.getLongitude()));
                 }
             }
 
@@ -162,13 +168,24 @@ public class ReplayIO {
             Display display = window.getDefaultDisplay();
             data.put(DISPLAY_KEY,display.getName());
 
-            data.put(MANUFACTURE_KEY, Build.MANUFACTURER);
+            data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
 
             data.put(MODEL_KEY, Build.MODEL);
 
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo network = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             data.put(NETWORK_TYPE_KEY,network.getTypeName());
+            Boolean usingWifi = network.isConnected();
+
+            network = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
+            Boolean usingBlueTooth = network.isConnected();
+
+            network = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+            Boolean usingCellular = network.isConnected();
+
+            final TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            String carrier = telephonyManager.getNetworkOperatorName();
+
         }
         catch (Exception e){
             e.printStackTrace();
