@@ -1,30 +1,25 @@
 package io.replay.framework;
 
 import android.content.Context;
-import android.os.Build;
-import android.text.format.Time;
+import android.location.Criteria;
 import android.location.LocationManager;
-import android.view.Display;
-import android.view.WindowManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.location.Criteria;
+import android.os.Build;
 import android.telephony.TelephonyManager;
-
-import org.json.JSONException;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import java.util.HashMap;
-import java.util.TimeZone;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
@@ -228,15 +223,8 @@ public class ReplayIO {
      */
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
-        Map<String,String> newData = addPassiveData(data);
-        Map<String,String> network = getNetworkData();
         if (!enabled) return;
-        try {
-            ReplayRequest request = ReplayRequestFactory.requestForEvent(eventName, newData, network);
-            queueLayer.enqueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        queueLayer.createAndEnqueue(eventName, addPassiveData(data), getNetworkData());
     }
 
     /**
@@ -247,12 +235,8 @@ public class ReplayIO {
     public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
-        try {
-            ReplayRequest request = ReplayRequestFactory.requestForAlias(userAlias);
-            queueLayer.enqueue(request);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        //TODO add passive data here
+        queueLayer.createAndEnqueue(userAlias);
     }
 
     /**
@@ -270,7 +254,6 @@ public class ReplayIO {
     public static void enable() {
         checkInitialized();
         enabled = true;
-
         mConfig.setEnabled(true);
     }
 

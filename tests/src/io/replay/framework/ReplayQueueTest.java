@@ -13,18 +13,19 @@ import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
+import io.replay.framework.network.ReplayNetworkManager;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.model.ReplayRequest;
 
 public class ReplayQueueTest extends AndroidTestCase {
 
-	private ReplayAPIManager apiManager;
+	private ReplayNetworkManager apiManager;
 	private ReplayQueue queue;
 	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		apiManager = new ReplayAPIManager("api_key", "client_uuid", "session_uuid", "distinct_id");
+		apiManager = new ReplayNetworkManager("api_key", "client_uuid", "session_uuid", "distinct_id");
 		
 		// add 101 request, so it will goes into two files
 		queue = new ReplayQueue(apiManager);

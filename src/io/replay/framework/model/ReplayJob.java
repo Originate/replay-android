@@ -1,5 +1,7 @@
 package io.replay.framework.model;
 
+import android.util.Pair;
+
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
@@ -7,7 +9,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 
+import io.replay.framework.network.ReplayNetworkManager;
 import io.replay.framework.util.ReplayLogger;
 
 /**
@@ -30,12 +34,25 @@ public class ReplayJob extends Job implements Serializable {
 
     @Override
     public void onRun() throws Throwable {
-        //TODO network request
+        Pair<Integer, String> result;
+        try {
+            //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
+            result = ReplayNetworkManager.doPost(request);
+        } catch (IOException e) {
+            ReplayLogger.e(e, "Error while POSTing job to Replay server: ");
+            throw e;
+        }
+
+        if (result.first == HttpURLConnection.HTTP_OK) {
+            ReplayLogger.d("ReplayIO - successfully sent job to server");
+        } else {  //server error; log
+            ReplayLogger.e(TAG, "ReplayIO server error code: %s\nmessage: %s", result.first, result.second);
+        }
     }
 
     @Override
     public void onCancel() {
-        ReplayLogger.d(TAG, "Cancelled %s", request.toString());
+        ReplayLogger.d(TAG, "Cancelled Request: %s", request.toString());
     }
 
     @Override
@@ -43,8 +60,9 @@ public class ReplayJob extends Job implements Serializable {
         return true;
     }
 
+
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeObject(request);
+       oos.writeObject(request);
     }
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
