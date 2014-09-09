@@ -1,8 +1,21 @@
 package io.replay.framework;
 
 import android.content.Context;
+import android.location.Criteria;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
+import android.telephony.TelephonyManager;
+import android.view.Display;
+import android.view.WindowManager;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
@@ -17,6 +30,17 @@ import io.replay.framework.util.ReplayPrefs;
 import io.replay.framework.util.Util;
 
 public class ReplayIO {
+
+    private static String MODEL_KEY="device_model";
+    private static String MANUFACTURER_KEY="device_manufacturer";
+    private static String OS_KEY="client_os";
+    private static String SDK_KEY="client_sdk";
+    private static String DISPLAY_KEY="display";
+    private static String TIME_KEY="timestamp";
+    private static String MOBILE_KEY="mobile";
+    private static String WIFI_KEY="wifi";
+    private static String BLUETOOTH_KEY="bluetooth";
+    private static String CARRIER_KEY="carrier";
 
     private static boolean debugMode;
     private static boolean enabled;
@@ -112,6 +136,86 @@ public class ReplayIO {
     }
 
     /**
+     * Create a dictionary of network properties .
+     *
+     */
+    public static Map<String,String> getNetworkData() {
+
+        Map<String,String> network = new HashMap<String, String>();
+
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        boolean usingWifi = networkInfo.isConnected();
+        network.put(WIFI_KEY,String.valueOf(usingWifi));
+
+        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
+        boolean usingBlueTooth = networkInfo.isConnected();
+        network.put(BLUETOOTH_KEY,String.valueOf(usingBlueTooth));
+
+        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        boolean usingCellular = networkInfo.isConnected();
+        network.put(MOBILE_KEY,String.valueOf(usingCellular));
+
+        final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        String carrier = telephonyManager.getNetworkOperatorName();
+        network.put(CARRIER_KEY,carrier);
+
+        return network;
+    }
+
+
+
+    /**
+     * Send additional properties that are automatically tracked .
+     *
+     * @param data      {@link Map} object stores key-value pairs.
+     */
+    public static Map<String,String> addPassiveData(Map<String,String> data){
+        try {
+            Date currentTime = new Date();
+            DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+            ausFormat.setTimeZone(TimeZone.getTimeZone("Universal"));
+            data.put(TIME_KEY,ausFormat.format(currentTime));
+
+            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            Criteria crit = new Criteria();
+            crit.setPowerRequirement(Criteria.POWER_LOW);
+            crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
+            String provider = locationManager.getBestProvider(crit, true);
+
+            if (provider != null) {
+                android.location.Location location;
+                try {
+                    location = locationManager.getLastKnownLocation(provider); // this is a cached location
+                } catch (SecurityException ex) {
+                    //The application may not have permission to access location
+                    location = null;
+                }
+                if (location != null) {
+                    data.put("latitude", String.valueOf(location.getLatitude()));
+                    data.put("longitude", String.valueOf(location.getLongitude()));
+                }
+            }
+
+            data.put(OS_KEY,Build.VERSION.RELEASE);
+
+            data.put(SDK_KEY,Build.VERSION.SDK);
+
+            WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            Display display = window.getDefaultDisplay();
+            data.put(DISPLAY_KEY,display.getName());
+
+            data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
+
+            data.put(MODEL_KEY, Build.MODEL);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    /**
      * Send event with data to server.
      *
      * @param eventName Name of the event.
@@ -120,7 +224,7 @@ public class ReplayIO {
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueue(eventName, data);
+        queueLayer.createAndEnqueue(eventName, addPassiveData(data), getNetworkData());
     }
 
     /**
@@ -131,6 +235,7 @@ public class ReplayIO {
     public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
+        //TODO add passive data here
         queueLayer.createAndEnqueue(userAlias);
     }
 

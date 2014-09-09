@@ -41,12 +41,12 @@ public class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueue(final String event, final Map<String, String> data){
+    public void createAndEnqueue(final String event, final Map<String, String> data, final Map<String, String> network){
         handler().post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
+                    ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data, network);
                     enqueueAction(request);
                 } catch (JSONException e) {
                     ReplayLogger.e(e, "Exception while creating request %s: ", event);
