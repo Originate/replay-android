@@ -183,7 +183,7 @@ public class ReplayIO {
             network = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
             Boolean usingCellular = network.isConnected();
 
-            final TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
             String carrier = telephonyManager.getNetworkOperatorName();
 
         }
