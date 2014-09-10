@@ -25,7 +25,6 @@ public class ReplayWatchdogService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent workIntent) {
-        final Handler handler = new Handler();
         Config mConfig = new Config();
         mConfig.setApiKey(workIntent.getExtras().getString(API_KEY,"default"));
         final ReplayQueue queue = new ReplayQueue(this, mConfig);
