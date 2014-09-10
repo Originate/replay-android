@@ -25,6 +25,6 @@ public class OrphanFinder extends IntentService {
             public void run() {
                 queue.flush();
             }
-        }, 100);
+        }, 1000*60*60*12);
     }
 }
