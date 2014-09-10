@@ -9,6 +9,7 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
+import android.content.Intent;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
+import io.replay.framework.model.OrphanFinder;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
@@ -30,6 +32,8 @@ import io.replay.framework.util.ReplayPrefs;
 import io.replay.framework.util.Util;
 
 public class ReplayIO {
+
+    private static Intent orphanFinder;
 
     private static String MODEL_KEY="device_model";
     private static String MANUFACTURER_KEY="device_manufacturer";
@@ -381,6 +385,9 @@ public class ReplayIO {
      * Call this in your Activity's onStart() method, to track the status of your app.
      */
     public static void activityStart() {
+        orphanFinder = new Intent(mContext, OrphanFinder.class);
+        mContext.startService(orphanFinder);
+
         started++;
         checkAppVisibility();
     }
@@ -404,8 +411,9 @@ public class ReplayIO {
      * Call this in your Activity's onStop() method, tracking the status of your app.
      */
     public static void activityStop() {
-        stopped++;
+        mContext.stopService(orphanFinder);
 
+        stopped++;
         checkAppVisibility();
     }
 
