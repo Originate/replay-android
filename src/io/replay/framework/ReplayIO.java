@@ -24,7 +24,7 @@ import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.model.OrphanFinder;
+import io.replay.framework.model.ReplayWatchdogService;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
@@ -391,7 +391,7 @@ public class ReplayIO {
     public static void activityStart() {
         am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         orphanFinder = PendingIntent.getService(mContext, 0,
-                OrphanFinder.createIntent(mContext,mConfig.getApiKey()), 0);
+                ReplayWatchdogService.createIntent(mContext,mConfig.getApiKey()), 0);
         am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, orphanFinder); //12 hours
 
         started++;
