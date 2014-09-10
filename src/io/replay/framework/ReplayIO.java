@@ -10,6 +10,9 @@ import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
 import android.content.Intent;
+import android.app.PendingIntent;
+import android.app.AlarmManager;
+import android.os.SystemClock;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,7 +36,8 @@ import io.replay.framework.util.Util;
 
 public class ReplayIO {
 
-    private static Intent orphanFinder;
+    private static AlarmManager am;
+    private static PendingIntent orphanFinder;
 
     private static String MODEL_KEY="device_model";
     private static String MANUFACTURER_KEY="device_manufacturer";
@@ -385,8 +389,10 @@ public class ReplayIO {
      * Call this in your Activity's onStart() method, to track the status of your app.
      */
     public static void activityStart() {
-        orphanFinder = new Intent(mContext, OrphanFinder.class);
-        mContext.startService(orphanFinder);
+        am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        orphanFinder = PendingIntent.getService(mContext, 0,
+                new Intent(mContext.getApplicationContext(), OrphanFinder.class), 0);
+        am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, pendingIntent); //12 hours
 
         started++;
         checkAppVisibility();
@@ -411,7 +417,7 @@ public class ReplayIO {
      * Call this in your Activity's onStop() method, tracking the status of your app.
      */
     public static void activityStop() {
-        mContext.stopService(orphanFinder);
+        am.cancel(orphanFinder);
 
         stopped++;
         checkAppVisibility();
