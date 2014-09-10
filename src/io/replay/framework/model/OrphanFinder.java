@@ -1,5 +1,6 @@
 package io.replay.framework.model;
 
+import android.content.Context;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Handler;
@@ -10,6 +11,14 @@ import io.replay.framework.util.ReplayParams;
 
 public class OrphanFinder extends IntentService {
 
+    private static final String API_KEY = "api_key";
+
+    public static Intent createIntent(Context c, String apiKey){
+        Intent i = new Intent(c, OrphanFinder.class);
+        i.putExtra(API_KEY, apiKey);
+        return i;
+    }
+
     public OrphanFinder() {
         super("OrphanFinder");
     }
@@ -17,14 +26,11 @@ public class OrphanFinder extends IntentService {
     @Override
     protected void onHandleIntent(Intent workIntent) {
         final Handler handler = new Handler();
-        Config mConfig = ReplayParams.getOptions(this.getApplicationContext());
+        Config mConfig = new Config();
+        mConfig.setApiKey(workIntent.getStringExtra(API_KEY));
         final ReplayQueue queue = new ReplayQueue(this, mConfig);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                queue.flush();
-            }
-        }, 1000*60*60*12);
+        if (queue.count()>0) {
+            queue.flush();
+        }
     }
 }

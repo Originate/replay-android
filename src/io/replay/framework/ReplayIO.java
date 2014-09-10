@@ -391,8 +391,8 @@ public class ReplayIO {
     public static void activityStart() {
         am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         orphanFinder = PendingIntent.getService(mContext, 0,
-                new Intent(mContext.getApplicationContext(), OrphanFinder.class), 0);
-        am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, pendingIntent); //12 hours
+                OrphanFinder.createIntent(mContext,mConfig.getApiKey()), 0);
+        am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, orphanFinder); //12 hours
 
         started++;
         checkAppVisibility();
