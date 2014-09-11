@@ -132,7 +132,10 @@ public class ReplayIO {
         mPrefs.setClientID(getClientUUID());
         mPrefs.setDistinctID("");
 
-        // initialize ReplayAPIManager
+        //create new SessionID
+        ReplaySessionManager.getOrCreateSessionUUID(appContext);
+
+        // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
 
         // initialize ReplayQueue
@@ -206,18 +209,6 @@ public class ReplayIO {
     }
 
     /**
-     * Set debug mode.  When debug mode is on, logs will be printed.
-     *
-     * @param debug Boolean value to set to.
-     */
-    public static void setDebugMode(boolean debug) {
-        checkInitialized();
-        debugMode = debug;
-
-        mConfig.setDebug(debug);
-    }
-
-    /**
      * Tell if debug mode is enabled.
      *
      * @return True if enabled, false otherwise.
@@ -227,10 +218,20 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered background.  {@link io.replay.framework.queue.ReplayQueue} will stop running,
-     * requests in queue will be saved to disk. Session will be ended, too.
+     * Set debug mode.  When debug mode is on, logs will be printed.
+     *
+     * @param debug Boolean value to set to.
+     */
+    public static void setDebugMode(boolean debug) {
+        checkInitialized();
+
+        mConfig.setDebug(debug);
+    }
+
+    /**
+     * Called when the app entered background.  {@link ReplayQueue} will stop running,
+     * , and the Session will be ended, too.
      *.
-     * @see io.replay.framework.ReplayApplication
      */
     public static void stop() {
         checkInitialized();
@@ -243,7 +244,10 @@ public class ReplayIO {
      * Called when the app entered foreground.  {@link io.replay.framework.queue.ReplayQueue} will be restarted.
      * A new session is started. If there are persisted requests, load them into queue.
      *
+<<<<<<< HEAD:replay-android/src/main/java/io/replay/framework/ReplayIO.java
      * @see io.replay.framework.ReplayApplication
+=======
+>>>>>>> minor refactor to SessionManager:src/io/replay/framework/ReplayIO.java
      */
     public static void run() {
         checkInitialized();
@@ -251,10 +255,9 @@ public class ReplayIO {
             replayQueue = new ReplayQueue(mContext, mConfig);
         }else {
             replayQueue.start();
-        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
         }
 
-        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
+        mPrefs.setSessionID(ReplaySessionManager.getOrCreateSessionUUID(mContext));
     }
 
     /**
@@ -369,18 +372,7 @@ public class ReplayIO {
         identify("");
     }
 
-    /**
-     * Get the distinct ID.
-     *
-     * @return The distinct ID.
-     */
-    private static String getDistinctId() {
-        checkInitialized();
-        return mPrefs.getDistinctID();
-    }
-
     public static Config getConfig(){
         return mConfig;
     }
-
 }
