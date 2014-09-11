@@ -20,11 +20,11 @@ import android.app.Application;
  * }
  * </pre>
  * <p/>
- * <p>Note: This feature rely on {@link android.app.Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)},
+ * <p>Note: This feature rely on {@link android.app.Application#registerActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks)},
  * it is available since Android API level 14 (Ice Cream Sandwich). So, devices earlier than this will have to
  * use the following ways.</p>
  * <p/>
- * 1, Implement your Activitys by extends {@link ReplayActivity}, it enables ReplayIO tracking the status of your application. <br>
+ * 1, Implement your Activitys by extends {@link io.replay.framework.ReplayActivity}, it enables ReplayIO tracking the status of your application. <br>
  * 2. Manually track the status of your application, by overriding {@link android.app.Activity#onStart()}, {@link android.app.Activity#onResume()},
  * {@link android.app.Activity#onPause()} and  {@link android.app.Activity#onStop()}:
  *
@@ -53,7 +53,7 @@ import android.app.Application;
  *     super.onStop();
  * }
  * </pre>
- * @see ReplayActivity
+ * @see io.replay.framework.ReplayActivity
  * @see ReplayIO#activityStart
  * @see ReplayIO#activityResume
  * @see ReplayIO#activityPause

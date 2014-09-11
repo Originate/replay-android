@@ -1,0 +1,52 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    flatDir{
+        dirs 'libs'
+    }
+}
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "io.replay.framework"
+        minSdkVersion 8
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+
+        //commenting out tests because of the various changes we've made (Parth - Aug 22, 2014)
+        testApplicationId "com.replay.framework.tests"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile(name:'jobqueue', ext:'aar')
+}
+
+task clearJar(type: Delete) {
+    delete 'build/libs/replay-android.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/libs/')
+    include('classes.jar')
+    rename('classes.jar', 'replay-android.jar')
+}
+
+makeJar.dependsOn(clearJar, build)

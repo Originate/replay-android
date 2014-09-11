@@ -1,10 +1,13 @@
-package io.replay.framework;
+package io.replay.framework.tests;
 
 import java.util.UUID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
+
+import io.replay.framework.ReplayConfig;
+import io.replay.framework.ReplaySessionManager;
 
 public class ReplaySessionManagerTest extends AndroidTestCase {
 	private SharedPreferences mPrefs;

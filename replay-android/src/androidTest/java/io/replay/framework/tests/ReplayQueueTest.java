@@ -1,4 +1,4 @@
-package io.replay.framework;
+package io.replay.framework.tests;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -98,7 +98,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
-     * @throws JSONException
+     * @throws org.json.JSONException
      * @throws InterruptedException
      */
 	public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException, 
@@ -141,7 +141,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
-     * @throws JSONException
+     * @throws org.json.JSONException
      * @throws InterruptedException
      */
 	public void testSetDispatcherIntervalMinus() throws NoSuchFieldException, IllegalAccessException, 
@@ -199,7 +199,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
-     * @throws JSONException
+     * @throws org.json.JSONException
      * @throws InterruptedException
      */
 	public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException, 

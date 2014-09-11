@@ -16,7 +16,7 @@ public class DispatchTimerFactory {
     /**
      * Creates a DispatchTimer with the given parameters
      *
-     * @see DispatchTimer#DispatchTimer(long, boolean)
+     * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#DispatchTimer(long, boolean)
      */
     public static DispatchTimer createTimer(long dispatchInMs, boolean resetAfterComplete) {
         if (dispatchInMs > 0L) {

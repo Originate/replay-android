@@ -5,8 +5,8 @@ import android.app.Activity;
 /**
  * This is a base activity for automatically track the status of yours application.
  * Extends all your Activity classes with this or do this manually by overriding
- * {@link Activity#onStart()}, {@link Activity#onResume()}, {@link Activity#onPause()} and
- * {@link Activity#onStop()}:
+ * {@link android.app.Activity#onStart()}, {@link android.app.Activity#onResume()}, {@link android.app.Activity#onPause()} and
+ * {@link android.app.Activity#onStop()}:
  * <pre>
  * {@literal @}Override
  * public void onStart(){

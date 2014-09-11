@@ -2,7 +2,7 @@ package io.replay.framework.error;
 
 /**
  * Exception that throws when static methods are called before ReplayIO is initialized.
- * It is a subclass of {@link java.lang.IllegalStateException}, so that try...catch is not needed everywhere.
+ * It is a subclass of {@link IllegalStateException}, so that try...catch is not needed everywhere.
  */
 public class ReplayIONotInitializedException extends IllegalStateException {
     public ReplayIONotInitializedException() {

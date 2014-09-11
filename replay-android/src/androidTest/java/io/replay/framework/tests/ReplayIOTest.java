@@ -1,4 +1,4 @@
-package io.replay.framework;
+package io.replay.framework.tests;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
+import io.replay.framework.ReplayConfig;
+import io.replay.framework.ReplayIO;
 import io.replay.framework.error.ReplayIONotInitializedException;
 
 public class ReplayIOTest extends AndroidTestCase {

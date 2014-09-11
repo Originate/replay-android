@@ -176,7 +176,7 @@ public class ReplayIO {
     /**
      * Send additional properties that are automatically tracked .
      *
-     * @param data      {@link Map} object stores key-value pairs.
+     * @param data      {@link java.util.Map} object stores key-value pairs.
      */
     public static Map<String,String> addPassiveData(Map<String,String> data){
         try {
@@ -227,7 +227,7 @@ public class ReplayIO {
      * Send event with data to server.
      *
      * @param eventName Name of the event.
-     * @param data      {@link Map} object stores key-value pairs.
+     * @param data      {@link java.util.Map} object stores key-value pairs.
      */
     public static void trackEvent(String eventName, final Map<String, String> data) {
         checkInitialized();
@@ -306,10 +306,10 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered background.  {@link ReplayQueue} will stop running,
+     * Called when the app entered background.  {@link io.replay.framework.queue.ReplayQueue} will stop running,
      * requests in queue will be saved to disk. Session will be ended, too.
      *.
-     * @see ReplayApplication
+     * @see io.replay.framework.ReplayApplication
      */
     public static void stop() {
         checkInitialized();
@@ -319,10 +319,10 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered foreground.  {@link ReplayQueue} will be restarted.
+     * Called when the app entered foreground.  {@link io.replay.framework.queue.ReplayQueue} will be restarted.
      * A new session is started. If there are persisted requests, load them into queue.
      *
-     * @see ReplayApplication
+     * @see io.replay.framework.ReplayApplication
      */
     public static void run() {
         checkInitialized();

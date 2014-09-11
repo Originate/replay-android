@@ -1,4 +1,4 @@
-package io.replay.framework;
+package io.replay.framework.tests;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
+import io.replay.framework.ReplayConfig;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.network.ReplayNetworkManager;
 
