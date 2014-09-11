@@ -143,85 +143,6 @@ public class ReplayIO {
         initialized = true;
     }
 
-    /**
-     * Create a dictionary of network properties .
-     *
-     */
-    public static Map<String,String> getNetworkData() {
-
-        Map<String,String> network = new HashMap<String, String>();
-
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean usingWifi = networkInfo.isConnected();
-        network.put(WIFI_KEY,String.valueOf(usingWifi));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
-        boolean usingBlueTooth = networkInfo.isConnected();
-        network.put(BLUETOOTH_KEY,String.valueOf(usingBlueTooth));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean usingCellular = networkInfo.isConnected();
-        network.put(MOBILE_KEY,String.valueOf(usingCellular));
-
-        final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String carrier = telephonyManager.getNetworkOperatorName();
-        network.put(CARRIER_KEY,carrier);
-
-        return network;
-    }
-
-
-
-    /**
-     * Send additional properties that are automatically tracked .
-     *
-     * @param data      {@link java.util.Map} object stores key-value pairs.
-     */
-    public static Map<String,String> addPassiveData(Map<String,String> data){
-        try {
-            Date currentTime = new Date();
-            DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
-            ausFormat.setTimeZone(TimeZone.getTimeZone("Universal"));
-            data.put(TIME_KEY,ausFormat.format(currentTime));
-
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            Criteria crit = new Criteria();
-            crit.setPowerRequirement(Criteria.POWER_LOW);
-            crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
-            String provider = locationManager.getBestProvider(crit, true);
-
-            if (provider != null) {
-                android.location.Location location;
-                try {
-                    location = locationManager.getLastKnownLocation(provider); // this is a cached location
-                } catch (SecurityException ex) {
-                    //The application may not have permission to access location
-                    location = null;
-                }
-                if (location != null) {
-                    data.put("latitude", String.valueOf(location.getLatitude()));
-                    data.put("longitude", String.valueOf(location.getLongitude()));
-                }
-            }
-
-            data.put(OS_KEY,Build.VERSION.RELEASE);
-
-            data.put(SDK_KEY,Build.VERSION.SDK);
-
-            WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            Display display = window.getDefaultDisplay();
-            data.put(DISPLAY_KEY,display.getName());
-
-            data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
-
-            data.put(MODEL_KEY, Build.MODEL);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return data;
-    }
 
     /**
      * Send event with data to server.
@@ -229,10 +150,10 @@ public class ReplayIO {
      * @param eventName Name of the event.
      * @param data      {@link java.util.Map} object stores key-value pairs.
      */
-    public static void trackEvent(String eventName, final Map<String, String> data) {
+    public static void trackEvent(String eventName, Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueue(eventName, addPassiveData(data), getNetworkData());
+        queueLayer.createAndEnqueue(eventName, data);
     }
 
     /**
@@ -358,32 +279,11 @@ public class ReplayIO {
         }
         if (Util.isNullOrEmpty(mPrefs.getClientID())) {
             mPrefs.setClientID(UUID.randomUUID().toString());
-            ReplayIO.debugLog("Generated new client UUID");
+            ReplayLogger.d("Generated new client UUID");
         }
         return mPrefs.getClientID();
     }
 
-    /**
-     * Print debug log if debug mode is on.
-     *
-     * @param log The debug log to be printed.
-     */
-    public static void debugLog(String log) {
-        if (debugMode) {
-            ReplayLogger.d("REPLAY_IO", log);
-        }
-    }
-
-    /**
-     * Print error log if debug mode is on.
-     *
-     * @param log The error log to be printed.
-     */
-    public static void errorLog(String log) {
-        if (debugMode) {
-            ReplayLogger.e("REPLAY_IO", log);
-        }
-    }
 
     /**
      * Call this in your Activity's onStart() method, to track the status of your app.
