@@ -14,7 +14,7 @@ public class ReplayWatchdogService extends IntentService {
     private static final String API_KEY = "api_key";
 
     public static Intent createIntent(Context c, String apiKey){
-        Intent i = new Intent(c, OrphanFinder.class);
+        Intent i = new Intent(c, ReplayWatchdogService.class);
         i.putExtra(API_KEY, apiKey);
         return i;
     }
