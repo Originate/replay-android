@@ -1,31 +1,18 @@
 package io.replay.framework;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
-import android.content.Context;
-import android.location.Criteria;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.telephony.TelephonyManager;
-import android.view.Display;
-import android.view.WindowManager;
-import android.content.Intent;
-import android.app.PendingIntent;
+import android.app.Activity;
 import android.app.AlarmManager;
-import android.os.SystemClock;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import android.app.Application;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.os.SystemClock;
 
 import java.util.Map;
 import java.util.UUID;
@@ -33,6 +20,7 @@ import java.util.UUID;
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
 import io.replay.framework.model.ReplayRequestFactory;
+import io.replay.framework.model.ReplayWatchdogService;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
@@ -43,8 +31,9 @@ import io.replay.framework.util.Util;
 
 public final class ReplayIO {
 
-    private static AlarmManager am;
-    private static PendingIntent orphanFinder;
+    private static AlarmManager alarmManager;
+    private static PendingIntent watchdogIntent;
+    private static boolean watchdogEnabled = false;
 
     private static boolean enabled;
     private static Context mContext;
@@ -68,8 +57,8 @@ public final class ReplayIO {
     public static void init(Context context){
         if(initialized) return;
 
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        init(context, mConfig);
+        Config options = ReplayParams.getOptions(context.getApplicationContext());
+        init(context, options);
     }
 
     /**
@@ -78,16 +67,16 @@ public final class ReplayIO {
      *
      * It is acceptable to call this class from the main UI thread.
      *
-     * @param context The application context.  Use application context instead of activity context
+     * @param context The application context.  We use application context instead of activity context
      *                to avoid the risk of memory leak.
      * @param apiKey  the Replay API key
      */
     public static void init(Context context, String apiKey){
         if(initialized) return;
 
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey(apiKey);
-        init(context, mConfig);
+        Config options = ReplayParams.getOptions(context.getApplicationContext());
+        options.setApiKey(apiKey);
+        init(context, options);
     }
 
     /**
@@ -115,9 +104,10 @@ public final class ReplayIO {
         }
 
         mContext = context.getApplicationContext();
-        Context appContext = context.getApplicationContext(); //cache locally for performance reasons
+        final Context appContext = context.getApplicationContext(); //cache locally for performance reasons
 
         // load the default settings
+        mConfig = options;
         enabled = mConfig.isEnabled();
         mPrefs = ReplayPrefs.get(appContext);
         mPrefs.setClientID(getClientUUID());
@@ -135,18 +125,23 @@ public final class ReplayIO {
         replayQueue.start();
 
 
+        //determine if ReplayActivity is being used, regardless of SDK version
         boolean subclassExists = false;
-        try {
+        try { //reflection, but in the average case this code will run in <35ms
             PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), PackageManager.GET_ACTIVITIES);
             for (ActivityInfo info : packageInfo.activities) {
-                if (ReplayActivity.class.isAssignableFrom(Class.forName(info.name))) { //ReplayActivity is the superclass
+                Class<? extends Activity> clazz = (Class<? extends Activity>) Class.forName(info.name);
+                if(clazz == null) continue;
+                if (ReplayActivity.class.isAssignableFrom(clazz)) { //ReplayActivity is the superclass
                     subclassExists = true;
                     break;
                 }
             }
-        } catch (NameNotFoundException e)   { e.printStackTrace(); }
-          catch (ClassNotFoundException e)  { e.printStackTrace(); }
-          catch (NullPointerException e)    { e.printStackTrace(); }
+        }
+        catch (ClassCastException     e)  { e.printStackTrace(); }
+        catch (ClassNotFoundException e)  { e.printStackTrace(); }
+        catch (NameNotFoundException  e)  { e.printStackTrace(); }
+        catch (NullPointerException   e)  { e.printStackTrace(); }
 
 
         //hook into lifecycle if we're >=ICS and if we don't already have hooks
@@ -257,7 +252,7 @@ public final class ReplayIO {
      *
      * @see io.replay.framework.ReplayApplication
      */
-    public static void run() {
+    public static void start() {
         checkInitialized();
         if(replayQueue == null){
             replayQueue = new ReplayQueue(mContext, mConfig);
@@ -302,6 +297,7 @@ public final class ReplayIO {
      */
     public static void onActivityCreate(Context context) {
         ReplayIO.init(context);
+        initWatchdog();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -312,7 +308,7 @@ public final class ReplayIO {
      */
     public static void onActivityCreate(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
-        //TODO set watchdog here
+        initWatchdog();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -321,9 +317,10 @@ public final class ReplayIO {
      * @param context an instance of the Activity
      * @param options a full Config object that contains initialization parameters.
      */
+
     public static void onActivityCreate(Context context, Config options) {
         ReplayIO.init(context, options);
-        //TODO pendingintent flag-update_current
+        initWatchdog();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -333,7 +330,7 @@ public final class ReplayIO {
      */
     public static void onActivityStart(Context context) {
         ReplayIO.init(context);
-        //TODO pendingintent flag-update_current
+        initWatchdog();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -344,15 +341,18 @@ public final class ReplayIO {
      */
     public static void onActivityStart(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
+        initWatchdog();
     }
 
-    /** Initializes the Replay.io client, kicks off all worker threads,
+    /**Initializes the Replay.io client, kicks off all worker threads,
      *  and notifies the client that this activity has been created.
      *
      * @param context an instance of the Activity
+     * @param options a full Config object that contains initialization parameters.
      */
-    public static void onActivityStart(Context context, Config options) {
+    public static void onActivityStart(Context context, Config options){
         ReplayIO.init(context, options);
+        initWatchdog();
     }
 
     /**
@@ -370,17 +370,7 @@ public final class ReplayIO {
      * @param context the activity
      */
     public static void onActivityPause(Context context) {
-        if (queueLayer == null) {
-            final Context appCtx = context.getApplicationContext();
-            if (mConfig == null) {
-                mConfig = ReplayParams.getOptions(appCtx);
-            }
-            if (replayQueue == null) {
-                replayQueue = new ReplayQueue(context, mConfig);
-            }
-            queueLayer = new QueueLayer(replayQueue);
-        }
-        queueLayer.sendFlush();
+        flushQueue(context.getApplicationContext());
     }
 
     /**
@@ -389,10 +379,29 @@ public final class ReplayIO {
      * @param context
      */
     public static void onActivityStop(Context context) {
+        flushQueue(context.getApplicationContext());
+        if(watchdogEnabled){
+            alarmManager.cancel(watchdogIntent);
+            watchdogEnabled ^= true;
+        }
+    }
+
+    private static void initWatchdog() {
+        if(!watchdogEnabled){
+            if(alarmManager == null){
+                alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+            }
+            watchdogIntent = PendingIntent.getService(mContext, 0,
+                   ReplayWatchdogService.createIntent(mContext, mConfig.getApiKey()), PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, watchdogIntent); //12 hours
+            watchdogEnabled ^= true;
+        }
+    }
+
+    private static void flushQueue(Context context) {
         if (queueLayer == null) {
-            final Context appCtx = context.getApplicationContext();
             if (mConfig == null) {
-                mConfig = ReplayParams.getOptions(appCtx);
+                mConfig = ReplayParams.getOptions(context);
             }
             if (replayQueue == null) {
                 replayQueue = new ReplayQueue(context, mConfig);
@@ -400,7 +409,6 @@ public final class ReplayIO {
             queueLayer = new QueueLayer(replayQueue);
         }
         queueLayer.sendFlush();
-        //TODO set watchdog here
     }
 
     /**
