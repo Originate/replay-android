@@ -3,92 +3,66 @@ package io.replay.framework;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
+import android.content.Context;
 import android.os.Bundle;
 
+
 /**
- * Implements ActivityLifecycleCallbacks, help tracking the status of the app.
+ * In an application with a minimum API level of 14 (Ice Cream Sandwich), ReplayIO can
+ * monitor application lifecycle using Android-provided lifecycle hooks in lieu of the
+ * user manually providing them (usually in the form of subclassing {@link io.replay.framework.ReplayActivity}
+ * or manually calling {@link ReplayIO#onActivityCreate(Context)}, <i>etc.</i>) by using {@link android.app.Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)}.
+ * <p>ReplayIO provides three methods for tracking lifecycle status:
+ * <ol>
+ * <li>In applications with <code>mininumSDKVersion >= 14</code>  (ICS+), don't do anything, and ReplayIO will
+ * use {@link io.replay.framework.ReplayLifecycleHandler} to automagically track lifecycle! Easy!</li>
+ * <li>In applications of any SDK level, you may extend this class from all of your Activities that you wish to track.
+ * ReplayIO will then handle lifecycle events normally.
+ * </li>
+ * <li> If your application's <code>mininumSDKVersion</code> is less than 14 AND you already inherit from another base class (e.g., ActionBarSherlock),
+ * you may manually override {@link android.app.Activity#onCreate(android.os.Bundle)} {@link android.app.Activity#onStart()}, {@link android.app.Activity#onResume()},
+ * {@link android.app.Activity#onPause()} and {@link android.app.Activity#onStop()}, and then call the equivalent ReplayIO lifecycle methods.
+ * </li>
+ * </ol>
+ * Please only choose one of these methods.
+ * <p>ReplayIO will detect the lack of subclass and will enable this class for lifecycle hooks. In any other case,
+ * this class will be disabled so as to not duplicate lifecycle-managing events.
  */
 @SuppressLint("NewApi")
 public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
 
-    private static int started;
-    private static int resumed;
-    @SuppressWarnings("unused")
-    private static int paused;
-    private static int stopped;
-
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+        ReplayIO.onActivityCreate(activity);
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
-        started++;
-
-        checkAppVisibility();
+        ReplayIO.onActivityStart(activity);
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
-        resumed++;
-
-        checkAppVisibility();
+        ReplayIO.onActivityResume(activity);
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-        paused++;
+        ReplayIO.onActivityPause(activity);
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
-        stopped++;
-
-        checkAppVisibility();
+        ReplayIO.onActivityStop(activity);
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
+        /*do nothing*/
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-
-    }
-
-    /**
-     * Check if the app is visible to user.
-     * @return True if app is visible, false otherwise.
-     */
-    private static boolean isApplicationVisible() {
-        return started > stopped;
-    }
-
-    /**
-     * Check if the app is in foreground.
-     * @return True if app is is foreground, false otherwise.
-     */
-    private static boolean isApplicationInForeground() {
-        return resumed > stopped;
-    }
-
-    private void checkAppVisibility() {
-        /*try {
-            if (!isApplicationVisible()) {
-                if (ReplayIO.isRunning()) {
-                    ReplayIO.debugLog("App goes to background. Stop!");
-                    ReplayIO.stop();
-                }
-            } else {
-                if (!ReplayIO.isRunning()) {
-                    ReplayIO.debugLog("App goes to foreground. Run!");
-                    ReplayIO.run();
-                }
-            }
-        } catch (ReplayIONotInitializedException e) {
-            ReplayIO.errorLog(e.getMessage());
-        }*/
+        /*do nothing*/
     }
 }

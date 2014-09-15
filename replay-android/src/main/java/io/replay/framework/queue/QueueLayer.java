@@ -32,21 +32,12 @@ public class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void sendFlush() {
-        handler().post(new Runnable() {
-            @Override
-            public void run() {
-                queue.flush();
-            }
-        });
-    }
-
-    public void createAndEnqueue(final String event, final Map<String, String> data, final Map<String, String> network){
+    public void createAndEnqueue(final String event, final Map<String, String> data){
         handler().post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data, network);
+                    ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
                     enqueueAction(request);
                 } catch (JSONException e) {
                     ReplayLogger.e(e, "Exception while creating request %s: ", event);
@@ -75,6 +66,15 @@ public class QueueLayer extends LooperThreadWithHandler {
         }else {
             ReplayLogger.w("ReplayIO Queue", "request %s was dropped because max size of %s was reached", data.toString(), MAX_QUEUE);
         }
+    }
+
+    public void sendFlush() {
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                queue.flush();
+            }
+        });
     }
 }
 

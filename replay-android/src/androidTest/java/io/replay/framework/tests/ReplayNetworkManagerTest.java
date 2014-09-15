@@ -32,7 +32,7 @@ public class ReplayNetworkManagerTest extends AndroidTestCase {
 		String clientUUIDValue = (String) clientUUID.get(manager);
 		assertEquals("client_uuid", clientUUIDValue);
 		
-		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("sessionUUID");
+		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("getOrCreateSessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
 		assertEquals("session_uuid", sessionUUIDValue);
@@ -48,7 +48,7 @@ public class ReplayNetworkManagerTest extends AndroidTestCase {
 		
 		manager.updateSessionUUID("new_session_uuid");
 		
-		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("sessionUUID");
+		Field sessionUUID = ReplayNetworkManager.class.getDeclaredField("getOrCreateSessionUUID");
 		sessionUUID.setAccessible(true);
 		String sessionUUIDValue = (String) sessionUUID.get(manager);
 		assertEquals("new_session_uuid", sessionUUIDValue);

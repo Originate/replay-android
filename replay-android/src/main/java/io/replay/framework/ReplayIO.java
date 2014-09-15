@@ -1,31 +1,26 @@
 package io.replay.framework;
 
-import android.content.Context;
-import android.location.Criteria;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
-import android.telephony.TelephonyManager;
-import android.view.Display;
-import android.view.WindowManager;
-import android.content.Intent;
-import android.app.PendingIntent;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Application;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.SystemClock;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.model.ReplayWatchdogService;
 import io.replay.framework.model.ReplayRequestFactory;
+import io.replay.framework.model.ReplayWatchdogService;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
@@ -34,32 +29,17 @@ import io.replay.framework.util.ReplayParams;
 import io.replay.framework.util.ReplayPrefs;
 import io.replay.framework.util.Util;
 
-public class ReplayIO {
+public final class ReplayIO {
 
-    private static AlarmManager am;
-    private static PendingIntent orphanFinder;
+    private static AlarmManager alarmManager;
+    private static PendingIntent watchdogIntent;
+    private static boolean watchdogEnabled = false;
 
-    private static String MODEL_KEY="device_model";
-    private static String MANUFACTURER_KEY="device_manufacturer";
-    private static String OS_KEY="client_os";
-    private static String SDK_KEY="client_sdk";
-    private static String DISPLAY_KEY="display";
-    private static String TIME_KEY="timestamp";
-    private static String MOBILE_KEY="mobile";
-    private static String WIFI_KEY="wifi";
-    private static String BLUETOOTH_KEY="bluetooth";
-    private static String CARRIER_KEY="carrier";
-
-    private static boolean debugMode;
     private static boolean enabled;
     private static Context mContext;
     private static boolean initialized;
     private static Config mConfig;
 
-    private static int started;
-    private static int resumed;
-    private static int paused;
-    private static int stopped;
     private static ReplayPrefs mPrefs;
     private static ReplayQueue replayQueue;
     private static QueueLayer queueLayer;
@@ -77,8 +57,8 @@ public class ReplayIO {
     public static void init(Context context){
         if(initialized) return;
 
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        init(context, mConfig);
+        Config options = ReplayParams.getOptions(context.getApplicationContext());
+        init(context, options);
     }
 
     /**
@@ -87,16 +67,16 @@ public class ReplayIO {
      *
      * It is acceptable to call this class from the main UI thread.
      *
-     * @param context The application context.  Use application context instead of activity context
+     * @param context The application context.  We use application context instead of activity context
      *                to avoid the risk of memory leak.
      * @param apiKey  the Replay API key
      */
     public static void init(Context context, String apiKey){
         if(initialized) return;
 
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey(apiKey);
-        init(context, mConfig);
+        Config options = ReplayParams.getOptions(context.getApplicationContext());
+        options.setApiKey(apiKey);
+        init(context, options);
     }
 
     /**
@@ -105,11 +85,14 @@ public class ReplayIO {
      *
      * It is acceptable to call this class from the main UI thread.
      *
-     * @param context The application context.  Use application context instead of activity context
+     * @param context The application context.  We use application context instead of activity context
      *                to avoid the risk of memory leak.
      * @param options a full Config object that contains initialization parameters.
      */
+    @SuppressLint("NewApi")
     public static void init(Context context, Config options) throws ReplayIONoKeyException {
+        if (initialized) return;
+
         String detailMessage = "ReplayIO - %s should not be %s.";
 
         if(context == null){
@@ -121,18 +104,19 @@ public class ReplayIO {
         }
 
         mContext = context.getApplicationContext();
-        Context appContext = context.getApplicationContext(); //cache locally for performance reasons
+        final Context appContext = context.getApplicationContext(); //cache locally for performance reasons
 
         // load the default settings
+        mConfig = options;
         enabled = mConfig.isEnabled();
-        debugMode = mConfig.isDebug();
-
         mPrefs = ReplayPrefs.get(appContext);
-
         mPrefs.setClientID(getClientUUID());
         mPrefs.setDistinctID("");
 
-        // initialize ReplayAPIManager
+        //create new SessionID
+        ReplaySessionManager.getOrCreateSessionUUID(appContext);
+
+        // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
 
         // initialize ReplayQueue
@@ -140,87 +124,33 @@ public class ReplayIO {
         queueLayer = new QueueLayer(replayQueue);
         replayQueue.start();
 
-        initialized = true;
-    }
 
-    /**
-     * Create a dictionary of network properties .
-     *
-     */
-    public static Map<String,String> getNetworkData() {
-
-        Map<String,String> network = new HashMap<String, String>();
-
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean usingWifi = networkInfo.isConnected();
-        network.put(WIFI_KEY,String.valueOf(usingWifi));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
-        boolean usingBlueTooth = networkInfo.isConnected();
-        network.put(BLUETOOTH_KEY,String.valueOf(usingBlueTooth));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean usingCellular = networkInfo.isConnected();
-        network.put(MOBILE_KEY,String.valueOf(usingCellular));
-
-        final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String carrier = telephonyManager.getNetworkOperatorName();
-        network.put(CARRIER_KEY,carrier);
-
-        return network;
-    }
-
-
-
-    /**
-     * Send additional properties that are automatically tracked .
-     *
-     * @param data      {@link java.util.Map} object stores key-value pairs.
-     */
-    public static Map<String,String> addPassiveData(Map<String,String> data){
-        try {
-            Date currentTime = new Date();
-            DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
-            ausFormat.setTimeZone(TimeZone.getTimeZone("Universal"));
-            data.put(TIME_KEY,ausFormat.format(currentTime));
-
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            Criteria crit = new Criteria();
-            crit.setPowerRequirement(Criteria.POWER_LOW);
-            crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
-            String provider = locationManager.getBestProvider(crit, true);
-
-            if (provider != null) {
-                android.location.Location location;
-                try {
-                    location = locationManager.getLastKnownLocation(provider); // this is a cached location
-                } catch (SecurityException ex) {
-                    //The application may not have permission to access location
-                    location = null;
-                }
-                if (location != null) {
-                    data.put("latitude", String.valueOf(location.getLatitude()));
-                    data.put("longitude", String.valueOf(location.getLongitude()));
+        //determine if ReplayActivity is being used, regardless of SDK version
+        boolean subclassExists = false;
+        try { //reflection, but in the average case this code will run in <35ms
+            PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), PackageManager.GET_ACTIVITIES);
+            for (ActivityInfo info : packageInfo.activities) {
+                Class<? extends Activity> clazz = (Class<? extends Activity>) Class.forName(info.name);
+                if(clazz == null) continue;
+                if (ReplayActivity.class.isAssignableFrom(clazz)) { //ReplayActivity is the superclass
+                    subclassExists = true;
+                    break;
                 }
             }
-
-            data.put(OS_KEY,Build.VERSION.RELEASE);
-
-            data.put(SDK_KEY,Build.VERSION.SDK);
-
-            WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            Display display = window.getDefaultDisplay();
-            data.put(DISPLAY_KEY,display.getName());
-
-            data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
-
-            data.put(MODEL_KEY, Build.MODEL);
         }
-        catch (Exception e){
-            e.printStackTrace();
+        catch (ClassCastException     e)  { e.printStackTrace(); }
+        catch (ClassNotFoundException e)  { e.printStackTrace(); }
+        catch (NameNotFoundException  e)  { e.printStackTrace(); }
+        catch (NullPointerException   e)  { e.printStackTrace(); }
+
+
+        //hook into lifecycle if we're >=ICS and if we don't already have hooks
+        if (!subclassExists && VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
+            ((Application) appContext).registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
+            ReplayLogger.d("ReplayIO", "added ActivityLifecycleCallbacks");
         }
-        return data;
+
+        initialized = true;
     }
 
     /**
@@ -229,10 +159,10 @@ public class ReplayIO {
      * @param eventName Name of the event.
      * @param data      {@link java.util.Map} object stores key-value pairs.
      */
-    public static void trackEvent(String eventName, final Map<String, String> data) {
+    public static void trackEvent(String eventName, Map<String, String> data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueue(eventName, addPassiveData(data), getNetworkData());
+        queueLayer.createAndEnqueue(eventName, data);
     }
 
     /**
@@ -285,18 +215,6 @@ public class ReplayIO {
     }
 
     /**
-     * Set debug mode.  When debug mode is on, logs will be printed.
-     *
-     * @param debug Boolean value to set to.
-     */
-    public static void setDebugMode(boolean debug) {
-        checkInitialized();
-        debugMode = debug;
-
-        mConfig.setDebug(debug);
-    }
-
-    /**
      * Tell if debug mode is enabled.
      *
      * @return True if enabled, false otherwise.
@@ -306,10 +224,20 @@ public class ReplayIO {
     }
 
     /**
-     * Called when the app entered background.  {@link io.replay.framework.queue.ReplayQueue} will stop running,
-     * requests in queue will be saved to disk. Session will be ended, too.
+     * Set debug mode.  When debug mode is on, logs will be printed.
+     *
+     * @param debug Boolean value to set to.
+     */
+    public static void setDebugMode(boolean debug) {
+        checkInitialized();
+
+        mConfig.setDebug(debug);
+    }
+
+    /**
+     * Called when the app entered background.  {@link ReplayQueue} will stop running,
+     * , and the Session will be ended, too.
      *.
-     * @see io.replay.framework.ReplayApplication
      */
     public static void stop() {
         checkInitialized();
@@ -324,16 +252,15 @@ public class ReplayIO {
      *
      * @see io.replay.framework.ReplayApplication
      */
-    public static void run() {
+    public static void start() {
         checkInitialized();
         if(replayQueue == null){
             replayQueue = new ReplayQueue(mContext, mConfig);
         }else {
             replayQueue.start();
-        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
         }
 
-        mPrefs.setSessionID(ReplaySessionManager.sessionUUID(mContext));
+        mPrefs.setSessionID(ReplaySessionManager.getOrCreateSessionUUID(mContext));
     }
 
     /**
@@ -358,98 +285,130 @@ public class ReplayIO {
         }
         if (Util.isNullOrEmpty(mPrefs.getClientID())) {
             mPrefs.setClientID(UUID.randomUUID().toString());
-            ReplayIO.debugLog("Generated new client UUID");
+            ReplayLogger.d("Generated new client UUID");
         }
         return mPrefs.getClientID();
     }
 
-    /**
-     * Print debug log if debug mode is on.
+    /** Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
      *
-     * @param log The debug log to be printed.
+     * @param context an instance of the Activity
      */
-    public static void debugLog(String log) {
-        if (debugMode) {
-            ReplayLogger.d("REPLAY_IO", log);
+    public static void onActivityCreate(Context context) {
+        ReplayIO.init(context);
+        initWatchdog();
+    }
+
+    /** Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
+     *
+     * @param context an instance of the Activity
+     * @param apiKey the Replay API key
+     */
+    public static void onActivityCreate(Context context, String apiKey) {
+        ReplayIO.init(context, apiKey);
+        initWatchdog();
+    }
+
+    /** Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
+     *
+     * @param context an instance of the Activity
+     * @param options a full Config object that contains initialization parameters.
+     */
+
+    public static void onActivityCreate(Context context, Config options) {
+        ReplayIO.init(context, options);
+        initWatchdog();
+    }
+
+    /** Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
+     *
+     * @param context an instance of the Activity
+     */
+    public static void onActivityStart(Context context) {
+        ReplayIO.init(context);
+        initWatchdog();
+    }
+
+    /** Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
+     *
+     * @param context an instance of the Activity
+     * @param apiKey the Replay API key
+     */
+    public static void onActivityStart(Context context, String apiKey) {
+        ReplayIO.init(context, apiKey);
+        initWatchdog();
+    }
+
+    /**Initializes the Replay.io client, kicks off all worker threads,
+     *  and notifies the client that this activity has been created.
+     *
+     * @param context an instance of the Activity
+     * @param options a full Config object that contains initialization parameters.
+     */
+    public static void onActivityStart(Context context, Config options){
+        ReplayIO.init(context, options);
+        initWatchdog();
+    }
+
+    /**
+     * Called when the activity has been resumed.
+     *
+     * @param context the activity
+     */
+    public static void onActivityResume(Context context) {
+        ReplayIO.init(context);
+    }
+
+    /**
+     * Called when the activity is paused.
+     *
+     * @param context the activity
+     */
+    public static void onActivityPause(Context context) {
+        flushQueue(context.getApplicationContext());
+    }
+
+    /**
+     * Called when the activity has been stopped.
+     *
+     * @param context
+     */
+    public static void onActivityStop(Context context) {
+        flushQueue(context.getApplicationContext());
+        if(watchdogEnabled){
+            alarmManager.cancel(watchdogIntent);
+            watchdogEnabled ^= true;
         }
     }
 
-    /**
-     * Print error log if debug mode is on.
-     *
-     * @param log The error log to be printed.
-     */
-    public static void errorLog(String log) {
-        if (debugMode) {
-            ReplayLogger.e("REPLAY_IO", log);
-        }
-    }
-
-    /**
-     * Call this in your Activity's onStart() method, to track the status of your app.
-     */
-    public static void activityStart() {
-        am = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        orphanFinder = PendingIntent.getService(mContext, 0,
-                ReplayWatchdogService.createIntent(mContext,mConfig.getApiKey()), 0);
-        am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, orphanFinder); //12 hours
-
-        started++;
-        checkAppVisibility();
-    }
-
-    /**
-     * Call this in your Activity's onResume() method, to track the status of your app.
-     */
-    public static void activityResume() {
-        resumed++;
-        checkAppVisibility();
-    }
-
-    /**
-     * Call this in your Activity's onPause() method, tracking the status of your app.
-     */
-    public static void activityPause() {
-        paused++;
-    }
-
-    /**
-     * Call this in your Activity's onStop() method, tracking the status of your app.
-     */
-    public static void activityStop() {
-        am.cancel(orphanFinder);
-
-        stopped++;
-        checkAppVisibility();
-    }
-
-    private static boolean isApplicationVisible() {
-        return started > stopped;
-    }
-
-    private static boolean isApplicationInForeground() {
-        return resumed > stopped;
-    }
-
-    private static void checkAppVisibility() {
-       /* try {
-            if (!isApplicationVisible()) {
-                if (ReplayIO.isRunning()) {
-                    ReplayIO.debugLog("App goes to background. Stop!");
-                    ReplayIO.stop();
-                }
-            } else {
-                if (!ReplayIO.isRunning()) {
-                    ReplayIO.debugLog("App goes to foreground. Run!");
-                    ReplayIO.run();
-                }
+    private static void initWatchdog() {
+        if(!watchdogEnabled){
+            if(alarmManager == null){
+                alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             }
-        } catch (ReplayIONotInitializedException e) {
-            ReplayIO.errorLog(e.getMessage());
-        }*/
-        /*TODO this shouldn't be using a integers to keep track of app state - however,
-          it's out of scope for this particular branch. */
-        //TODO this is duplicated in ReplayLifecycleHandler
+            watchdogIntent = PendingIntent.getService(mContext, 0,
+                   ReplayWatchdogService.createIntent(mContext, mConfig.getApiKey()), PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, watchdogIntent); //12 hours
+            watchdogEnabled ^= true;
+        }
+    }
+
+    private static void flushQueue(Context context) {
+        if (queueLayer == null) {
+            if (mConfig == null) {
+                mConfig = ReplayParams.getOptions(context);
+            }
+            if (replayQueue == null) {
+                replayQueue = new ReplayQueue(context, mConfig);
+            }
+            queueLayer = new QueueLayer(replayQueue);
+        }
+        queueLayer.sendFlush();
     }
 
     /**
@@ -469,18 +428,7 @@ public class ReplayIO {
         identify("");
     }
 
-    /**
-     * Get the distinct ID.
-     *
-     * @return The distinct ID.
-     */
-    private static String getDistinctId() {
-        checkInitialized();
-        return mPrefs.getDistinctID();
-    }
-
     public static Config getConfig(){
         return mConfig;
     }
-
 }

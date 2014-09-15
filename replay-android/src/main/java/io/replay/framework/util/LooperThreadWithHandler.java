@@ -3,8 +3,6 @@ package io.replay.framework.util;
 import android.os.Handler;
 import android.os.Looper;
 
-import io.replay.framework.ReplayIO;
-
 /**
  * Created by parthpadgaonkar on 8/13/14.
  */
@@ -33,7 +31,7 @@ public class LooperThreadWithHandler extends Thread {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    ReplayIO.errorLog("Failed while waiting for singleton thread ready.");
+                    ReplayLogger.e(e, "Failed while waiting for singleton thread ready.");
                 }
             }
         }
