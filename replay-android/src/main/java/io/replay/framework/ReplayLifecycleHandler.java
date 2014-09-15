@@ -6,11 +6,12 @@ import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.os.Bundle;
 
+
 /**
  * In an application with a minimum API level of 14 (Ice Cream Sandwich), ReplayIO can
  * monitor application lifecycle using Android-provided lifecycle hooks in lieu of the
  * user manually providing them (usually in the form of subclassing {@link io.replay.framework.ReplayActivity}
- * or manually calling {@link ReplayIO#onActivityCreate(Context)}, <i>etc.</i>)
+ * or manually calling {@link ReplayIO#onActivityCreate(Context)}, <i>etc.</i>) by using {@link android.app.Application#registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)}.
  * <p>ReplayIO provides three methods for tracking lifecycle status:
  * <ol>
  * <li>In applications with <code>mininumSDKVersion >= 14</code>  (ICS+), don't do anything, and ReplayIO will
