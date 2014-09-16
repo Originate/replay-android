@@ -14,13 +14,11 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.SystemClock;
 
-import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
 import io.replay.framework.model.ReplayRequestFactory;
-import io.replay.framework.model.ReplayWatchdogService;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
@@ -110,7 +108,7 @@ public final class ReplayIO {
         mConfig = options;
         enabled = mConfig.isEnabled();
         mPrefs = ReplayPrefs.get(appContext);
-        mPrefs.setClientID(getClientUUID());
+        mPrefs.setClientID(getOrGenerateClientUUID());
         mPrefs.setDistinctID("");
 
         //create new SessionID
@@ -157,9 +155,9 @@ public final class ReplayIO {
      * Send event with data to server.
      *
      * @param eventName Name of the event.
-     * @param data      {@link java.util.Map} object stores key-value pairs.
+     * @param data      Extra information to be tracked in the main JSON object.
      */
-    public static void trackEvent(String eventName, Map<String, String> data) {
+    public static void track(String eventName, Object...data) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueue(eventName, data);
@@ -279,7 +277,7 @@ public final class ReplayIO {
      *
      * @return Client UUID.
      */
-    public static String getClientUUID() {
+    public static String getOrGenerateClientUUID() {
         if (null == mConfig || !initialized) {
             throw new ReplayIONotInitializedException();
         }

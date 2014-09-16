@@ -13,25 +13,22 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.ReplayIO;
-import io.replay.framework.network.ReplayNetworkManager;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayRequestFactory {
 
     private static final String KEY_EVENT_NAME = "event_name";
     private static final String NETWORK_KEY = "network";
+    private static final String PROPERTIES_KEY = "properties";
     private static ReplayRequestFactory instance;
     private static Context mContext;
 
@@ -50,7 +47,7 @@ public class ReplayRequestFactory {
         return instance == null ? instance = new ReplayRequestFactory(context.getApplicationContext()) : instance;
     }
 
-    private final static Map<String, String> base = new HashMap<String, String>(3);
+    private final static ReplayJsonObject base = new ReplayJsonObject();
 
     public ReplayRequestFactory(Context context) {
         ReplayPrefs mPrefs = ReplayPrefs.get(context);
@@ -58,8 +55,14 @@ public class ReplayRequestFactory {
         base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
         base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
         base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        ReplayJsonObject properties = new ReplayJsonObject();
+        collectPassiveData(properties);
+        base.put(PROPERTIES_KEY, properties);
     }
 
+    public static ReplayJsonObject generatePassiveData(){
+
+    }
 
     /**
      * Build the ReplayRequest object for an event request.
@@ -69,8 +72,11 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      * @throws org.json.JSONException
      */
-    public static ReplayRequest requestForEvent(String event, Map<String, String> data) throws JSONException {
-        return new ReplayRequest(RequestType.EVENTS, jsonForEvent(event, data));
+    public static ReplayRequest requestForEvent(String event, Object[] data) throws JSONException {
+        ReplayJsonObject json = new ReplayJsonObject(data);
+        json.put(KEY_EVENT_NAME, event);
+
+        return new ReplayRequest(RequestType.EVENTS, json);
     }
 
     /**
@@ -81,82 +87,25 @@ public class ReplayRequestFactory {
      * @throws org.json.JSONException
      */
     public static ReplayRequest requestForAlias(String alias) throws JSONException {
-        return new ReplayRequest(RequestType.ALIAS, jsonForAlias(alias));
-    }
-
-    /**
-     * Generate the JSONObject for a event request.
-     *
-     * @param event The event name.
-     * @param data  The name-value paired data. Can be null.
-     * @return The JSONObject of data.
-     * @throws org.json.JSONException
-     */
-    private static JSONObject jsonForEvent(String event, Map<String, String> data) throws JSONException {
-        JSONObject json = new JSONObject(base);
-        if (null == data) {
-            data = new HashMap<String, String>();
-        }
-        JSONObject properties = new JSONObject(addPassiveData(data));
-        properties.put(NETWORK_KEY, new JSONObject(getNetworkData()));
-        data.put(KEY_EVENT_NAME, event);
-
-        json.put(ReplayNetworkManager.KEY_DATA, properties);
-        return json;
-    }
-
-    /**
-     * Generate the JSONObject for a alias request.
-     *
-     * @param alias The alias.
-     * @return The JSONObject of data.
-     * @throws org.json.JSONException
-     */
-    private static JSONObject jsonForAlias(String alias) throws JSONException {
-        JSONObject json = new JSONObject(base);
+        ReplayJsonObject json = new ReplayJsonObject();
         json.put(RequestType.ALIAS.toString(), alias);
-        return json;
+
+        return new ReplayRequest(RequestType.ALIAS, json);
     }
 
     /**
-     * Create a dictionary of network properties .
+     * Send additional properties that are automatically tracked.
      *
+     * @param previousJson the JsonObject to which to add the passive data
      */
-    public static Map<String,String> getNetworkData() {
-
-        Map<String,String> network = new HashMap<String, String>();
-
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean usingWifi = networkInfo.isConnected();
-        network.put(WIFI_KEY,String.valueOf(usingWifi));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
-        boolean usingBlueTooth = networkInfo.isConnected();
-        network.put(BLUETOOTH_KEY,String.valueOf(usingBlueTooth));
-
-        networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean usingCellular = networkInfo.isConnected();
-        network.put(MOBILE_KEY,String.valueOf(usingCellular));
-
-        final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String carrier = telephonyManager.getNetworkOperatorName();
-        network.put(CARRIER_KEY,carrier);
-
-        return network;
-    }
-
-    /**
-     * Send additional properties that are automatically tracked .
-     *
-     * @param data      {@link Map} object stores key-value pairs.
-     */
-    public static Map<String,String> addPassiveData(Map<String,String> data){
+    public static ReplayJsonObject collectPassiveData(ReplayJsonObject previousJson){
         try {
             Date currentTime = new Date();
-            DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+            ReplayJsonObject props = new ReplayJsonObject();
+
+           /* DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
             ausFormat.setTimeZone(TimeZone.getDefault());
-            data.put(TIME_KEY,ausFormat.format(currentTime));
+            props.put(TIME_KEY, ausFormat.format(currentTime));*/
 
             LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             Criteria crit = new Criteria();
@@ -165,35 +114,52 @@ public class ReplayRequestFactory {
             String provider = locationManager.getBestProvider(crit, true);
 
             if (provider != null) {
-                Location location;
                 try {
-                    location = locationManager.getLastKnownLocation(provider); // this is a cached location
+                    Location location = locationManager.getLastKnownLocation(provider); // this is a cached location
+                    props.put("latitude", Double.toString(location.getLatitude()));
+                    props.put("longitude", Double.toString(location.getLongitude()));
                 } catch (SecurityException ex) {
                     //The application may not have permission to access location
-                    location = null;
-                }
-                if (location != null) {
-                    data.put("latitude", String.valueOf(location.getLatitude()));
-                    data.put("longitude", String.valueOf(location.getLongitude()));
                 }
             }
 
-            data.put(OS_KEY, Build.VERSION.RELEASE);
+            props.put(OS_KEY, VERSION.RELEASE);
 
-            data.put(SDK_KEY, Integer.toString(VERSION.SDK_INT));
+            props.put(SDK_KEY, Integer.toString(VERSION.SDK_INT));
 
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
-            data.put(DISPLAY_KEY,display.getName());
+            props.put(DISPLAY_KEY, display.getName());
 
-            data.put(MANUFACTURER_KEY, Build.MANUFACTURER);
+            props.put(MANUFACTURER_KEY, Build.MANUFACTURER);
 
-            data.put(MODEL_KEY, Build.MODEL);
+            props.put(MODEL_KEY, Build.MODEL);
+
+
+            //network
+            ReplayJsonObject network = new ReplayJsonObject();
+
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            network.put(WIFI_KEY,String.valueOf(networkInfo.isConnected()));
+
+            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
+            network.put(BLUETOOTH_KEY,String.valueOf(networkInfo.isConnected()));
+
+            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+            network.put(MOBILE_KEY,String.valueOf(networkInfo.isConnected()));
+
+            final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            String carrier = telephonyManager.getNetworkOperatorName();
+            network.put(CARRIER_KEY,carrier);
+
+            props.put(NETWORK_KEY, network);
+            previousJson.put(PROPERTIES_KEY, props);
         }
         catch (Exception e){
             e.printStackTrace();
         }
-        return data;
+        return previousJson;
     }
 
 }

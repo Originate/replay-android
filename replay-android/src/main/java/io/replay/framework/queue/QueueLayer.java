@@ -2,8 +2,6 @@ package io.replay.framework.queue;
 
 import org.json.JSONException;
 
-import java.util.Map;
-
 import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
@@ -32,7 +30,12 @@ public class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueue(final String event, final Map<String, String> data){
+    /**Convenience method that creates a {@link ReplayRequest} object and automatically enqueues it.
+     *
+     * @param event
+     * @param data
+     */
+    public void createAndEnqueue(final String event, final Object[] data){
         handler().post(new Runnable() {
             @Override
             public void run() {
