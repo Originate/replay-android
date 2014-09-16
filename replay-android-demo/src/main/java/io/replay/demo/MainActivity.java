@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put("name", "button1");
 				map.put("id", String.valueOf(R.id.button1));
-				ReplayIO.trackEvent("Button clicked", map);
+				ReplayIO.track("Button clicked", map);
 			}
 		});
     	
@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				HashMap<String,String> map = new HashMap<String, String>();
 				map.put("toggle", isChecked ? "checked":"unchecked");
-				ReplayIO.trackEvent("ToggleButton check changed", map);
+				ReplayIO.track("ToggleButton check changed", map);
 			}
 		});
     	
@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
 				HashMap<String,String> map = new HashMap<String, String>();
 				map.put("value", String.valueOf(progress));
 				map.put("fromUser", String.valueOf(fromUser));
-				ReplayIO.trackEvent("SeekBar changed", map);
+				ReplayIO.track("SeekBar changed", map);
 			}
 
 			@Override

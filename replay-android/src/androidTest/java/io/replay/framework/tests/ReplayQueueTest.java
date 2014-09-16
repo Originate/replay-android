@@ -82,7 +82,7 @@ public class ReplayQueueTest extends AndroidTestCase {
 		
 		int count = 0;
 		for (ReplayRequest request : requests) {
-			JSONObject json = new JSONObject(new String(request.getBody()));
+			JSONObject json = new JSONObject(new String(request.toByteCode()));
 			JSONObject data = json.getJSONObject("data");
 			
 			assertEquals("event"+count, data.getString("event"));

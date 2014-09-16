@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,10 +14,11 @@ import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.Util;
 
 /**
- * Convenience class created to facilitate the mapping of String to Object. This class extends
+ * Convenience class created to facilitate the mapping of String to Object. This class extends {@link org.json.JSONObject}
+ * and implements {@link java.lang.Iterable}, allowing the user to non-deterministically iterate through the KeySet of this object.
  *
  */
-public class ReplayJsonObject extends JSONObject {
+public class ReplayJsonObject extends JSONObject implements Serializable, Iterable{
 
     public ReplayJsonObject() {
         super();
@@ -34,8 +36,7 @@ public class ReplayJsonObject extends JSONObject {
             final int length = keyValuePairs.length;
             if (length % 2 != 0 && length > 0) {
                 for (int i = 0; i < length; i+=2) {
-                    final String key = keyValuePairs[i].toString();
-                    this.put(key, keyValuePairs[i + 1]);
+                    this.putObj(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
                 }
             } else {
                 ReplayLogger.w("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
@@ -310,5 +311,10 @@ public class ReplayJsonObject extends JSONObject {
         }
 
         return true;
+    }
+
+    @Override
+    public Iterator iterator() {
+        return this.keys();
     }
 }

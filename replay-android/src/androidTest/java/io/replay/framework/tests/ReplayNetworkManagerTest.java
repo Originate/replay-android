@@ -61,10 +61,10 @@ public class ReplayNetworkManagerTest extends AndroidTestCase {
 		
 		ReplayRequest request = manager.requestForEvent("color_selected", map);
 		assertNotNull(request);
-		assertNotNull(request.getBody());
-		assertNotNull(new String(request.getBody()));
+		assertNotNull(request.toByteCode());
+		assertNotNull(new String(request.toByteCode()));
 		
-		JSONObject json = new JSONObject(new String(request.getBody())); 
+		JSONObject json = new JSONObject(new String(request.toByteCode()));
 		assertNotNull(json);
 		
 		assertTrue(json.has(ReplayConfig.KEY_REPLAY_KEY));
@@ -94,9 +94,9 @@ public class ReplayNetworkManagerTest extends AndroidTestCase {
 		
 		ReplayRequest request = manager.requestForAlias("new_alias");
 		assertNotNull(request);
-		assertNotNull(request.getBody());
+		assertNotNull(request.toByteCode());
 		
-		JSONObject json = new JSONObject(new String(request.getBody())); 
+		JSONObject json = new JSONObject(new String(request.toByteCode()));
 		assertNotNull(json);
 		
 		assertTrue(json.has(ReplayConfig.KEY_REPLAY_KEY));

@@ -47,7 +47,7 @@ public class ReplayIOTest extends AndroidTestCase {
         mPrefs.edit().commit();
 
         // get/generate client UUID
-        String clientUUID = ReplayIO.getClientUUID();
+        String clientUUID = ReplayIO.getOrGenerateClientUUID();
         assertNotNull(clientUUID);
         assertEquals(UUID.fromString(clientUUID).toString(), clientUUID);
 
@@ -57,7 +57,7 @@ public class ReplayIOTest extends AndroidTestCase {
         assertEquals(mPrefs.getString(ReplayConfig.KEY_CLIENT_ID, ""), clientUUID);
 
         // should not regenerate the UUID
-        assertEquals(ReplayIO.getClientUUID(), clientUUID);
+        assertEquals(ReplayIO.getOrGenerateClientUUID(), clientUUID);
     }
 
     public void testDisable() throws ReplayIONotInitializedException {

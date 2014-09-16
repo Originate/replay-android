@@ -5,8 +5,6 @@ public interface ReplayConfig {
     /** ReplayIO API key */
     public static final String KEY_REPLAY_KEY = "replay_key";
 
-    public static final String KEY_DATA = "data";
-
     /** The server URL requests will be posted to */
     public static final String REPLAY_URL = "http://dyn.originatechina.com:3000/";
 

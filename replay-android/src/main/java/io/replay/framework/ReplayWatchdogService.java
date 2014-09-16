@@ -1,13 +1,12 @@
-package io.replay.framework.model;
+package io.replay.framework;
 
-import android.content.Context;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
-import io.replay.framework.util.ReplayParams;
+import io.replay.framework.util.Util;
 
 public class ReplayWatchdogService extends IntentService {
 
@@ -26,7 +25,10 @@ public class ReplayWatchdogService extends IntentService {
     @Override
     protected void onHandleIntent(Intent workIntent) {
         Config mConfig = new Config();
-        mConfig.setApiKey(workIntent.getExtras().getString(API_KEY,"default"));
+        String key = workIntent.getStringExtra(API_KEY);
+        if(Util.isNullOrEmpty(key)){
+            mConfig.setApiKey(key);
+        }else return;
         final ReplayQueue queue = new ReplayQueue(this, mConfig);
         if (queue.count()>0) {
             queue.flush();
