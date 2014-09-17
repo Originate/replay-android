@@ -12,12 +12,7 @@ import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
 
-import org.json.JSONException;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import org.json.JSONObject;
 
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayConfig.RequestType;
@@ -31,6 +26,7 @@ public class ReplayRequestFactory {
     private static final String PROPERTIES_KEY = "properties";
     private static ReplayRequestFactory instance;
     private static Context mContext;
+    private static ReplayPrefs mPrefs;
 
     private static final String MODEL_KEY="device_model";
     private static final String MANUFACTURER_KEY="device_manufacturer";
@@ -43,25 +39,43 @@ public class ReplayRequestFactory {
     private static final String BLUETOOTH_KEY="bluetooth";
     private static final String CARRIER_KEY="carrier";
 
+    private final static ReplayJsonObject base = new ReplayJsonObject();
+
     public static ReplayRequestFactory init(Context context) {
         return instance == null ? instance = new ReplayRequestFactory(context.getApplicationContext()) : instance;
     }
 
-    private final static ReplayJsonObject base = new ReplayJsonObject();
-
     public ReplayRequestFactory(Context context) {
-        ReplayPrefs mPrefs = ReplayPrefs.get(context);
+        mPrefs = ReplayPrefs.get(context);
         mContext = context;
-        base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
-        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
-        base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
         ReplayJsonObject properties = new ReplayJsonObject();
         collectPassiveData(properties);
         base.put(PROPERTIES_KEY, properties);
     }
 
-    public static ReplayJsonObject generatePassiveData(){
+    /**Merges event metadata
+     *
+     * @param request
+     */
+    public static void mergePassiveData(ReplayRequest request){
+        ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
+        base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
+        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
+        toReturn.mergeJSON(base); //add base passive data to json
+        updateTimestamp(toReturn, request.getCreatedAt());
+        request.setJsonBody(toReturn);
+    }
+
+    private static void updateTimestamp(ReplayJsonObject json, long createdAt) {
+        JSONObject p = json.getJsonObject(PROPERTIES_KEY);
+        if(p != null){
+            ReplayJsonObject props = (ReplayJsonObject) p;
+            long delta = (System.nanoTime() - createdAt) / 1000000L ;
+            props.put(TIME_KEY, delta);
+            json.put(PROPERTIES_KEY, props); //it's clobberin' time!
+        }
     }
 
     /**
@@ -70,11 +84,11 @@ public class ReplayRequestFactory {
      * @param event The event name.
      * @param data  The name-value paired data.
      * @return ReplayRequest object.
-     * @throws org.json.JSONException
      */
-    public static ReplayRequest requestForEvent(String event, Object[] data) throws JSONException {
+    public static ReplayRequest requestForEvent(String event, Object[] data)  {
         ReplayJsonObject json = new ReplayJsonObject(data);
         json.put(KEY_EVENT_NAME, event);
+
 
         return new ReplayRequest(RequestType.EVENTS, json);
     }
@@ -84,9 +98,8 @@ public class ReplayRequestFactory {
      *
      * @param alias The alias.
      * @return ReplayRequest object.
-     * @throws org.json.JSONException
      */
-    public static ReplayRequest requestForAlias(String alias) throws JSONException {
+    public static ReplayRequest requestForAlias(String alias) {
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(RequestType.ALIAS.toString(), alias);
 
@@ -98,14 +111,9 @@ public class ReplayRequestFactory {
      *
      * @param previousJson the JsonObject to which to add the passive data
      */
-    public static ReplayJsonObject collectPassiveData(ReplayJsonObject previousJson){
+    private static ReplayJsonObject collectPassiveData(ReplayJsonObject previousJson){
         try {
-            Date currentTime = new Date();
             ReplayJsonObject props = new ReplayJsonObject();
-
-           /* DateFormat ausFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
-            ausFormat.setTimeZone(TimeZone.getDefault());
-            props.put(TIME_KEY, ausFormat.format(currentTime));*/
 
             LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             Criteria crit = new Criteria();

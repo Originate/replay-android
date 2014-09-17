@@ -13,6 +13,7 @@ public class ReplayRequest implements Serializable {
 
     private RequestType type;
     private ReplayJsonObject json;
+    private long createdAt;
 
     /**
      * ReplayRequest represent a request that's ready to be sent to Replay.io server.
@@ -21,10 +22,21 @@ public class ReplayRequest implements Serializable {
      */
     public ReplayRequest(RequestType type, ReplayJsonObject json) {
         this.type = type;
+        if(json == null) {
+            json = new ReplayJsonObject();
+        }
         this.json = json;
+        createdAt = System.nanoTime();
+    }
+
+    public ReplayJsonObject getJsonBody(){
+        return json;
     }
 
     public void setJsonBody(ReplayJsonObject json){
+        if(json == null) {
+            json = new ReplayJsonObject();
+        }
         this.json = json;
     }
 
@@ -36,22 +48,26 @@ public class ReplayRequest implements Serializable {
     /**
      * @return The json data to be sent, in byte array.
      */
-    public byte[] toByteCode() {
+    public byte[] getBytes() {
         return json.toString().getBytes();
     }
 
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.writeObject(type);
-        oos.writeUTF(json.toString());
+        oos.writeObject(json);
 
     }
     private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
         type = (RequestType) ois.readObject();
-        json = new ReplayJsonObject(ois.readUTF());
+        json = new ReplayJsonObject(ois.readObject());
     }
 
     @Override
     public String toString() {
         return "ReplayRequest{" +"type=" + type +", json=" + json +'}';
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
     }
 }

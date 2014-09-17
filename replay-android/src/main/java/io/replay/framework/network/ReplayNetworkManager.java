@@ -26,7 +26,7 @@ public class ReplayNetworkManager implements ReplayConfig {
      * second being {@link java.net.HttpURLConnection#getResponseMessage()}
      */
     public static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
-        final byte[] jsonBody = request.toByteCode();
+        final byte[] jsonBody = request.getBytes();
 
         URL url = new URL(REPLAY_URL + request.getType());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

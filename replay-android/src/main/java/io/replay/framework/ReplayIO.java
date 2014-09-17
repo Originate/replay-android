@@ -1,7 +1,6 @@
 package io.replay.framework;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -128,7 +127,7 @@ public final class ReplayIO {
         try { //reflection, but in the average case this code will run in <35ms
             PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), PackageManager.GET_ACTIVITIES);
             for (ActivityInfo info : packageInfo.activities) {
-                Class<? extends Activity> clazz = (Class<? extends Activity>) Class.forName(info.name);
+                Class<?> clazz =  Class.forName(info.name);
                 if(clazz == null) continue;
                 if (ReplayActivity.class.isAssignableFrom(clazz)) { //ReplayActivity is the superclass
                     subclassExists = true;
@@ -171,7 +170,6 @@ public final class ReplayIO {
     public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
-        //TODO add passive data here
         queueLayer.createAndEnqueue(userAlias);
     }
 
@@ -248,7 +246,6 @@ public final class ReplayIO {
      * Called when the app entered foreground.  {@link io.replay.framework.queue.ReplayQueue} will be restarted.
      * A new session is started. If there are persisted requests, load them into queue.
      *
-     * @see io.replay.framework.ReplayApplication
      */
     public static void start() {
         checkInitialized();
