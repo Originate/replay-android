@@ -1,6 +1,7 @@
 package io.replay.framework.model;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -136,6 +137,13 @@ public class ReplayRequestFactory {
 
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
+
+            Point size = new Point();
+            display.getSize(size);
+            int width = size.x;
+            int height = size.y;
+            props.put(DISPLAY_KEY,width+"x"+height);
+
             props.put(DISPLAY_KEY, display.getName());
 
             props.put(MANUFACTURER_KEY, Build.MANUFACTURER);

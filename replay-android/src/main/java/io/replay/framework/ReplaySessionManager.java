@@ -17,7 +17,7 @@ public class ReplaySessionManager implements ReplayConfig {
      */
     public static String getOrCreateSessionUUID(Context context) {
         ReplayPrefs prefs = ReplayPrefs.get(context);
-        if (!(prefs.getSessionID().length() == 0)) {
+        if (prefs.getSessionID().length() == 0) {
             prefs.setSessionID(UUID.randomUUID().toString());
             ReplayLogger.d("Generated new session uuid");
         }
