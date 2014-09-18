@@ -40,7 +40,7 @@ public class ReplayJob extends Job implements Serializable {
         try {
             //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
             result = ReplayNetworkManager.doPost(request);
-        } catch (IOException e) {
+        } catch (Exception e) {
             ReplayLogger.e(e, "Error while POSTing job to Replay server: ");
             throw e;
         }

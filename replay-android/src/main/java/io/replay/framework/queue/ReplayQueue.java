@@ -71,8 +71,16 @@ public class ReplayQueue {
         jobqueue.addJob(new ReplayJob(request));
     }
 
+    public void enqueue(ReplayJob job) {
+        jobqueue.addJob(job);
+    }
+
     public void flush() {
         dispatchTimer.onFinish(); //DispatchTimer.onFinish implicitly calls start()
+    }
+
+    public void clear(){
+        jobqueue.clear();
     }
 
     public int count() {

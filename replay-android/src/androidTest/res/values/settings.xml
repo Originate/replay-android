@@ -2,7 +2,7 @@
 <resources>
 
     //the interval between when events are dispatched to the server in milliseconds
-    <integer name="dispatch_interval">60000</integer>
+    <integer name="dispatch_interval">60000</integer> //1 minute
 
     //set true to enable event tracking
     //<bool name="enabled">true</bool>

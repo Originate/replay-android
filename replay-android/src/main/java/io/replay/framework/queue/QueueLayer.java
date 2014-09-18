@@ -1,6 +1,7 @@
 package io.replay.framework.queue;
 
 import io.replay.framework.ReplayIO;
+import io.replay.framework.model.ReplayJob;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.util.LooperThreadWithHandler;
@@ -67,6 +68,19 @@ public class QueueLayer extends LooperThreadWithHandler {
             @Override
             public void run() {
                 queue.flush();
+            }
+        });
+    }
+
+    public void enqueueJob(final ReplayJob job) {
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (queue.count() < MAX_QUEUE) {
+                    queue.enqueue(job);
+                } else {
+                    ReplayLogger.w("ReplayIO Queue", "request %s was dropped because max size of %s was reached", job.toString(), MAX_QUEUE);
+                }
             }
         });
     }
