@@ -13,6 +13,11 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile project(':replay-android')
+    compile 'com.jakewharton:butterknife:5.1.2'
 }

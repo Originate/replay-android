@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    //the interval between when events are dispatched to the server in milliseconds
+    <integer name="dispatch_interval">60000</integer> //1 minute
+
+    //set true to enable event tracking
+    //<bool name="enabled">true</bool>
+
+    //set true to print debug messages
+    <bool name="debug_mode_enabled">true</bool>
+
+    //If the number of events stored (not yet dispatched) reaches this value, no more events will be received
+    <integer name="max_queue">1200</integer>
+
+    //Normally events are only sent to the server when the dispatch_interval is met
+    //but if the number of events reaches flush_at, they will be automatically sent
+    //<integer name="flush_at">50</integer>
+
+     //replay api key
+    <string name="api_key">"testKey"</string>
+
+</resources>
