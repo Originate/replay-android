@@ -30,16 +30,20 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
             mergeJSON(copyFrom);
     }
 
-    public ReplayJsonObject(Map<String, Object> map) {
+    public ReplayJsonObject(Map<String, ?> map) {
         this();
         if (map == null || map.isEmpty()) return;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
             String key = entry.getKey();
             if (this.has(key)) continue;
             this.putObj(key, entry.getValue());
         }
     }
 
+    /**Convenience method for creating a JsonObject pre-instantiated with key-value pairs.
+     *
+     * @param keyValuePairs
+     */
     public ReplayJsonObject(Object... keyValuePairs) {
         super();
         if (keyValuePairs != null) {
@@ -58,7 +62,7 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
     /*package*/ void mergeJSON(JSONObject copyFrom) {
         for (Iterator<String> keys = copyFrom.keys(); keys.hasNext(); ) {
             String key = keys.next();
-            if (this.has(key)) continue; //wouldn't clobber, but why waste CPU cycles?
+            if (this.has(key)) continue; //shouldn't clobber
             try {
                 this.putObj(key, copyFrom.get(key));
             } catch (JSONException e) {
@@ -91,6 +95,7 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
     public JSONObject put(String name, Object value) {
         return putObj(name, value);
     }
+
     public JSONObject put(String name, ReplayJsonObject value) {
         return putObj(name, value);
     }

@@ -22,10 +22,7 @@ public class ReplayRequest implements Serializable {
      */
     public ReplayRequest(RequestType type, ReplayJsonObject json) {
         this.type = type;
-        if(json == null) {
-            json = new ReplayJsonObject();
-        }
-        this.json = json;
+        this.json = json != null ? json : new ReplayJsonObject();
         createdAt = System.nanoTime();
     }
 
@@ -55,11 +52,13 @@ public class ReplayRequest implements Serializable {
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.writeObject(type);
         oos.writeObject(json);
+        oos.writeLong(createdAt);
 
     }
     private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
         type = (RequestType) ois.readObject();
         json = new ReplayJsonObject(ois.readObject());
+        createdAt = ois.readLong();
     }
 
     @Override

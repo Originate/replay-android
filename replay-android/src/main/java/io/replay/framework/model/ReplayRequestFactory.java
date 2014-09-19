@@ -89,7 +89,6 @@ public class ReplayRequestFactory {
         ReplayJsonObject json = new ReplayJsonObject(data);
         json.put(KEY_EVENT_NAME, event);
 
-
         return new ReplayRequest(RequestType.EVENTS, json);
     }
 
@@ -151,7 +150,7 @@ public class ReplayRequestFactory {
             NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             network.put(WIFI_KEY,String.valueOf(networkInfo.isConnected()));
 
-            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
+            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH); //might fail (silently, if there's a god) < 13;
             network.put(BLUETOOTH_KEY,String.valueOf(networkInfo.isConnected()));
 
             networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);

@@ -41,7 +41,6 @@ public final class ReplayIO {
     private static ReplayQueue replayQueue;
     private static QueueLayer queueLayer;
 
-
     /**
      * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
      * including the Replay API key, which is required to be present in order to communicate with the server.
@@ -119,6 +118,7 @@ public final class ReplayIO {
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(context, mConfig);
         queueLayer = new QueueLayer(replayQueue);
+        queueLayer.start();
         replayQueue.start();
 
 
