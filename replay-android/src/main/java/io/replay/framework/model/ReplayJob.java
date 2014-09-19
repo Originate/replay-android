@@ -34,6 +34,8 @@ public class ReplayJob extends Job implements Serializable {
 
     @Override
     public void onRun() throws Throwable {
+        ReplayRequestFactory.mergePassiveData(request);
+
         Pair<Integer, String> result;
         try {
             //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
@@ -44,7 +46,7 @@ public class ReplayJob extends Job implements Serializable {
         }
 
         if (result.first == HttpURLConnection.HTTP_OK) {
-            ReplayLogger.d("ReplayIO - successfully sent job to server");
+            ReplayLogger.d("ReplayIO - successfully sent job to server %s", result.first);
         } else {  //server error; log
             ReplayLogger.e(TAG, "ReplayIO server error code: %s\nmessage: %s", result.first, result.second);
         }

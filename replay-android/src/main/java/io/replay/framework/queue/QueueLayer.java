@@ -1,9 +1,5 @@
 package io.replay.framework.queue;
 
-import org.json.JSONException;
-
-import java.util.Map;
-
 import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
@@ -32,38 +28,36 @@ public class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueue(final String event, final Map<String, String> data){
+    /**
+     * Convenience method that creates a {@link ReplayRequest} object and automatically enqueues it.
+     *
+     * @param event
+     * @param data
+     */
+    public void createAndEnqueue(final String event, final Object[] data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
-                    enqueueAction(request);
-                } catch (JSONException e) {
-                    ReplayLogger.e(e, "Exception while creating request %s: ", event);
-                }
+                ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
+                enqueueAction(request);
             }
         });
     }
 
-    public void createAndEnqueue(final String alias){
+    public void createAndEnqueue(final String alias) {
         handler().post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    ReplayRequest request = ReplayRequestFactory.requestForAlias(alias);
-                    enqueueAction(request);
-                } catch (JSONException e) {
-                    ReplayLogger.e(e, "Exception while creating request %s: ", alias);
-                }
+                ReplayRequest request = ReplayRequestFactory.requestForAlias(alias);
+                enqueueAction(request);
             }
         });
     }
 
     private void enqueueAction(ReplayRequest data) {
-        if(queue.count() < MAX_QUEUE){
+        if (queue.count() < MAX_QUEUE) {
             queue.enqueue(data);
-        }else {
+        } else {
             ReplayLogger.w("ReplayIO Queue", "request %s was dropped because max size of %s was reached", data.toString(), MAX_QUEUE);
         }
     }
