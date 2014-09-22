@@ -7,6 +7,8 @@ import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.util.LooperThreadWithHandler;
 import io.replay.framework.util.ReplayLogger;
 
+import android.os.Handler;
+
 /**
  * Created by parthpadgaonkar on 8/28/14.
  */
@@ -21,7 +23,8 @@ public class QueueLayer extends LooperThreadWithHandler {
     }
 
     public void enqueue(final ReplayRequest data) {
-        handler().post(new Runnable() {
+        Handler handler = handler();
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 enqueueAction(data);
@@ -64,7 +67,8 @@ public class QueueLayer extends LooperThreadWithHandler {
     }
 
     public void sendFlush() {
-        handler().post(new Runnable() {
+        Handler handler = handler();
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 queue.flush();
@@ -73,7 +77,8 @@ public class QueueLayer extends LooperThreadWithHandler {
     }
 
     public void enqueueJob(final ReplayJob job) {
-        handler().post(new Runnable() {
+        Handler handler = handler();
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 if (queue.count() < MAX_QUEUE) {

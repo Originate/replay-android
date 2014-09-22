@@ -7,7 +7,7 @@ import android.os.Looper;
  * Created by parthpadgaonkar on 8/13/14.
  */
 public class LooperThreadWithHandler extends Thread {
-    protected Handler handler;
+    private Handler handler;
 
     @Override
     public void run() {

@@ -61,6 +61,7 @@ public class ReplayQueue {
 
     public void start() {
         jobqueue.start();
+        dispatchTimer.start();
     }
 
     public void stop() {
