@@ -20,11 +20,13 @@ import io.replay.framework.util.ReplayLogger;
 public class ReplayQueue {
     private final JobManager jobqueue;
     private final DispatchTimerInterface dispatchTimer;
+    private final int MAX_QUEUE;
 
     public ReplayQueue(Context context, Config replayOptions) {
         Configuration queueOptions = getJobQueueConfig(context, replayOptions);
         jobqueue = new JobManager(context, queueOptions);
         dispatchTimer = queueOptions.getDispatchTimer();
+        MAX_QUEUE = replayOptions.getMaxQueue();
     }
 
     private static Configuration getJobQueueConfig(final Context context, final Config replayOptions) {
@@ -69,11 +71,19 @@ public class ReplayQueue {
     }
 
     public void enqueue(ReplayRequest request) {
-        jobqueue.addJob(new ReplayJob(request));
+        if(jobqueue.count() < MAX_QUEUE) {
+            jobqueue.addJob(new ReplayJob(request));
+        }else {
+            ReplayLogger.w("ReplayIO Queue", "request %s was dropped because max size of %s was reached", request.toString(), MAX_QUEUE);
+        }
     }
 
     public void enqueue(ReplayJob job) {
-        jobqueue.addJob(job);
+        if(jobqueue.count() < MAX_QUEUE) {
+            jobqueue.addJob(job);
+        }else {
+            ReplayLogger.w("ReplayIO Queue", "request %s was dropped because max size of %s was reached", job.toString(), MAX_QUEUE);
+        }
     }
 
     public void flush() {
