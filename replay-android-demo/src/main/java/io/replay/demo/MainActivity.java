@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
 
         Config mConfig = ReplayParams.getOptions(getApplicationContext());
         mConfig.setApiKey("51cbeec7-be27-451f-809b-03dbd02dfe5a");
-        mConfig.setDispatchInterval(1000*60); // 10 hours == infinity?
+        mConfig.setDispatchInterval(1000*60*60); // 10 hours == infinity?
         mConfig.setFlushAt(10);
         mConfig.setMaxQueue(50);
         mConfig.setDebug(true);
