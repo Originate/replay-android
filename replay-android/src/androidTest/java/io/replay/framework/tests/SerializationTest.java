@@ -1,4 +1,4 @@
-package io.replay.framework.tests.model;
+package io.replay.framework.tests;
 
 import android.test.AndroidTestCase;
 
@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.tests.model.TestReplayJob;
 
 /**
  * Created by parthpadgaonkar on 9/22/14.

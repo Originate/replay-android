@@ -249,14 +249,6 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
     }
 
 
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof JSONObject)
-            return equals(this, o);
-        else return false;
-    }
-
     @Override
     public int hashCode() {
         int code = 17;
@@ -266,6 +258,55 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
             code += (k.hashCode() ^ (v != null ? v.hashCode() : 0));
         }
         return code;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof JSONObject && equals(this, (JSONObject) o);
+    }
+
+    public static boolean equals(JSONObject one, JSONObject two) {
+        if (one == null || two == null) return one == two;
+        if (one.length() != two.length()) return false;
+
+
+        Iterator<String> i1 = one.keys();
+        Iterator<String> i2 = two.keys();
+        while(i1.hasNext() && i2.hasNext()){
+            String k1 = i1.next();
+            String k2 = i2.next();
+            Object v1;
+            Object v2;
+            try {
+                v1 = one.get(k1);
+                v2 = two.get(k2);
+            } catch (JSONException e) {
+                return false;
+            }
+            if (!k1.equals(k2) || !v1.equals(v2)) return false;
+
+        }
+        return true;
+    }
+
+
+/*    public static boolean equals(JSONArray one, JSONArray two) {
+        if (one == null || two == null) return one == two;
+        if (one.length() != two.length()) return false;
+
+        final int oneLength = one.length();
+        for (int i = 0; i < oneLength; i++) {
+            try {
+                Object oneVal = one.get(i);
+                Object twoVal = two.get(i);
+                //recursive equals call
+                if (!equals(oneVal, twoVal)) return false;
+            } catch (JSONException e) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static boolean equals(Object left, Object right) {
@@ -292,50 +333,7 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
         }
 
         return true;
-    }
-
-    public static boolean equals(JSONArray one, JSONArray two) {
-        if (one == null || two == null) return one == two;
-        if (one.length() != two.length()) return false;
-
-        final int oneLength = one.length();
-        for (int i = 0; i < oneLength; i++) {
-            try {
-                Object oneVal = one.get(i);
-                Object twoVal = two.get(i);
-                //recursive equals call
-                if (!equals(oneVal, twoVal)) return false;
-            } catch (JSONException e) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean equals(JSONObject one, JSONObject two) {
-        if (one == null || two == null) return one == two;
-        if (one.length() != two.length()) return false;
-
-        @SuppressWarnings("unchecked") Iterator<String> iterator = one.keys();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            if (!two.has(key)) {
-                return false;
-            } else {
-                try {
-                    Object oneVal = one.get(key);
-                    Object twoVal = two.get(key);
-
-                    if (!equals(oneVal, twoVal)) return false;
-                } catch (JSONException e) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
+    }*/
 
     @Override
     public Iterator<String> iterator() {
