@@ -4,6 +4,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +22,7 @@ import io.replay.framework.util.Util;
  * and implements {@link java.lang.Iterable}, allowing the user to non-deterministically iterate through the KeySet of this object.
  *
  */
-public class ReplayJsonObject extends JSONObject implements Serializable, Iterable{
+public class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializable{
 
     public ReplayJsonObject() {
         super();
@@ -48,7 +52,7 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
         super();
         if (keyValuePairs != null) {
             final int length = keyValuePairs.length;
-            if (length % 2 != 0 && length > 0) {
+            if (length % 2 == 0 && length > 0) {
                 for (int i = 0; i < length; i+=2) {
                     this.putObj(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
                 }
@@ -244,11 +248,24 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
         }
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof JSONObject)
             return equals(this, o);
         else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int code = 17;
+
+        for (String k : this) {
+            Object v = get(k);
+            code += (k.hashCode() ^ (v != null ? v.hashCode() : 0));
+        }
+        return code;
     }
 
     public static boolean equals(Object left, Object right) {
@@ -321,7 +338,31 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
     }
 
     @Override
-    public Iterator iterator() {
+    public Iterator<String> iterator() {
         return this.keys();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        //out.defaultWriteObject();
+       // if (this.length() > 0) {
+            out.writeInt(this.length());
+            for (String key : this) {
+                out.writeObject(key);
+                out.writeObject(this.get(key));
+            }
+      //  }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        //in.defaultReadObject();
+        int length = in.readInt();
+        if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
+        for (int i = 0; i < length; i++) {
+            String key = (String) in.readObject();
+            Object val = in.readObject();
+            this.putObj(key, val);
+
+        }
+
     }
 }
