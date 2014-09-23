@@ -117,4 +117,14 @@
             android:text=" "
             android:textAppearance="?android:attr/textAppearanceSmall"/>
     </ScrollView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0"
+        android:id="@+id/textView3"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/button3"
+        android:layout_toLeftOf="@+id/scrollView" />
 </RelativeLayout>
