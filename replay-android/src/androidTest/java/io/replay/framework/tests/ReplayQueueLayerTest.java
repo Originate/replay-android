@@ -1,31 +1,27 @@
 package io.replay.framework.tests;
 
-import java.util.UUID;
-
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import io.replay.framework.ReplayConfig;
-import io.replay.framework.ReplaySessionManager;
-import io.replay.framework.model.ReplayJob;
+import io.replay.framework.ReplayConfig.RequestType;
+import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
+import io.replay.framework.tests.model.TestReplayJob;
 import io.replay.framework.util.Config;
 import io.replay.framework.util.ReplayParams;
-import io.replay.framework.queue.QueueLayer;
 
 public class ReplayQueueLayerTest extends AndroidTestCase {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
 
-	public void testCreateAndEnqueue() throws InterruptedException{
+    public void testCreateAndEnqueue() throws InterruptedException{
         Context context = getContext();
 
         // load parameters
@@ -43,7 +39,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         ql.createAndEnqueue("Event", null);
         Thread.sleep(1000);
         assertEquals(1,queue.count());
-	}
+    }
 
     public void testEnqueueJob() throws JSONException, InterruptedException{
         Context context = getContext();
@@ -60,8 +56,10 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertEquals(0,queue.count());
 
         //check to make sure events can be enqueued
-        ReplayJob job = new ReplayJob(new ReplayRequest(ReplayConfig.RequestType.EVENTS, new JSONObject().put("event_name", "test")));
-        ql.enqueueJob(job);
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+
+        ql.enqueueJob(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         Thread.sleep(1000);
         assertEquals(1,queue.count());
     }
@@ -81,8 +79,10 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertEquals(0,queue.count());
 
         //check to make sure events can be enqueued
-        ReplayRequest request = new ReplayRequest(ReplayConfig.RequestType.EVENTS, new JSONObject().put("event_name", "test"));
-        ql.enqueue(request);
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+
+        ql.enqueueJob(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         Thread.sleep(1000);
         assertEquals(1,queue.count());
     }

@@ -4,9 +4,9 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import io.replay.framework.ReplayConfig.RequestType;
+import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.tests.model.TestReplayJob;
@@ -54,9 +54,12 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //add events to queue
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(3, queue.count());
 
         //The queue should automatically flush
@@ -64,7 +67,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
     }
 
-   /**
+    /**
      * Test setDispatcherInterval(-1), this will fail if server side is not on.
      * Slow network connection will cause failure, too.
      *
@@ -120,6 +123,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws org.json.JSONException
      * @throws InterruptedException
      */
+/*
     public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException,
                                                           IllegalArgumentException, JSONException, InterruptedException {
         Context context = getContext();
@@ -137,10 +141,13 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //add events to queue
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(4, queue.count());
 
         //make sure the queue is flushed after dispatchInterval milliseconds have passed
@@ -148,6 +155,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
         queue.stop();
     }
+*/
 
     /*
      * Test setDispatcherInterval(5), this will fail if server side is not on.
@@ -178,15 +186,18 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //add events to queue
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(5, queue.count());
 
         //After maxQueue events are added, the system shouldn't allow any more
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(5, queue.count());
 
         //flush the queue so future tests work
@@ -224,16 +235,18 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //add events to queue
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
 
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(4, queue.count());
 
 
         //After flushAt events are added, the queue should automatically flush
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, new JSONObject().put("event_name", "test"))));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         Thread.sleep(2000);
         assertEquals(0, queue.count());
         queue.stop();
