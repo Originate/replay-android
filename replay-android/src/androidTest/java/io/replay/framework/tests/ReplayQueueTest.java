@@ -246,7 +246,6 @@ public class ReplayQueueTest extends AndroidTestCase {
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(4, queue.count());
 
-
         //After flushAt events are added, the queue should automatically flush
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         Thread.sleep(2000);

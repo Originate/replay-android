@@ -35,5 +35,5 @@ test:
 
 general: 
     artifacts:
-        - "replay-android/build/reports/androidTests/connected"
-
+        - cd /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+        - cp -R . $CIRCLE_ARTIFACTS
