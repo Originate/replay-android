@@ -204,6 +204,7 @@ public class ReplayQueueTest extends AndroidTestCase {
 
         //flush the queue so future tests work
         queue.clear();
+        Thread.sleep(900);
         assertEquals(0, queue.count());
         queue.stop();
     }

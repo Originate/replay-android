@@ -37,4 +37,4 @@ test:
     override:
         - (./gradlew connectedAndroidTest --info)
     post:
-        - cp -R . $CIRCLE_ARTIFACTS
+        - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
