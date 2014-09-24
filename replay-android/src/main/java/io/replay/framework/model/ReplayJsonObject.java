@@ -4,6 +4,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +22,7 @@ import io.replay.framework.util.Util;
  * and implements {@link java.lang.Iterable}, allowing the user to non-deterministically iterate through the KeySet of this object.
  *
  */
-public class ReplayJsonObject extends JSONObject implements Serializable, Iterable{
+public class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializable{
 
     public ReplayJsonObject() {
         super();
@@ -48,7 +52,7 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
         super();
         if (keyValuePairs != null) {
             final int length = keyValuePairs.length;
-            if (length % 2 != 0 && length > 0) {
+            if (length % 2 == 0 && length > 0) {
                 for (int i = 0; i < length; i+=2) {
                     this.putObj(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
                 }
@@ -244,11 +248,65 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
         }
     }
 
+
+    @Override
+    public int hashCode() {
+        int code = 17;
+
+        for (String k : this) {
+            Object v = get(k);
+            code += (k.hashCode() ^ (v != null ? v.hashCode() : 0));
+        }
+        return code;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o instanceof JSONObject)
-            return equals(this, o);
-        else return false;
+        return o instanceof JSONObject && equals(this, (JSONObject) o);
+    }
+
+    public static boolean equals(JSONObject one, JSONObject two) {
+        if (one == null || two == null) return one == two;
+        if (one.length() != two.length()) return false;
+
+
+        Iterator<String> i1 = one.keys();
+        Iterator<String> i2 = two.keys();
+        while(i1.hasNext() && i2.hasNext()){
+            String k1 = i1.next();
+            String k2 = i2.next();
+            Object v1;
+            Object v2;
+            try {
+                v1 = one.get(k1);
+                v2 = two.get(k2);
+            } catch (JSONException e) {
+                return false;
+            }
+            if (!k1.equals(k2) || !v1.equals(v2)) return false;
+
+        }
+        return true;
+    }
+
+
+/*    public static boolean equals(JSONArray one, JSONArray two) {
+        if (one == null || two == null) return one == two;
+        if (one.length() != two.length()) return false;
+
+        final int oneLength = one.length();
+        for (int i = 0; i < oneLength; i++) {
+            try {
+                Object oneVal = one.get(i);
+                Object twoVal = two.get(i);
+                //recursive equals call
+                if (!equals(oneVal, twoVal)) return false;
+            } catch (JSONException e) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static boolean equals(Object left, Object right) {
@@ -275,53 +333,34 @@ public class ReplayJsonObject extends JSONObject implements Serializable, Iterab
         }
 
         return true;
-    }
-
-    public static boolean equals(JSONArray one, JSONArray two) {
-        if (one == null || two == null) return one == two;
-        if (one.length() != two.length()) return false;
-
-        final int oneLength = one.length();
-        for (int i = 0; i < oneLength; i++) {
-            try {
-                Object oneVal = one.get(i);
-                Object twoVal = two.get(i);
-                //recursive equals call
-                if (!equals(oneVal, twoVal)) return false;
-            } catch (JSONException e) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean equals(JSONObject one, JSONObject two) {
-        if (one == null || two == null) return one == two;
-        if (one.length() != two.length()) return false;
-
-        @SuppressWarnings("unchecked") Iterator<String> iterator = one.keys();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            if (!two.has(key)) {
-                return false;
-            } else {
-                try {
-                    Object oneVal = one.get(key);
-                    Object twoVal = two.get(key);
-
-                    if (!equals(oneVal, twoVal)) return false;
-                } catch (JSONException e) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
+    }*/
 
     @Override
-    public Iterator iterator() {
+    public Iterator<String> iterator() {
         return this.keys();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        //out.defaultWriteObject();
+       // if (this.length() > 0) {
+            out.writeInt(this.length());
+            for (String key : this) {
+                out.writeObject(key);
+                out.writeObject(this.get(key));
+            }
+      //  }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        //in.defaultReadObject();
+        int length = in.readInt();
+        if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
+        for (int i = 0; i < length; i++) {
+            String key = (String) in.readObject();
+            Object val = in.readObject();
+            this.putObj(key, val);
+
+        }
+
     }
 }

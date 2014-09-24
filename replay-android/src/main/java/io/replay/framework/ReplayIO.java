@@ -275,7 +275,7 @@ public final class ReplayIO {
      * @return Client UUID.
      */
     public static String getOrGenerateClientUUID() {
-        if (null == mConfig || !initialized) {
+        if (null == mConfig) {
             throw new ReplayIONotInitializedException();
         }
         if (Util.isNullOrEmpty(mPrefs.getClientID())) {

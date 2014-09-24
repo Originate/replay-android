@@ -40,7 +40,7 @@ public class ReplayJob extends Job implements Serializable {
         try {
             //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
             result = ReplayNetworkManager.doPost(request);
-        } catch (IOException e) {
+        } catch (Exception e) {
             ReplayLogger.e(e, "Error while POSTing job to Replay server: ");
             throw e;
         }
@@ -69,5 +69,23 @@ public class ReplayJob extends Job implements Serializable {
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         request = (ReplayRequest) ois.readObject();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReplayJob)) return false;
+
+        ReplayJob replayJob = (ReplayJob) o;
+
+        if (request != null ? !request.equals(replayJob.request) : replayJob.request != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return request != null ? request.hashCode() : 0;
     }
 }

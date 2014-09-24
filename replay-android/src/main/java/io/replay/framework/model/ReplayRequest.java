@@ -57,7 +57,7 @@ public class ReplayRequest implements Serializable {
     }
     private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
         type = (RequestType) ois.readObject();
-        json = new ReplayJsonObject(ois.readObject());
+        json = (ReplayJsonObject) ois.readObject();
         createdAt = ois.readLong();
     }
 
@@ -68,5 +68,25 @@ public class ReplayRequest implements Serializable {
 
     public long getCreatedAt() {
         return createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReplayRequest)) return false;
+
+        ReplayRequest that = (ReplayRequest) o;
+
+        if (json != null ? !json.equals(that.json) : that.json != null) return false;
+        if (type != that.type) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (json != null ? json.hashCode() : 0);
+        return result;
     }
 }

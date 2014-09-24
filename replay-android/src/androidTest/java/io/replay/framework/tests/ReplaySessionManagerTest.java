@@ -8,6 +8,8 @@ import android.test.AndroidTestCase;
 
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplaySessionManager;
+import io.replay.framework.util.ReplayParams;
+import io.replay.framework.util.ReplayPrefs;
 
 public class ReplaySessionManagerTest extends AndroidTestCase {
 	private SharedPreferences mPrefs;
@@ -15,11 +17,11 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		mPrefs = getContext().getSharedPreferences(ReplayConfig.PREFERENCES, Context.MODE_PRIVATE);
+		mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
 	}
 
 	public void testSessionUUID() {
-		assertFalse(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
+        assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID,""),"");
 		
 		String uuid = ReplaySessionManager.getOrCreateSessionUUID(getContext());
 		
@@ -28,20 +30,20 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 		assertEquals(UUID.fromString(uuid).toString(), uuid);
 		
 		// should save to preferences
-		assertTrue(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
-		assertEquals(mPrefs.getString(ReplayConfig.KEY_SESSION_ID, ""), uuid);
+		assertTrue(mPrefs.contains(ReplayPrefs.KEY_SESSION_ID));
+		assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID, ""), uuid);
 		
 		// should not regenerate the UUID
 		assertEquals(ReplaySessionManager.getOrCreateSessionUUID(getContext()), uuid);
 	}
 	
 	public void testEndSession() {
-		if (!mPrefs.contains(ReplayConfig.KEY_SESSION_ID)) {
+		if (!mPrefs.contains(ReplayPrefs.KEY_SESSION_ID)) {
 			ReplaySessionManager.getOrCreateSessionUUID(getContext());
-			assertTrue(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
+			assertTrue(mPrefs.contains(ReplayPrefs.KEY_SESSION_ID));
 		}
 		
 		ReplaySessionManager.endSession(getContext());
-		assertFalse(mPrefs.contains(ReplayConfig.KEY_SESSION_ID));
+		assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID,""),"");
 	}
 }

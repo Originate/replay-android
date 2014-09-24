@@ -68,6 +68,11 @@ public class Config {
         return dispatchInterval;
     }
 
+    /**Set the timer for this many MS
+     *
+     * @param dispatchInterval
+     * @return
+     */
     public Config setDispatchInterval(int dispatchInterval){
         this.dispatchInterval = dispatchInterval;
         return this;

@@ -18,7 +18,7 @@ android {
         versionName "1.0"
 
         //commenting out tests because of the various changes we've made (Parth - Aug 22, 2014)
-        testApplicationId "com.replay.framework.tests"
+        testApplicationId "io.replay.framework.tests"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 

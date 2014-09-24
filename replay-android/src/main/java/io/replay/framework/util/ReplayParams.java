@@ -10,7 +10,7 @@ public class ReplayParams {
 
     private static final String STRING_RESOURCE_KEY = "string";
     private static final String INTEGER_RESOURCE_KEY = "integer";
-    private static final String BOOLEAN_RESOURCE_KEY = "boolean";
+    private static final String BOOLEAN_RESOURCE_KEY = "bool";
 
     private static final String DISPATCH_INTERVAL = "dispatch_interval";
     private static final String MAX_QUEUE = "max_queue";
