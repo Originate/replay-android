@@ -5,6 +5,10 @@
 # ANDROID_BUILD_TOOLS_VERSION (20.0.0)
 #
 
+general: 
+    artifacts:
+        - cd /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+
 machine:
     environment:
         ANDROID_HOME: /home/ubuntu/android
@@ -32,8 +36,5 @@ test:
         - (source replay-envsetup.sh && waitAVD)
     override:
         - (./gradlew connectedAndroidTest --info)
-
-general: 
-    artifacts:
-        - cd /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+    post:
         - cp -R . $CIRCLE_ARTIFACTS
