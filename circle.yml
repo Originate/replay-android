@@ -33,3 +33,7 @@ test:
     override:
         - (./gradlew connectedAndroidTest --info)
 
+general: 
+    artifacts:
+        - "replay-android/build/reports/androidTests/connected"
+
