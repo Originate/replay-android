@@ -35,6 +35,6 @@ test:
             timeout: 1200
         - (source replay-envsetup.sh && waitAVD)
     override:
-        - (./gradlew connectedAndroidTest --info)
+        - (./gradlew connectedAndroidTest)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
