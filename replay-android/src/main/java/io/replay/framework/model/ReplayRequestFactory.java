@@ -49,9 +49,8 @@ public class ReplayRequestFactory {
     public ReplayRequestFactory(Context context) {
         mPrefs = ReplayPrefs.get(context);
         mContext = context;
-        ReplayJsonObject properties = new ReplayJsonObject();
-        collectPassiveData(properties);
-        base.put(PROPERTIES_KEY, properties);
+        ReplayJsonObject props = collectPassiveData();
+        base.put(PROPERTIES_KEY, props);
     }
 
     /**Merges event metadata
@@ -109,12 +108,10 @@ public class ReplayRequestFactory {
     /**
      * Send additional properties that are automatically tracked.
      *
-     * @param previousJson the JsonObject to which to add the passive data
      */
-    private static ReplayJsonObject collectPassiveData(ReplayJsonObject previousJson){
+    private static ReplayJsonObject collectPassiveData(){
+        ReplayJsonObject props = new ReplayJsonObject();
         try {
-            ReplayJsonObject props = new ReplayJsonObject();
-
             LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
             Criteria crit = new Criteria();
             crit.setPowerRequirement(Criteria.POWER_LOW);
@@ -144,8 +141,6 @@ public class ReplayRequestFactory {
             int height = size.y;
             props.put(DISPLAY_KEY,width+"x"+height);
 
-            props.put(DISPLAY_KEY, display.getName());
-
             props.put(MANUFACTURER_KEY, Build.MANUFACTURER);
 
             props.put(MODEL_KEY, Build.MODEL);
@@ -156,25 +151,30 @@ public class ReplayRequestFactory {
 
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            network.put(WIFI_KEY,String.valueOf(networkInfo.isConnected()));
+            if (networkInfo != null){
+                network.put(WIFI_KEY,String.valueOf(networkInfo.isConnected()));
+            }
 
             networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH); //might fail (silently, if there's a god) < 13;
-            network.put(BLUETOOTH_KEY,String.valueOf(networkInfo.isConnected()));
+            if (networkInfo != null){
+                network.put(BLUETOOTH_KEY,String.valueOf(networkInfo.isConnected()));
+            }
 
             networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-            network.put(MOBILE_KEY,String.valueOf(networkInfo.isConnected()));
+            if (networkInfo != null){
+                network.put(MOBILE_KEY,String.valueOf(networkInfo.isConnected()));
+            }
 
             final TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
             String carrier = telephonyManager.getNetworkOperatorName();
             network.put(CARRIER_KEY,carrier);
 
             props.put(NETWORK_KEY, network);
-            previousJson.put(PROPERTIES_KEY, props);
         }
         catch (Exception e){
             e.printStackTrace();
         }
-        return previousJson;
+        return props;
     }
 
 }

@@ -9,7 +9,7 @@ import io.replay.framework.model.ReplayJsonObject;
 /**
  * Created by parthpadgaonkar on 9/23/14.
  */
-public class ReplayJsonObjectTest extends AndroidTestCase {
+public class ReplayJsonObjecTTest extends AndroidTestCase {
 
     @Override
     public void setUp() throws Exception {
