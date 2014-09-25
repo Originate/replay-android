@@ -37,12 +37,6 @@ public class ReplayRequest implements Serializable {
         this.json = json;
     }
 
-    public void setBasicJson(){
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put("api_key","key");
-        this.json = json;
-    }
-
     /** @return The type of request data. */
     public RequestType getType() {
         return type;
