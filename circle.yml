@@ -1,0 +1,40 @@
+# Build configuration file for Circle CI
+#
+#
+# ANDROID_API_LEVEL 19
+# ANDROID_BUILD_TOOLS_VERSION (20.0.0)
+#
+
+general: 
+    artifacts:
+        - cd /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+
+machine:
+    environment:
+        ANDROID_HOME: /home/ubuntu/android
+    timezone:
+        America/Los_Angeles
+    java:
+        version: oraclejdk6
+
+
+dependencies:
+    cache_directories:
+        - ~/.android
+        - ~/android
+    pre:
+        - (source replay-envsetup.sh && ensureDependenciesAndCreateAVD)
+
+test:
+    pre:
+        - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
+            background: true
+        - (./gradlew assembleDebug):
+            timeout: 1200
+        - (./gradlew assembleDebugTest):
+            timeout: 1200
+        - (source replay-envsetup.sh && waitAVD)
+    override:
+        - (./gradlew connectedAndroidTest)
+    post:
+        - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS

@@ -25,7 +25,6 @@ public class ReplayJsonObjecTTest extends AndroidTestCase {
         ReplayJsonObject one = new ReplayJsonObject();
         ReplayJsonObject two = new ReplayJsonObject();
 
-
         assertEquals(one, two);
         assertTrue(one.equals(two) && two.equals(one));
 
