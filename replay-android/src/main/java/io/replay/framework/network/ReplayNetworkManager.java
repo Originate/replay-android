@@ -9,7 +9,8 @@ import java.net.URL;
 
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.model.ReplayRequest;
-
+import io.replay.framework.model.ReplayJsonObject;
+import java.util.HashMap;
 /**The ReplayNetworkManager is a simple wrapper around the Android/Java {@link java.net.HttpURLConnection}.
  * Given a {@link io.replay.framework.model.ReplayRequest} object, this class will POST the JSON body to the
  * appropriate endpoint.
@@ -26,12 +27,22 @@ public class ReplayNetworkManager implements ReplayConfig {
      * second being {@link java.net.HttpURLConnection#getResponseMessage()}
      */
     public static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
-        final byte[] jsonBody = request.getBytes();
+        ReplayJsonObject data = new ReplayJsonObject();
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("replay_key", "20394281092");
 
-        URL url = new URL(REPLAY_URL + request.getType());
+        data.put("distinct_id", "a3098fjs2");
+        data.put("event", "bar");
+        data.put("session_id", "55b17871-fbc5-11e3-9727-3965d78f0c34");
+        json.put("data",data);
+        final byte[] jsonBody = json.toString().getBytes();
+
+        //final byte[] jsonBody = request.getBytes();
+
+        URL url = new URL("http://10.0.2.2:3000/" + request.getType());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
-        connection.setFixedLengthStreamingMode(jsonBody.length);
+        //connection.setFixedLengthStreamingMode(jsonBody.length);
         connection.setInstanceFollowRedirects(false);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");
@@ -43,6 +54,8 @@ public class ReplayNetworkManager implements ReplayConfig {
         bos.write(jsonBody);
         bos.flush();
         bos.close();
+        String a = connection.getResponseMessage();
+        String b = connection.getErrorStream().toString();
         return Pair.create(connection.getResponseCode(), connection.getResponseMessage());
     }
 }

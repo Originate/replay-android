@@ -6,9 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
-import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplaySessionManager;
-import io.replay.framework.util.ReplayParams;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplaySessionManagerTest extends AndroidTestCase {

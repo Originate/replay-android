@@ -37,7 +37,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      */
 
     public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException,
-                                                             IllegalArgumentException, JSONException, InterruptedException {
+            IllegalArgumentException, JSONException, InterruptedException {
         Context context = getContext();
 
         // load parameters
@@ -170,7 +170,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws InterruptedException
      */
     public void testMaxQueue() throws NoSuchFieldException, IllegalAccessException,
-                                            IllegalArgumentException, JSONException, InterruptedException {
+            IllegalArgumentException, JSONException, InterruptedException {
 
         Context context = getContext();
 
@@ -217,7 +217,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws InterruptedException
      */
     public void testFlushAt() throws NoSuchFieldException, IllegalAccessException,
-                                           IllegalArgumentException, JSONException, InterruptedException {
+            IllegalArgumentException, JSONException, InterruptedException {
 
         Context context = getContext();
 
