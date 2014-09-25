@@ -48,7 +48,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         mConfig.setMaxQueue(15);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
-        queue.start();
+        queue.stop();
 
         //make sure queue is empty for start of tests
         assertEquals(0, queue.count());
@@ -62,8 +62,10 @@ public class ReplayQueueTest extends AndroidTestCase {
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(3, queue.count());
 
+        queue.start();
+
         //The queue should automatically flush
-        Thread.sleep(2000);
+        Thread.sleep(7000);
         assertEquals(0, queue.count());
     }
 
@@ -202,8 +204,6 @@ public class ReplayQueueTest extends AndroidTestCase {
 
         //flush the queue so future tests work
         queue.clear();
-        assertEquals(0, queue.count());
-        queue.stop();
     }
 
     /**
@@ -243,7 +243,6 @@ public class ReplayQueueTest extends AndroidTestCase {
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
         assertEquals(4, queue.count());
-
 
         //After flushAt events are added, the queue should automatically flush
         queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
