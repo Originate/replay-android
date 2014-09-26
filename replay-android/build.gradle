@@ -9,7 +9,6 @@ repositories {
 android {
     compileSdkVersion 19
     buildToolsVersion "20.0.0"
-
     defaultConfig {
         applicationId "io.replay.framework"
         minSdkVersion 8
@@ -21,9 +20,28 @@ android {
         testApplicationId "io.replay.framework.tests"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
-
     lintOptions {
         abortOnError false
+    }
+    buildTypes {
+        def STRING = "String"
+        def REPLAY_URL = "REPLAY_URL"
+        emulator.initWith(buildTypes.debug)
+        emulator {
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, "\"10.0.2.2:3000/\""
+            //stupidly, without the extra strings, it tries to make "10.0.2.2" into a very very weird Long.
+
+        }
+        genymotion.initWith(buildTypes.debug)
+        genymotion {
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, "\"192.168.52.1:3000/\""
+        }
+        release {
+            debuggable false
+            buildConfigField STRING, REPLAY_URL, "\"api.replay.io/\""
+        }
     }
 }
 

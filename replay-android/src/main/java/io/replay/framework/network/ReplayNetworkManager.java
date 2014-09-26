@@ -38,7 +38,7 @@ public class ReplayNetworkManager {
 
         //final byte[] jsonBody = request.getBytes();
 
-        URL url = new URL("http://10.0.2.2:3000/" + request.getType());
+        URL url = new URL(BuildConfig.REPLAY_URL + request.getType());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         //connection.setFixedLengthStreamingMode(jsonBody.length);
