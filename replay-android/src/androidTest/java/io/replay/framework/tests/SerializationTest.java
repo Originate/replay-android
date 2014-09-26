@@ -9,9 +9,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.tests.model.TestReplayJob;
 
 /**
