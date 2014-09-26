@@ -29,7 +29,7 @@ test:
     pre:
         - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
             background: true
-        - (./gradlew assembleDebug):
+        - (./gradlew assembleEmulator):
             timeout: 1200
         - (./gradlew assembleDebugTest):
             timeout: 1200

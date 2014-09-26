@@ -16,7 +16,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-        //commenting out tests because of the various changes we've made (Parth - Aug 22, 2014)
         testApplicationId "io.replay.framework.tests"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
@@ -26,21 +25,26 @@ android {
     buildTypes {
         def STRING = "String"
         def REPLAY_URL = "REPLAY_URL"
+        debug{
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, urlStr()
+        }
+
         emulator.initWith(buildTypes.debug)
         emulator {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, "\"10.0.2.2:3000/\""
+            buildConfigField STRING, REPLAY_URL, urlStr("10.0.2.2:3000/")
             //stupidly, without the extra strings, it tries to make "10.0.2.2" into a very very weird Long.
 
         }
         genymotion.initWith(buildTypes.debug)
         genymotion {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, "\"192.168.52.1:3000/\""
+            buildConfigField STRING, REPLAY_URL, urlStr("192.168.52.1:3000/")
         }
         release {
             debuggable false
-            buildConfigField STRING, REPLAY_URL, "\"api.replay.io/\""
+            buildConfigField STRING, REPLAY_URL, urlStr("api.replay.io/")
         }
     }
 }
@@ -63,3 +67,7 @@ task makeJar(type: Copy) {
 }
 
 makeJar.dependsOn(clearJar, build)
+
+private def urlStr(String str){
+    return "\"" + str + "\"";
+}
