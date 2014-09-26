@@ -7,9 +7,18 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import io.replay.framework.ReplayConfig.RequestType;
-
 public class ReplayRequest implements Serializable {
+
+    public static enum RequestType{
+        /** The ReplayRequest type: alias. */
+        ALIAS,
+        /** The ReplayRequest type: events. */
+        EVENTS;
+
+        @Override public String toString() {
+            return name().toLowerCase();
+        }
+    }
 
     private RequestType type;
     private ReplayJsonObject json;

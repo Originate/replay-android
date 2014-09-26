@@ -7,16 +7,15 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.replay.framework.ReplayConfig;
-import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.BuildConfig;
 import io.replay.framework.model.ReplayJsonObject;
-import java.util.HashMap;
+import io.replay.framework.model.ReplayRequest;
 /**The ReplayNetworkManager is a simple wrapper around the Android/Java {@link java.net.HttpURLConnection}.
  * Given a {@link io.replay.framework.model.ReplayRequest} object, this class will POST the JSON body to the
  * appropriate endpoint.
  *
  */
-public class ReplayNetworkManager implements ReplayConfig {
+public class ReplayNetworkManager {
 
     /**
      * Post the request to the server. This operation occurs in the thread that called it.
