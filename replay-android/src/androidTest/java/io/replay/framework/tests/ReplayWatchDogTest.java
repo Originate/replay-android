@@ -1,11 +1,11 @@
 package io.replay.framework.tests;
 
 
-import java.util.concurrent.CountDownLatch;
-
 import android.content.Context;
 import android.content.Intent;
 import android.test.ServiceTestCase;
+
+import java.util.concurrent.CountDownLatch;
 
 import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayWatchdogService;
@@ -33,7 +33,7 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         getService().setLatch(latch);
     }
 
-    public void testHandleIntent() throws InterruptedException {
+    public void testHandleIntent() {
         Context context = getContext();
 
         // Create Queue
@@ -41,7 +41,7 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         mConfig.setApiKey("testKey");
         mConfig.setDispatchInterval(3600000); // 60 min == infinity?
         ReplayQueue queue = new ReplayQueue(context, mConfig);
-        queue.start();
+        queue.stop();
 
         //Add jobs to the queue
         ReplayJsonObject json = new ReplayJsonObject();
@@ -53,14 +53,18 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
 
         //Invoke the watchdog service
         startService(new Intent(getSystemContext(), ReplayWatchdogService.class));
-        latch.await();
-        Thread.sleep(2000);
+        try {
+            latch.await();
+            Thread.sleep(2000);
+            //forces the queue to re-poll its DB; otherwise, will return incorrect count.
+            queue = new ReplayQueue(context, mConfig);
+            queue.stop(); //this is to prove that the queue isn't flushing jobs that the Service didn't get to.
 
-        //get the new queue
-        queue = new ReplayQueue(context, mConfig);
+            assertEquals(0, queue.count());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-
-        assertEquals(0,queue.count());
     }
 
 
