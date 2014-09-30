@@ -1,3 +1,4 @@
+apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.library'
 
 repositories {
@@ -23,8 +24,8 @@ android {
         abortOnError false
     }
     buildTypes {
-        def STRING = "String"
-        def REPLAY_URL = "REPLAY_URL"
+        final def STRING = "String"
+        final def REPLAY_URL = "REPLAY_URL"
         debug{
             debuggable true
             buildConfigField STRING, REPLAY_URL, urlStr()
@@ -68,6 +69,6 @@ task makeJar(type: Copy) {
 
 makeJar.dependsOn(clearJar, build)
 
-private def urlStr(String str){
+private def urlStr(final String str){
     return "\"" + str + "\"";
 }
