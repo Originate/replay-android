@@ -15,9 +15,8 @@ import android.view.WindowManager;
 
 import org.json.JSONObject;
 
-import io.replay.framework.ReplayConfig;
-import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.ReplayIO;
+import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.util.ReplayPrefs;
 
 public class ReplayRequestFactory {
@@ -29,6 +28,8 @@ public class ReplayRequestFactory {
     private static Context mContext;
     private static ReplayPrefs mPrefs;
 
+    /** ReplayIO API key */
+    public static final String KEY_REPLAY_KEY = "replay_key";
     private static final String MODEL_KEY="device_model";
     private static final String MANUFACTURER_KEY="device_manufacturer";
     private static final String OS_KEY="client_os";
@@ -61,7 +62,7 @@ public class ReplayRequestFactory {
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
         base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
-        base.put(ReplayConfig.KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
+        base.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
         base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
         toReturn.mergeJSON(base); //add base passive data to json
         updateTimestamp(toReturn, request.getCreatedAt());

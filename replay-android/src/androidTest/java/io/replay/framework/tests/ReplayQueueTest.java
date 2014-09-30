@@ -5,9 +5,9 @@ import android.test.AndroidTestCase;
 
 import org.json.JSONException;
 
-import io.replay.framework.ReplayConfig.RequestType;
 import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.tests.model.TestReplayJob;
 import io.replay.framework.util.Config;

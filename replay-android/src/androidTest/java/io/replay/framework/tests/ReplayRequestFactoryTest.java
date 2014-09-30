@@ -5,17 +5,16 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.UUID;
 
-import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayIO;
 import io.replay.framework.ReplaySessionManager;
+import io.replay.framework.model.ReplayRequest;
+import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.util.ReplayPrefs;
-import io.replay.framework.model.ReplayRequest;
-import io.replay.framework.model.ReplayJsonObject;
-import org.json.JSONObject;
 
 public class ReplayRequestFactoryTest extends AndroidTestCase {
 
@@ -45,7 +44,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         Thread.sleep(1000);
         ReplayRequestFactory.mergePassiveData(rq);
 
-        assertEquals(ReplayConfig.RequestType.EVENTS,rq.getType());
+        assertEquals(RequestType.EVENTS,rq.getType());
         assertEquals("distinct",rq.getJsonBody().get("distinct_id"));
         assertEquals(uuid,rq.getJsonBody().get("client_id"));
         assertEquals("Event",rq.getJsonBody().get("event_name"));

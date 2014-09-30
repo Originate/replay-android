@@ -7,7 +7,7 @@ import java.util.UUID;
 import io.replay.framework.util.ReplayLogger;
 import io.replay.framework.util.ReplayPrefs;
 
-public class ReplaySessionManager implements ReplayConfig {
+public class ReplaySessionManager {
 
     /**
      * Get or generate a session UUID.  Generated session UUID will be saved.
