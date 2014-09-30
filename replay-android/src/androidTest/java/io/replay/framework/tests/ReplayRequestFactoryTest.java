@@ -51,7 +51,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         assertEquals("Event",rq.getJsonBody().get("event_name"));
         assertEquals("key",rq.getJsonBody().get("replay_key"));
 
-        assertEquals((System.nanoTime()-rq.getCreatedAt())/1000000L,rq.getJsonBody().getJsonObject("properties").getLong("timestamp"));
+        assertEquals((System.nanoTime()-rq.getCreatedAt())/10000000L,rq.getJsonBody().getJsonObject("properties").getLong("timestamp")/10L);
     }
 
     public void testPassiveData() throws InterruptedException, JSONException{
