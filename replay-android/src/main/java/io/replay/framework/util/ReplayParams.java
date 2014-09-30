@@ -58,10 +58,10 @@ public class ReplayParams {
         //Ensure that the value is not null and is within constraints before assigning it
         if (dispatchInterval != null) {
             if (dispatchInterval < MIN_DISPATCH_INTERVAL){
-                throw new IllegalArgumentException("Max Queue cannot have a value less than "+MIN_DISPATCH_INTERVAL);
+                throw new IllegalArgumentException("Max Queue cannot have a value less than " + MIN_DISPATCH_INTERVAL);
             }
             else if (dispatchInterval > MAX_DISPATCH_INTERVAL){
-                throw new IllegalArgumentException("Max Queue cannot have a value greater than %d"+MAX_DISPATCH_INTERVAL);
+                throw new IllegalArgumentException("Max Queue cannot have a value greater than " + MAX_DISPATCH_INTERVAL);
             }
             else {
                 options.setDispatchInterval(dispatchInterval);
@@ -72,10 +72,10 @@ public class ReplayParams {
         //Ensure that the value is not null and is within constraints before assigning it
         if (maxQueue != null){
             if (maxQueue < MIN_MAX_QUEUE){
-                throw new IllegalArgumentException("Max Queue cannot have a value less than %d" + MIN_MAX_QUEUE);
+                throw new IllegalArgumentException("Max Queue cannot have a value less than " + MIN_MAX_QUEUE);
             }
             else if (maxQueue > MAX_MAX_QUEUE){
-                throw new IllegalArgumentException("Max Queue cannot have a value greater than %d" + MAX_MAX_QUEUE);
+                throw new IllegalArgumentException("Max Queue cannot have a value greater than " + MAX_MAX_QUEUE);
             }
             else {
                 options.setMaxQueue(maxQueue);
@@ -86,10 +86,10 @@ public class ReplayParams {
         //Ensure that the value is not null and is within constraints before assigning it
         if (flushAt != null){
             if (flushAt < MIN_FLUSH_AT){
-                throw new IllegalArgumentException("Flush At cannot have a value less than %d" + MIN_FLUSH_AT);
+                throw new IllegalArgumentException("Flush At cannot have a value less than " + MIN_FLUSH_AT);
             }
             else if (flushAt > MAX_FLUSH_AT){
-                throw new IllegalArgumentException("Flush At cannot have a value greater than %d" + MAX_FLUSH_AT);
+                throw new IllegalArgumentException("Flush At cannot have a value greater than " + MAX_FLUSH_AT);
             }
             else {
                 options.setFlushAt(flushAt);
