@@ -19,6 +19,13 @@ public class ReplayParams {
     private static final String DEBUG_MODE_ENABLED = "debug_mode_enabled";
     private static final String API_KEY = "api_key";
 
+    private static final int MIN_DISPATCH_INTERVAL = 5*1000; //5 seconds
+    private static final int MIN_MAX_QUEUE = 100;
+    private static final int MIN_FLUSH_AT = 20;
+    private static final int MAX_DISPATCH_INTERVAL = 30*60*1000; //30 minutes
+    private static final int MAX_MAX_QUEUE = 10000;
+    private static final int MAX_FLUSH_AT = 1000;
+
     private ReplayParams(){} //private constructor
 
     public static Config getOptions(Context context) {
@@ -34,13 +41,43 @@ public class ReplayParams {
         if (apiKey != null) options.setApiKey(apiKey);
 
         Integer dispatchInterval = getInteger(context, DISPATCH_INTERVAL);
-        if (dispatchInterval != null) options.setDispatchInterval(dispatchInterval);
+        if (dispatchInterval != null) {
+            if (dispatchInterval < MIN_DISPATCH_INTERVAL){
+                throw new IllegalArgumentException(String.format("Max Queue cannot have a value less than %d", MIN_DISPATCH_INTERVAL));
+            }
+            else if (dispatchInterval > MAX_DISPATCH_INTERVAL){
+                throw new IllegalArgumentException(String.format("Max Queue cannot have a value greater than %d", MAX_DISPATCH_INTERVAL));
+            }
+            else {
+                options.setDispatchInterval(dispatchInterval);
+            }
+        }
 
         Integer maxQueue = getInteger(context, MAX_QUEUE);
-        if (maxQueue != null) options.setMaxQueue(maxQueue);
+        if (maxQueue != null){
+            if (maxQueue < MIN_MAX_QUEUE){
+                throw new IllegalArgumentException(String.format("Max Queue cannot have a value less than %d", MIN_MAX_QUEUE));
+            }
+            else if (maxQueue > MAX_MAX_QUEUE){
+                throw new IllegalArgumentException(String.format("Max Queue cannot have a value greater than %d", MAX_MAX_QUEUE));
+            }
+            else {
+                options.setMaxQueue(maxQueue);
+            }
+        }
 
         Integer flushAt = getInteger(context, FLUSH_AT);
-        if (flushAt != null) options.setFlushAt(flushAt);
+        if (flushAt != null){
+            if (flushAt < MIN_FLUSH_AT){
+                throw new IllegalArgumentException(String.format("Flush At cannot have a value less than %d", MIN_FLUSH_AT));
+            }
+            else if (flushAt > MAX_FLUSH_AT){
+                throw new IllegalArgumentException(String.format("Flush At cannot have a value greater than %d", MAX_FLUSH_AT));
+            }
+            else {
+                options.setFlushAt(flushAt);
+            }
+        }
 
         return options;
     }
