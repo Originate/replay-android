@@ -106,7 +106,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
 
         //check to make sure events can be flushed
         ql.sendFlush();
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         assertEquals(0,queue.count());
     }
