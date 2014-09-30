@@ -33,7 +33,7 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         getService().setLatch(latch);
     }
 
-    public void testHandleIntent() throws InterruptedException {
+    public void testWatchDog() throws InterruptedException {
         Context context = getContext();
 
         // Create Queue
