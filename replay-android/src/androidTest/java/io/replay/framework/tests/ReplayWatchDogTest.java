@@ -7,7 +7,6 @@ import android.test.ServiceTestCase;
 
 import java.util.concurrent.CountDownLatch;
 
-import io.replay.framework.ReplayConfig;
 import io.replay.framework.ReplayWatchdogService;
 import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
@@ -46,9 +45,9 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         //Add jobs to the queue
         ReplayJsonObject json = new ReplayJsonObject();
         json.put("event_name", "test");
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayConfig.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayConfig.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayConfig.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
         assertEquals(3,queue.count());
 
         //Invoke the watchdog service
