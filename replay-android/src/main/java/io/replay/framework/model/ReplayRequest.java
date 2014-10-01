@@ -94,8 +94,6 @@ public class ReplayRequest implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (json != null ? json.hashCode() : 0);
-        return result;
+        return 31 * (type != null ? type.hashCode() : 0) + (json != null ? json.hashCode() : 0);
     }
 }

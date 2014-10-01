@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
@@ -136,10 +137,19 @@ public class ReplayRequestFactory {
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
 
-            Point size = new Point();
-            display.getSize(size);
-            int width = size.x;
-            int height = size.y;
+
+            int width;
+            int height;
+            if(VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2){
+                Point size = new Point();
+                display.getSize(size);
+                width = size.x;
+                height = size.y;
+            }else{
+                height = display.getHeight();
+                width = display.getWidth();
+            }
+
             props.put(DISPLAY_KEY,width+"x"+height);
 
             props.put(MANUFACTURER_KEY, Build.MANUFACTURER);
@@ -156,7 +166,7 @@ public class ReplayRequestFactory {
                 network.put(WIFI_KEY,String.valueOf(networkInfo.isConnected()));
             }
 
-            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH); //might fail (silently, if there's a god) < 13;
+            networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH); //might fail (silently?) < 13;
             if (networkInfo != null){
                 network.put(BLUETOOTH_KEY,String.valueOf(networkInfo.isConnected()));
             }

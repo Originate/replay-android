@@ -1,130 +1,128 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="horizontal"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:weightSum="2">
 
-    <!-- <ToggleButton
-         android:id="@+id/toggleButton1"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_below="@+id/button2"
-         android:layout_centerHorizontal="true"
-         android:layout_marginTop="40dp"
-         android:text="ToggleButton" />
-
-     <SeekBar
-         android:id="@+id/seekBar1"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:layout_alignParentLeft="true"
-         android:layout_below="@+id/toggleButton1"
-         android:layout_marginTop="20dp" />
-
-     <Button
-         android:id="@+id/button1"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_marginRight="14dp"
-         android:layout_marginTop="48dp"
-         android:layout_toLeftOf="@+id/toggleButton1"
-         android:text="Button" />
-
-     <Button
-         android:id="@+id/button2"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_alignBaseline="@+id/button1"
-         android:layout_alignBottom="@+id/button1"
-         android:layout_alignRight="@+id/seekBar1"
-         android:text="Manual dispatch" />
-
-     <EditText
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:id="@+id/editText"
-         android:layout_marginTop="28dp"
-         android:layout_below="@+id/seekBar1"
-         android:layout_alignParentLeft="true"
-         android:layout_alignParentStart="true"
-         android:hint="new identity"
-         android:layout_alignRight="@+id/seekBar1"
-         android:layout_alignEnd="@+id/seekBar1" />
-
-     <Button
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="identify()"
-         android:id="@+id/button4"
-         android:layout_alignTop="@+id/button3"
-         android:layout_alignLeft="@+id/button2"
-         android:layout_alignStart="@+id/button2" />
-
-     <TextView
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="Current Identity:"
-         android:id="@+id/textView"
-         android:layout_below="@+id/editText"
-         android:layout_alignRight="@+id/editText"
-         android:layout_alignEnd="@+id/editText"
-         android:layout_alignParentLeft="true"
-         android:layout_alignParentStart="true" />
-
-     <Button
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="identify(...)"
-         android:id="@+id/button3"
-         android:layout_below="@+id/textView"
-         android:layout_alignLeft="@+id/button1"
-         android:layout_alignStart="@+id/button1" />-->
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_weight="1"
-        android:text="add job"
-        />
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button2"
-        android:layout_toLeftOf="@+id/scrollView"
-        android:text="flush"/>
-
     <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/button2">
+        android:layout_weight="1"
+        >
 
-        <TextView
-            android:id="@+id/textView2"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=" "
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:orientation="vertical"
+            >
+
+            <Button
+                android:id="@+id/button_a"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text='Track "Click Event A"'/>
+
+            <Button
+                android:id="@+id/button_b"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text='Track "Click Event B"'/>
+
+            <EditText
+                android:id="@+id/customEventText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:hint="Insert Custom Event Name"
+                android:inputType="text"/>
+
+            <Button
+                android:id="@+id/button_customEvent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text='Custom Event'/>
+
+            <EditText
+                android:id="@+id/identifyText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:hint="Insert id to identify user"
+                android:inputType="text"/>
+
+            <Button
+                android:id="@+id/button_identify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text='identify()'/>
+
+            <Button
+                android:id="@+id/flush"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text='flush'/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="Queue Count:"
+                    android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                <TextView
+                    android:id="@+id/flushCountTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="0"
+                    android:textAppearance="?android:attr/textAppearanceMedium"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
     </ScrollView>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="0"
-        android:id="@+id/textView3"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/button3"
-        android:layout_toLeftOf="@+id/scrollView" />
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Queue Log"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            >
+
+            <TextView
+                android:id="@+id/log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+</LinearLayout>

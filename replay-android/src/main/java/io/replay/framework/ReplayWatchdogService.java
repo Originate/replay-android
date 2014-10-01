@@ -19,7 +19,7 @@ public class ReplayWatchdogService extends IntentService {
     }
 
     public ReplayWatchdogService() {
-        super("OrphanFinder");
+        super("ReplayWatchdogService");
     }
 
     @Override

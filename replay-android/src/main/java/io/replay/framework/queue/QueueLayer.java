@@ -1,5 +1,6 @@
 package io.replay.framework.queue;
 
+import io.replay.framework.BuildConfig;
 import io.replay.framework.model.ReplayJob;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequestFactory;
@@ -65,12 +66,16 @@ public class QueueLayer extends LooperThreadWithHandler {
     }
 
     public void enqueueJob(final ReplayJob job) {
-        handler().post(new Runnable() {
+        if(!BuildConfig.BUILD_TYPE.equals("release"))
+            handler().post(new Runnable() {
             @Override
             public void run() {
                 queue.enqueue(job);
             }
         });
+        else{
+            throw new IllegalStateException("This method is used solely for testing - please use QueueLayer#");
+        }
     }
 }
 

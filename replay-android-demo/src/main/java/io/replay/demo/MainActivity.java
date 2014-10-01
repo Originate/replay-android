@@ -3,26 +3,31 @@ package io.replay.demo;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import io.replay.demo.model.TestReplayJob;
 import io.replay.framework.ReplayIO;
-import io.replay.framework.model.ReplayJob;
-import io.replay.framework.model.ReplayJsonObject;
-import io.replay.framework.model.ReplayRequest;
-import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
 import io.replay.framework.util.ReplayParams;
+import io.replay.framework.util.Util;
 
 public class MainActivity extends Activity {
 
-    @InjectView(R.id.textView2) TextView textview;
-    @InjectView(R.id.textView3) TextView count;
+    public static final String API_KEY = "2bbf36db-ed6f-4944-92ab-11639c2b74f2";
+    @InjectView(R.id.customEventText) TextView customText;
+    @InjectView(R.id.identifyText) TextView identifyText;
+    @InjectView(R.id.flushCountTV) TextView count;
+    @InjectView(R.id.log) TextView log;
+
+
     private ReplayQueue queue;
     private QueueLayer ql;
     private Handler mHandler;
@@ -31,8 +36,8 @@ public class MainActivity extends Activity {
     Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
-            count.setText(queue.count()+"");
-            mHandler.postDelayed(mStatusChecker, 1000);
+            count.setText(String.valueOf(queue.count()));
+            mHandler.postDelayed(mStatusChecker, 333);
         }
     };
 
@@ -40,13 +45,17 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
         ButterKnife.inject(this);
 
-        ReplayIO.init(getApplicationContext(), "51cbeec7-be27-451f-809b-03dbd02dfe5a");
+        ReplayIO.init(getApplicationContext(), API_KEY);
 
 
         Config mConfig = ReplayParams.getOptions(getApplicationContext());
-        mConfig.setApiKey("51cbeec7-be27-451f-809b-03dbd02dfe5a");
+        mConfig.setApiKey(API_KEY);
         mConfig.setDispatchInterval(1000*60*60); // 10 hours == infinity?
         mConfig.setFlushAt(10);
         mConfig.setMaxQueue(50);
@@ -63,144 +72,62 @@ public class MainActivity extends Activity {
         queue.start();
 
         mHandler = new Handler();
-        mStatusChecker.run();
+        mHandler.postDelayed(mStatusChecker, 333);
     }
 
-    @OnClick(R.id.button2)
-    public void button1Click()  {
-
-        int oldCount = queue.count();
-
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put("event_name", "test");
-
-        ReplayJob job = new ReplayJob(new ReplayRequest(RequestType.EVENTS, json));
+    @OnClick(R.id.button_a)
+    public void AButtonClick() {
+        TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForEvent("Clicked Button A", null));
         ql.enqueueJob(job);
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        log.setText(log.getText() + "\nAdded Button_A Job #"+job.idStr);
+    }
+
+    @OnClick(R.id.button_b)
+    public void BButtonClick(){
+        TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForEvent("Clicked Button B", null));
+        ql.enqueueJob(job);
+        log.setText(log.getText() + "\nAdded Button_B Job #"+job.idStr);
+    }
+
+    @OnClick(R.id.button_customEvent)
+    public void customButtonClick(){
+        String custom = customText.getText().toString();
+        if(!Util.isNullOrEmpty(custom)){
+            TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForEvent("Clicked " + custom, null));
+            ql.enqueueJob(job);
+            log.setText(log.getText() + "\nAdded Custom Event Job#"+job.idStr);
+        }else{
+            Toast.makeText(this, "Please type some text first",Toast.LENGTH_SHORT).show();
         }
-        if(oldCount + 1 == queue.count()) {
-            textview.setText(textview.getText()+ "\nAdded " + job+"\nQueue: "+queue.count());
+
+    }
+
+    @OnClick(R.id.button_identify)
+    public void identifyButtonClick(){
+        String alias = identifyText.getText().toString();
+        if(!Util.isNullOrEmpty(alias)){
+            TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForEvent("Clicked " + alias, null));
+            ql.enqueueJob(job);
+            log.setText(log.getText() + "\nAdded Alias Job #"+job.idStr);
+        }else{
+            Toast.makeText(this, "Please type some text first",Toast.LENGTH_SHORT).show();
         }
     }
 
-    @OnClick(R.id.button3)
-    public void button2click(){
+    @OnClick(R.id.flush)
+    public void flushButtonClick(){
         ql.sendFlush();
-        int i = 0;
-        int prev=queue.count();
-        while(queue.count() >0){
-            if(queue.count() == prev -1){
-                prev = queue.count();
-                textview.setText(textview.getText() + "\n Removed job\t count: " + prev);
-            }
-            if(i%10000==0){
-                textview.setText(textview.getText() + "\n\tIterationCount: "+i/10000
-                );
-            }
-            i++;
-
-            if(++i == 200000) break;
-        }
-        if(i != 20000){
-            textview.setText(textview.getText() + "\nFlush complete: "+queue.count());
-        }
-
+        mHandler.postDelayed(flushCheck, 1000);
     }
 
-    /* Button button1 = (Button) findViewById(R.id.button1);
-    	button1.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("name", "button1");
-				map.put("id", String.valueOf(R.id.button1));
-				ReplayIO.track("Button clicked", map);
-			}
-		});
-    	
-    	Button button2 = (Button) findViewById(R.id.button2);
-    	button2.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				ReplayIO.dispatch();
-			}
-		});
-        
-    	ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
-    	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				// TODO Auto-generated method stub
-				HashMap<String,String> map = new HashMap<String, String>();
-				map.put("toggle", isChecked ? "checked":"unchecked");
-				ReplayIO.track("ToggleButton check changed", map);
-			}
-		});
-    	
-    	SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar1);
-    	seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-				// TODO Auto-generated method stub
-				HashMap<String,String> map = new HashMap<String, String>();
-				map.put("value", String.valueOf(progress));
-				map.put("fromUser", String.valueOf(fromUser));
-				ReplayIO.track("SeekBar changed", map);
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
-			}
-    		
-    	});
-
-        final EditText identityText = (EditText) findViewById(R.id.editText);
-        Button buttonIdentifySet = (Button) findViewById(R.id.button3);
-        Button buttonIdentifyClear = (Button) findViewById(R.id.button4);
-        View.OnClickListener listener = new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                if (view.getId() == R.id.button3) {
-                    String identity = identityText.getText().toString();
-                    ReplayIO.identify(identity);
-                    showIdentity();
-                }
-                if (view.getId() == R.id.button4) {
-                    ReplayIO.identify();
-                    showIdentity();
-                }
+    private Runnable flushCheck = new Runnable(){
+        @Override
+        public void run() {
+            if(queue.count() == 0){
+                log.setText("\nSuccessfully flushed queue!");
+                TestReplayJob.id.set(0);
             }
-        };
-
-        buttonIdentifySet.setOnClickListener(listener);
-        buttonIdentifyClear.setOnClickListener(listener);
-
-        showIdentity();
-    }
-
-    private void showIdentity() {
-        TextView tv = (TextView) findViewById(R.id.textView);
-        tv.setText("Current Identity: "+ ReplayPrefs.get(this).getDistinctID());
-    }you
-*/
+        }
+    };
 
 }

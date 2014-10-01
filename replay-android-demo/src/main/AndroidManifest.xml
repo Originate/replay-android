@@ -6,7 +6,7 @@
 
     <application
         android:label="@string/app_name"
-        android:icon="@drawable/ic_launcher">
+        android:icon="@drawable/replay_icon">
 
         <activity
             android:name="io.replay.demo.MainActivity"

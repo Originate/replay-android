@@ -59,7 +59,6 @@ public class DispatchTimerFactory {
             }
             mStopTimeInFuture = SystemClock.elapsedRealtime() + dispatchInterval;
             mHandler.sendMessage(mHandler.obtainMessage(MSG));
-
         }
 
         @Override
