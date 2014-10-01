@@ -104,11 +104,19 @@ public class MainActivity extends Activity {
 
     @OnClick(R.id.button_identify)
     public void identifyButtonClick(){
-        String alias = identifyText.getText().toString();
-        if(!Util.isNullOrEmpty(alias)){
-            TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForEvent("Clicked " + alias, null));
+        String traits = identifyText.getText().toString();
+        if(!Util.isNullOrEmpty(traits)){
+            Object[] data = new Object[6];
+            data[0] = "email";
+            data[1] = "example@gmail.com";
+            data[2] = "age";
+            data[3] = 22;
+            data[4] = "gender";
+            data[5] = "male";
+
+            TestReplayJob job = new TestReplayJob(ReplayRequestFactory.requestForTraits(data));
             ql.enqueueJob(job);
-            log.setText(log.getText() + "\nAdded Alias Job #"+job.idStr);
+            log.setText(log.getText() + "\nAdded Traits Job #"+job.idStr);
         }else{
             Toast.makeText(this, "Please type some text first",Toast.LENGTH_SHORT).show();
         }

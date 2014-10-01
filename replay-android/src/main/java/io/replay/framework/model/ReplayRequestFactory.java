@@ -51,8 +51,6 @@ public class ReplayRequestFactory {
     public ReplayRequestFactory(Context context) {
         mPrefs = ReplayPrefs.get(context);
         mContext = context;
-        ReplayJsonObject props = collectPassiveData();
-        base.put(PROPERTIES_KEY, props);
     }
 
     /**Merges event metadata
@@ -62,10 +60,10 @@ public class ReplayRequestFactory {
     public static void mergePassiveData(ReplayRequest request){
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
-        base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
-        base.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
-        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
-        toReturn.mergeJSON(base); //add base passive data to json
+        toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        toReturn.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
+        toReturn.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
+
         updateTimestamp(toReturn, request.getCreatedAt());
         request.setJsonBody(toReturn);
     }
@@ -88,23 +86,28 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      */
     public static ReplayRequest requestForEvent(String event, Object[] data)  {
-        ReplayJsonObject json = new ReplayJsonObject(data);
+        ReplayJsonObject props = collectPassiveData();
+        ReplayJsonObject extras = new ReplayJsonObject(data);
+        props.mergeJSON(extras);
+
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put(PROPERTIES_KEY,props);
         json.put(KEY_EVENT_NAME, event);
 
         return new ReplayRequest(RequestType.EVENTS, json);
     }
 
     /**
-     * Build the ReplayRequest object for an alias request.
+     * Build the ReplayRequest object for an traits request.
      *
-     * @param alias The alias.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForAlias(String alias) {
+    public static ReplayRequest requestForTraits(Object[] data) {
+        ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
-        json.put(RequestType.ALIAS.toString(), alias);
+        json.put(PROPERTIES_KEY,extras);
 
-        return new ReplayRequest(RequestType.ALIAS, json);
+        return new ReplayRequest(RequestType.TRAITS, json);
     }
 
     /**

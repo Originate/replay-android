@@ -31,8 +31,9 @@ public class ReplayNetworkManager {
 
         String urlStr = BuildConfig.REPLAY_URL;
         switch(request.getType()){
-            case ALIAS:
-                return Pair.create(-1,"ALIAS NOT IMPLEMENTED YET");
+            case TRAITS:
+                urlStr += "traits";
+                break;
             case EVENTS:
                 urlStr += "events";
                 break;
