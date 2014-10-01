@@ -8,6 +8,8 @@ repositories {
 }
 
 android {
+    publishNonDefault true
+
     compileSdkVersion 19
     buildToolsVersion "20.0.0"
     defaultConfig {
@@ -26,9 +28,11 @@ android {
     buildTypes {
         final def STRING = "String"
         final def REPLAY_URL = "REPLAY_URL"
-        debug{
+        def urlStr = {"\"http://$it\"" }
+
+        debug {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, urlStr()
+            buildConfigField STRING, REPLAY_URL, urlStr("")
         }
 
         emulator.initWith(buildTypes.debug)
@@ -41,7 +45,7 @@ android {
         genymotion.initWith(buildTypes.debug)
         genymotion {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, urlStr("192.168.52.1:3000/")
+            buildConfigField STRING, REPLAY_URL, urlStr("192.168.56.1:3000/")
         }
         release {
             debuggable false
@@ -68,7 +72,3 @@ task makeJar(type: Copy) {
 }
 
 makeJar.dependsOn(clearJar, build)
-
-private def urlStr(final String str){
-    return "\"" + str + "\"";
-}

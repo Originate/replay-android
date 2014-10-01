@@ -8,7 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import io.replay.framework.BuildConfig;
-import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.util.ReplayLogger;
 
@@ -28,19 +27,18 @@ public class ReplayNetworkManager {
      * second being {@link java.net.HttpURLConnection#getResponseMessage()}
      */
     public static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
-        ReplayJsonObject data = new ReplayJsonObject();
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put("replay_key", "20394281092");
+        final byte[] jsonBody = request.getBytes();
 
-        data.put("distinct_id", "a3098fjs2");
-        data.put("event", "bar");
-        data.put("session_id", "55b17871-fbc5-11e3-9727-3965d78f0c34");
-        json.put("data",data);
-        final byte[] jsonBody = json.toString().getBytes();
+        String urlStr = BuildConfig.REPLAY_URL;
+        switch(request.getType()){
+            case ALIAS:
+                return Pair.create(-1,"ALIAS NOT IMPLEMENTED YET");
+            case EVENTS:
+                urlStr += "events";
+                break;
+        }
+        URL url = new URL(urlStr);
 
-        //final byte[] jsonBody = request.getBytes();
-
-        URL url = new URL(BuildConfig.REPLAY_URL + request.getType());
         ReplayLogger.d("","POSTing to ", url.toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
