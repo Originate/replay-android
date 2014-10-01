@@ -251,7 +251,7 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
 
     @Override
     public int hashCode() {
-        int code = 17;
+        int code = 31;
 
         for (String k : this) {
             Object v = get(k);
@@ -341,18 +341,14 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
-        //out.defaultWriteObject();
-       // if (this.length() > 0) {
-            out.writeInt(this.length());
-            for (String key : this) {
-                out.writeObject(key);
-                out.writeObject(this.get(key));
-            }
-      //  }
+        out.writeInt(this.length());
+        for (String key : this) {
+            out.writeObject(key);
+            out.writeObject(this.get(key));
+        }
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
-        //in.defaultReadObject();
         int length = in.readInt();
         if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
         for (int i = 0; i < length; i++) {

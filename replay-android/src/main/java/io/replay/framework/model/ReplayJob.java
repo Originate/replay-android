@@ -78,10 +78,8 @@ public class ReplayJob extends Job implements Serializable {
 
         ReplayJob replayJob = (ReplayJob) o;
 
-        if (request != null ? !request.equals(replayJob.request) : replayJob.request != null)
-            return false;
+        return !(request != null ? !request.equals(replayJob.request) : replayJob.request != null);
 
-        return true;
     }
 
     @Override
