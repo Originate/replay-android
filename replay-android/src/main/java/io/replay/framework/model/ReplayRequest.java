@@ -10,8 +10,8 @@ import java.io.Serializable;
 public class ReplayRequest implements Serializable {
 
     public static enum RequestType{
-        /** The ReplayRequest type: traits. */
-        TRAITS,
+        /** The ReplayRequest type: alias. */
+        ALIAS,
         /** The ReplayRequest type: events. */
         EVENTS;
 
@@ -26,7 +26,7 @@ public class ReplayRequest implements Serializable {
 
     /**
      * ReplayRequest represent a request that's ready to be sent to Replay.io server.
-     * @param type The data type of the request, it can either be {@link RequestType#TRAITS} or {@link RequestType#EVENTS}.
+     * @param type The data type of the request, it can either be {@link RequestType#ALIAS} or {@link RequestType#EVENTS}.
      * @param json The JSON data to be sent.
      */
     public ReplayRequest(RequestType type, ReplayJsonObject json) {

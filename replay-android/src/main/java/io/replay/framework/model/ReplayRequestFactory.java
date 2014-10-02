@@ -51,6 +51,8 @@ public class ReplayRequestFactory {
     public ReplayRequestFactory(Context context) {
         mPrefs = ReplayPrefs.get(context);
         mContext = context;
+        ReplayJsonObject props = collectPassiveData();
+        base.put(PROPERTIES_KEY, props);
     }
 
     /**Merges event metadata
@@ -60,10 +62,10 @@ public class ReplayRequestFactory {
     public static void mergePassiveData(ReplayRequest request){
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
-        toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
-        toReturn.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
-        toReturn.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
-
+        base.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        base.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
+        base.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
+        toReturn.mergeJSON(base); //add base passive data to json
         updateTimestamp(toReturn, request.getCreatedAt());
         request.setJsonBody(toReturn);
     }
@@ -86,28 +88,23 @@ public class ReplayRequestFactory {
      * @return ReplayRequest object.
      */
     public static ReplayRequest requestForEvent(String event, Object[] data)  {
-        ReplayJsonObject props = collectPassiveData();
-        ReplayJsonObject extras = new ReplayJsonObject(data);
-        props.mergeJSON(extras);
-
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put(PROPERTIES_KEY,props);
+        ReplayJsonObject json = new ReplayJsonObject(data);
         json.put(KEY_EVENT_NAME, event);
 
         return new ReplayRequest(RequestType.EVENTS, json);
     }
 
     /**
-     * Build the ReplayRequest object for an traits request.
+     * Build the ReplayRequest object for an alias request.
      *
+     * @param alias The alias.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForTraits(Object[] data) {
-        ReplayJsonObject extras = new ReplayJsonObject(data);
+    public static ReplayRequest requestForAlias(String alias) {
         ReplayJsonObject json = new ReplayJsonObject();
-        json.put(PROPERTIES_KEY,extras);
+        json.put(RequestType.ALIAS.toString(), alias);
 
-        return new ReplayRequest(RequestType.TRAITS, json);
+        return new ReplayRequest(RequestType.ALIAS, json);
     }
 
     /**
@@ -140,6 +137,7 @@ public class ReplayRequestFactory {
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
 
+
             int width;
             int height;
             if(VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2){
@@ -161,6 +159,7 @@ public class ReplayRequestFactory {
 
             //network
             ReplayJsonObject network = new ReplayJsonObject();
+
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if (networkInfo != null){

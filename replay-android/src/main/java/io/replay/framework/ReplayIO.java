@@ -163,14 +163,14 @@ public final class ReplayIO {
     }
 
     /**
-     * Update traits. Send a traits request to server side.
+     * Update alias. Send a alias request to server side.
      *
-     * @param data      Extra information to be tracked in the main JSON object.
+     * @param userAlias New alias.
      */
-    public static void updateTraits(Object... data ) {
+    public static void updateAlias(String userAlias) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueueTraits(data);
+        queueLayer.createAndEnqueue(userAlias);
     }
 
     /**

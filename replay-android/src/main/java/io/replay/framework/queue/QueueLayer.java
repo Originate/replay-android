@@ -42,11 +42,11 @@ public class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueueTraits(final Object[] data) {
+    public void createAndEnqueue(final String alias) {
         handler().post(new Runnable() {
             @Override
             public void run() {
-                ReplayRequest request = ReplayRequestFactory.requestForTraits(data);
+                ReplayRequest request = ReplayRequestFactory.requestForAlias(alias);
                 enqueueAction(request);
             }
         });
