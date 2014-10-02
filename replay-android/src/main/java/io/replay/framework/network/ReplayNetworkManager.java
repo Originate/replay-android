@@ -29,15 +29,7 @@ public class ReplayNetworkManager {
     public static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
         final byte[] jsonBody = request.getBytes();
 
-        String urlStr = BuildConfig.REPLAY_URL;
-        switch(request.getType()){
-            case ALIAS:
-                return Pair.create(-1,"ALIAS NOT IMPLEMENTED YET");
-            case EVENTS:
-                urlStr += "events";
-                break;
-        }
-        URL url = new URL(urlStr);
+        URL url = new URL(BuildConfig.REPLAY_URL + request.getType().toString());
 
         ReplayLogger.d("","POSTing to ", url.toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

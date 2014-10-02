@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     releaseCompile project(path: ':replay-android', configuration: 'release')
-    debugCompile project(path: ':replay-android', configuration: 'genymotion') //change "genymotion" to the appropriate buildType.
+    debugCompile project(path: ':replay-android', configuration: 'emulator') //change "genymotion" to the appropriate buildType.
 
     //compile project(':replay-android')
     compile 'com.jakewharton:butterknife:5.1.2'

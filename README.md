@@ -153,9 +153,9 @@ We have tests, write and use them!
 ReplayIO.trackEvent(String event, Map<String,String> data)
 ```
 
-### Set Alias
+### Set Traits
 ```java
-ReplayIO.updateAlias(String alias)
+ReplayIO.updateTraits(String traits)
 ```
 
 ### Debugging
