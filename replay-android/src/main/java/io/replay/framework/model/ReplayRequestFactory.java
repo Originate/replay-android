@@ -140,7 +140,6 @@ public class ReplayRequestFactory {
             WindowManager window = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             Display display = window.getDefaultDisplay();
 
-
             int width;
             int height;
             if(VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2){
@@ -162,7 +161,6 @@ public class ReplayRequestFactory {
 
             //network
             ReplayJsonObject network = new ReplayJsonObject();
-
             ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             if (networkInfo != null){
