@@ -45,7 +45,6 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         ReplayRequestFactory.mergePassiveData(rq);
 
         assertEquals(RequestType.EVENTS,rq.getType());
-        assertEquals("distinct",rq.getJsonBody().get("distinct_id"));
         assertEquals(uuid,rq.getJsonBody().get("client_id"));
         assertEquals("Event",rq.getJsonBody().get("event_name"));
         assertEquals("key",rq.getJsonBody().get("replay_key"));
