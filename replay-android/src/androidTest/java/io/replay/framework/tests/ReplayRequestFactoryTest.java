@@ -40,7 +40,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
 
         // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event",null);
+        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
         Thread.sleep(1000);
         ReplayRequestFactory.mergePassiveData(rq);
 
@@ -69,7 +69,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
 
         // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event",null);
+        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
         Thread.sleep(1000);
         ReplayRequestFactory.mergePassiveData(rq);
 
