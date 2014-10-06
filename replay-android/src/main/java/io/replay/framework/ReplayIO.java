@@ -57,6 +57,10 @@ public final class ReplayIO {
         init(context, options);
     }
 
+    public static int count(){
+        return replayQueue.count();
+    }
+
     /**
      * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
      * including the Replay API key, which is required to be present in order to communicate with the server.
