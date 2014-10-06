@@ -20,6 +20,8 @@ import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.util.ReplayPrefs;
 
+import java.util.Map;
+
 public class ReplayRequestFactory {
 
     private static final String KEY_EVENT_NAME = "event_name";
@@ -101,11 +103,43 @@ public class ReplayRequestFactory {
     }
 
     /**
+     * Build the ReplayRequest object for an event request.
+     *
+     * @param event The event name.
+     * @param data  The name-value paired data.
+     * @return ReplayRequest object.
+     */
+    public static ReplayRequest requestForEvent(String event, Map<String,?> data)  {
+        ReplayJsonObject props = collectPassiveData();
+        ReplayJsonObject extras = new ReplayJsonObject(data);
+        props.mergeJSON(extras);
+
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put(PROPERTIES_KEY,props);
+        json.put(KEY_EVENT_NAME, event);
+
+        return new ReplayRequest(RequestType.EVENTS, json);
+    }
+
+    /**
      * Build the ReplayRequest object for an traits request.
      *
      * @return ReplayRequest object.
      */
     public static ReplayRequest requestForTraits(Object[] data) {
+        ReplayJsonObject extras = new ReplayJsonObject(data);
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put(PROPERTIES_KEY,extras);
+
+        return new ReplayRequest(RequestType.TRAITS, json);
+    }
+
+    /**
+     * Build the ReplayRequest object for an traits request.
+     *
+     * @return ReplayRequest object.
+     */
+    public static ReplayRequest requestForTraits(Map<String,?> data) {
         ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(PROPERTIES_KEY,extras);

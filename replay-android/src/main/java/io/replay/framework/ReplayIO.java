@@ -13,6 +13,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.SystemClock;
 
+import java.util.Map;
 import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
@@ -167,11 +168,34 @@ public final class ReplayIO {
     }
 
     /**
+     * Send event with data to server.
+     *
+     * @param eventName Name of the event.
+     * @param data      Extra information to be tracked in the main JSON object.
+     */
+    public static void track(String eventName, Map<String,?> data) {
+        checkInitialized();
+        if (!enabled) return;
+        queueLayer.createAndEnqueue(eventName, data);
+    }
+
+    /**
      * Update traits. Send a traits request to server side.
      *
      * @param data      Extra information to be tracked in the main JSON object.
      */
     public static void updateTraits(Object... data ) {
+        checkInitialized();
+        if (!enabled) return;
+        queueLayer.createAndEnqueueTraits(data);
+    }
+
+    /**
+     * Update traits. Send a traits request to server side.
+     *
+     * @param data      Extra information to be tracked in the main JSON object.
+     */
+    public static void updateTraits(Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueueTraits(data);
