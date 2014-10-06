@@ -16,11 +16,11 @@ import android.view.WindowManager;
 
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.util.ReplayPrefs;
-
-import java.util.Map;
 
 public class ReplayRequestFactory {
 
@@ -90,7 +90,7 @@ public class ReplayRequestFactory {
      * @param data  The name-value paired data.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForEvent(String event, Object[] data)  {
+    public static ReplayRequest requestForEvent(String event, Object... data)  {
         ReplayJsonObject props = collectPassiveData();
         ReplayJsonObject extras = new ReplayJsonObject(data);
         props.mergeJSON(extras);
@@ -126,7 +126,7 @@ public class ReplayRequestFactory {
      *
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForTraits(Object[] data) {
+    public static ReplayRequest requestForTraits(Object... data) {
         ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(PROPERTIES_KEY,extras);
