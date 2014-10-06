@@ -46,14 +46,6 @@
                 android:layout_gravity="center_horizontal"
                 android:text='Custom Event'/>
 
-            <EditText
-                android:id="@+id/identifyText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:hint="Insert id to identify user"
-                android:inputType="text"/>
-
             <Button
                 android:id="@+id/button_identify"
                 android:layout_width="match_parent"

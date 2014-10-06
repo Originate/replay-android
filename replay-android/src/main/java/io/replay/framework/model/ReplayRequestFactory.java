@@ -16,6 +16,8 @@ import android.view.WindowManager;
 
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import io.replay.framework.ReplayIO;
 import io.replay.framework.model.ReplayRequest.RequestType;
 import io.replay.framework.util.ReplayPrefs;
@@ -60,9 +62,12 @@ public class ReplayRequestFactory {
     public static void mergePassiveData(ReplayRequest request){
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
-        toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, "meow");
         toReturn.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
         toReturn.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
+
+        ReplayJsonObject tmp = new ReplayJsonObject();
+        toReturn.put("browser_info",tmp );
 
         updateTimestamp(toReturn, request.getCreatedAt());
         request.setJsonBody(toReturn);
@@ -85,7 +90,26 @@ public class ReplayRequestFactory {
      * @param data  The name-value paired data.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForEvent(String event, Object[] data)  {
+    public static ReplayRequest requestForEvent(String event, Object... data)  {
+        ReplayJsonObject props = collectPassiveData();
+        ReplayJsonObject extras = new ReplayJsonObject(data);
+        props.mergeJSON(extras);
+
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put(PROPERTIES_KEY,props);
+        json.put(KEY_EVENT_NAME, event);
+
+        return new ReplayRequest(RequestType.EVENTS, json);
+    }
+
+    /**
+     * Build the ReplayRequest object for an event request.
+     *
+     * @param event The event name.
+     * @param data  The name-value paired data.
+     * @return ReplayRequest object.
+     */
+    public static ReplayRequest requestForEvent(String event, Map<String,?> data)  {
         ReplayJsonObject props = collectPassiveData();
         ReplayJsonObject extras = new ReplayJsonObject(data);
         props.mergeJSON(extras);
@@ -102,7 +126,20 @@ public class ReplayRequestFactory {
      *
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForTraits(Object[] data) {
+    public static ReplayRequest requestForTraits(Object... data) {
+        ReplayJsonObject extras = new ReplayJsonObject(data);
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put(PROPERTIES_KEY,extras);
+
+        return new ReplayRequest(RequestType.TRAITS, json);
+    }
+
+    /**
+     * Build the ReplayRequest object for an traits request.
+     *
+     * @return ReplayRequest object.
+     */
+    public static ReplayRequest requestForTraits(Map<String,?> data) {
         ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(PROPERTIES_KEY,extras);

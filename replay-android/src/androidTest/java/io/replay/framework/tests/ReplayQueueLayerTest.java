@@ -5,6 +5,8 @@ import android.test.AndroidTestCase;
 
 import org.json.JSONException;
 
+import java.util.HashMap;
+
 import io.replay.framework.model.ReplayJsonObject;
 import io.replay.framework.model.ReplayRequest;
 import io.replay.framework.model.ReplayRequest.RequestType;
@@ -36,7 +38,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //check to make sure events can be enqueued
-        ql.createAndEnqueue("Event", null);
+        ql.createAndEnqueue("Event", new HashMap<String, Object>());
         Thread.sleep(1000);
         assertEquals(1,queue.count());
     }
@@ -102,7 +104,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertEquals(0,queue.count());
 
         //enqueue event
-        ql.createAndEnqueue("Event",null);
+        ql.createAndEnqueue("Event",new HashMap<String, Object>());
 
         //check to make sure events can be flushed
         ql.sendFlush();

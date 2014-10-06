@@ -40,12 +40,11 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
 
         // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event",null);
+        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
         Thread.sleep(1000);
         ReplayRequestFactory.mergePassiveData(rq);
 
         assertEquals(RequestType.EVENTS,rq.getType());
-        assertEquals("distinct",rq.getJsonBody().get("distinct_id"));
         assertEquals(uuid,rq.getJsonBody().get("client_id"));
         assertEquals("Event",rq.getJsonBody().get("event_name"));
         assertEquals("key",rq.getJsonBody().get("replay_key"));
@@ -70,7 +69,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
 
         // initialize RequestFactory
         ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event",null);
+        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
         Thread.sleep(1000);
         ReplayRequestFactory.mergePassiveData(rq);
 

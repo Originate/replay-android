@@ -1,5 +1,7 @@
 package io.replay.framework.queue;
 
+import java.util.Map;
+
 import io.replay.framework.BuildConfig;
 import io.replay.framework.model.ReplayJob;
 import io.replay.framework.model.ReplayRequest;
@@ -37,6 +39,26 @@ public class QueueLayer extends LooperThreadWithHandler {
             @Override
             public void run() {
                 ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
+                enqueueAction(request);
+            }
+        });
+    }
+
+    public void createAndEnqueue(final String event, final Map<String,?> data) {
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                ReplayRequest request = ReplayRequestFactory.requestForEvent(event, data);
+                enqueueAction(request);
+            }
+        });
+    }
+
+    public void createAndEnqueueTraits(final Map<String,?> data) {
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                ReplayRequest request = ReplayRequestFactory.requestForTraits(data);
                 enqueueAction(request);
             }
         });
