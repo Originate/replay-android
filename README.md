@@ -1,4 +1,5 @@
-[![Circle CI](https://circleci.com/gh/Originate/replay-android.png?style=badge)](https://circleci.com/gh/Originate/replay-android)
+[![Circle CI](https://circleci.com/gh/Originate/replay-android/tree/develop.png?style=badge&circle-token=d9bbccb7db1bfaa58c304a8ac313aa2338f92423)](https://circleci.com/gh/Originate/replay-android/tree/develop)
+
 
 # Replay.IO Android Framework
 
@@ -39,28 +40,32 @@ Ensure your `AndroidManifest.xml` has the following items:
     ```
 
 ####Step 2 - Configuration XML
-Add the configuration XML, named `replay_io.xml` to your application/s `res/values` folder:
+Add the configuration XML to your application/s `res/values` folder. The xml file can have any name:
     ```xml
+    //NOTE: All the parameters except api_key have default values which will be used if no value is specified
+    
     <?xml version="1.0" encoding="utf-8"?>
     <resources>
-        //the interval between when events are dispatched to the server - OPTIONAL
+        //the interval between when events are dispatched to the server
+        //Default: 60000
         <integer name="dispatch_interval">0</integer>
     
         //set true to enable event tracking
+        //Default: true
         <string name="enabled">false</string> //OPTIONAL
     
         //set true to print debug messages
+        //default: false
         <string name="debug_mode_enabled">false</string> //OPTIONAL
     
         //If the number of events stored (not yet dispatched) reaches this value, no more events will be received
-        <integer name="max_queue">1200</integer> //OPTIONAL
+        //Default: 1200
+        <integer name="max_queue">1000</integer> //OPTIONAL
     
         //Normally events are only sent to the server when the dispatch_interval is met
         //but if the number of events reaches flush_at, they will be automatically sent
+        //Default: 100
         <integer name="flush_at">50</integer> //OPTIONAL
-    
-        //A string to identify app user (this isn't required, because we'll assign users a random id either way)
-        <string name="distinct_id">""</string> //OPTIONAL
     
         //replay api key
         <string name="api_key">API_KEY_HERE</string> //*NOT* OPTIONAL
@@ -120,67 +125,83 @@ You have 3 choices for this:
 <br>(In case you were curious, this is exactly what happens in `ReplayActivity`.)
 
 ####Step 4 - Track Away!
-You're ready! Kick things off with `ReplayIO.trackEvent(eventNameString
+You're ready! Kick things off with `ReplayIO.trackEvent(String, optionalVarArgsArrayOfData)`
 
 
 ### Tests
 
-We have tests, write and use them!
+Most of our functionality is covered by tests - if you find something that isn't please let us know :)
+The test suite can be run by:
+<br/> `gradle assembleEmulator`
+<br/> `gradle assembleDebugTest`
+<br/> `gradle connectedAndroidTest`<br/>
+Please note that these tests require a connected Android device - be it emulator, Genymotion, or real phone. 
 
 ## Documentation for framework users
 
 ### Installation
 
-1. * With ADT:<br>
+1. * With ADT:
         1. Import ReplayIO to your workspace, in the properties window, Android tab, check "Is Library".
         2. In your project's properties window, Android tab, add this ReplayIO as library.
-   * With Android Studio:<br>
-        1. Import the project by selecting build.gradle.
-        2. In your app project, set up `settings.gradle` and `build.gradle` properly.
+   * With Android Studio:
+        1. Import the project by selecting the top-level `build.gradle` file. 
            
 2. Make sure your AndroidManifest.xml has the INTERNET permission:
     ```xml
     <uses-permission android:name="android.permission.INTERNET"/>
     ```
 
-3. Initialized the tracker:
+3. Initialize the tracker:
     ```java
-    ReplayIO.init(Context context, String apiKey)
+    ReplayIO.init(Context context);                 // or
+    ReplayIO.init(Context context, String apiKey);  
     ```
-
+Note: initializing is not the same as enabling tracking. No events will be tracked unless the api is enabled.
+    
 ### Tracking Events
+In order to track an event. You use the following function:
 ```java
-ReplayIO.trackEvent(String event, Map<String,String> data)
+ReplayIO.track(String event, Map<String,?> properties)      //or
+ReplayIO.track(String event, Object... properties)      
 ```
+<br> To see a list of properties that can be specified go to:</br>
+<br>http://docs.replay.io/rest-api/api-special-properties </br>
+
+Note that properties are passed as either a Map of key value pairs or as a series of objects of the form "key1", value1, "key2", value2...
+
+### Set Distinct Id
+Once a distinct id is set, all events from the user will be associated with the distinct id. In addition, traits are associated with a distinct id, so the distinct id provides a way to link users to a specific set of traits.
+```java
+ReplayIO.identify(String distinctId)
+```
+
 
 ### Set Traits
+Setting traits for a user allows developers to add additional information such as gender and age. In order to associate a set of traits with the events being created, you must first use `identify(String distinctId)` to identify the user. 
 ```java
-ReplayIO.updateTraits(String traits)
+ReplayIO.updateTraits(Map<String,?> traits)     //or
+ReplayIO.updateTraits(Object... traits)
 ```
+<br> To see a list of traits that can be specified go to:</br>
+<br>http://docs.replay.io/rest-api/api-special-properties </br>
 
 ### Debugging
+Debugging is enabled/disabled intially based on the xml parameters file that you create (see step 2 of Setup).
 ```java
-ReplayIO.setDebugMode(true)
+ReplayIO.setDebugMode(true);
 ```
 
 ### Enable/disable
+The library will only track events and create traits if it is enabled. The library is enabled/disabled initially based on what is specified in the xml parameters file that you create (see step 2 of Setup).
 ```java
-ReplayIO.enable()
-ReplayIO.disable()
+ReplayIO.start();
+ReplayIO.stop();
 ```
 
 ### Dispatching
-By default, ReplayIO will dispatch event data as soon as `trackEvent` method is called. You can choose to dispatch data periodically as well as by modifying the dispatch interval. Specifying a negative interval will disable periodic dispatch.
+By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters xml file (see step 2 of setup). If the dispatch interval is  set to 0, then events are dispatched as soon as the `track` or `updateTraits` methods are called. Also, if you would like to manually dispatch the events/traits, you can use the following function:
 ```java
-ReplayIO.setDispatchInterval(120); //dispatch every 2 minutes
-```
-
-```java
-ReplayIO.setDispatchInterval(-1);  // disable periodic dispatch
-ReplayIO.dispatchNow();            // dispatch manually
-```
-
-```java
-ReplayIO.setDispatchInterval(0);   // dispatch immediately (default)
+ReplayIO.dispatch();
 ```
 
