@@ -47,7 +47,7 @@ Add the configuration XML to your application/s `res/values` folder. The xml fil
     <?xml version="1.0" encoding="utf-8"?>
     <resources>
         //the interval between when events are dispatched to the server
-        //Default: 60000
+        //Default: 60000 ms
         <integer name="dispatch_interval">0</integer>
     
         //set true to enable event tracking
@@ -132,18 +132,18 @@ You're ready! Kick things off with `ReplayIO.trackEvent(String, optionalVarArgsA
 
 Most of our functionality is covered by tests - if you find something that isn't please let us know :)
 The test suite can be run by:
-<br/> `gradle assembleEmulator`
+<br/> `gradle assembleEmulator` (or `assembleGenymotion` if you're testing using Genymotion)
 <br/> `gradle assembleDebugTest`
 <br/> `gradle connectedAndroidTest`<br/>
-Please note that these tests require a connected Android device - be it emulator, Genymotion, or real phone. 
+Please note that these tests require a connected Android device - be it emulator or Genymotion.
 
 ## Documentation for framework users
 
 ### Installation
 
 1. * With ADT:
-        1. Import ReplayIO to your workspace, in the properties window, Android tab, check "Is Library".
-        2. In your project's properties window, Android tab, add this ReplayIO as library.
+        1. Import Replay.io to your workspace, in the Properties window > Android tab > check "Is Library".
+        2. In your project's properties window, Android tab, add Replay.io as a library.
    * With Android Studio:
         1. Import the project by selecting the top-level `build.gradle` file. 
            
@@ -154,53 +154,56 @@ Please note that these tests require a connected Android device - be it emulator
 
 3. Initialize the tracker:
     ```java
-    ReplayIO.init(Context context);                 // or
+    ReplayIO.init(Context context);     // or
     ReplayIO.init(Context context, String apiKey);  
     ```
-Note: initializing is not the same as enabling tracking. No events will be tracked unless the api is enabled.
+*Note: initializing is not the same as enabling tracking. No events will be tracked unless the ReplayIO client is enabled.*
     
 ### Tracking Events
-In order to track an event. You use the following function:
+In order to track an event. You can use either of the following functions:
 ```java
-ReplayIO.track(String event, Map<String,?> properties)      //or
-ReplayIO.track(String event, Object... properties)      
+ReplayIO.track(String event, Map<String,?> properties);  //or
+ReplayIO.track(String event, Object... properties);
 ```
-<br> To see a list of properties that can be specified go to:</br>
+To see a list of properties that can be specified go to:</br>
 <br>http://docs.replay.io/rest-api/api-special-properties </br>
 
-Note that properties are passed as either a Map of key value pairs or as a series of objects of the form "key1", value1, "key2", value2...
+Note that properties are passed as either a `Map<String,?>` *or* as a varargs array of Objects - i.e., `"k1", v1, "k2", v2`.
 
-### Set Distinct Id
-Once a distinct id is set, all events from the user will be associated with the distinct id. In addition, traits are associated with a distinct id, so the distinct id provides a way to link users to a specific set of traits.
+### Set Distinct ID
+Once a Distinct ID (or *identity*) is set, all events from the user will be associated with that Distinct ID. In addition, traits are associated with a particular ID, so the Distinct ID provides a way to link users to a specific set of traits.
 ```java
-ReplayIO.identify(String distinctId)
+ReplayIO.identify(String distinctId);
 ```
 
-
 ### Set Traits
-Setting traits for a user allows developers to add additional information such as gender and age. In order to associate a set of traits with the events being created, you must first use `identify(String distinctId)` to identify the user. 
+Setting a user's traits allows developers to add additional information about a user, such as gender and age. <br>
+In order to associate a set of traits with a particular user, you must first use `identify(String distinctId)` to identify the user.
 ```java
-ReplayIO.updateTraits(Map<String,?> traits)     //or
-ReplayIO.updateTraits(Object... traits)
+ReplayIO.updateTraits(Map<String,?> traits);    //or
+ReplayIO.updateTraits(Object... traits);
 ```
 <br> To see a list of traits that can be specified go to:</br>
 <br>http://docs.replay.io/rest-api/api-special-properties </br>
 
 ### Debugging
-Debugging is enabled/disabled intially based on the xml parameters file that you create (see step 2 of Setup).
+Logging to Logcat is enabled/disabled intially based on the XML parameters file that you create (see Setup Step 2).
+The XML configuration can be overridden programmatically, however:
 ```java
 ReplayIO.setDebugMode(true);
+ReplayIO.setDebugMode(false);
 ```
 
 ### Enable/disable
-The library will only track events and create traits if it is enabled. The library is enabled/disabled initially based on what is specified in the xml parameters file that you create (see step 2 of Setup).
+The library will track events and create traits iff it is enabled. The libraryis enabled/disabled intially based on the XML parameters file that you create (see Setup Step 2).
 ```java
 ReplayIO.start();
 ReplayIO.stop();
 ```
 
 ### Dispatching
-By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters xml file (see step 2 of setup). If the dispatch interval is  set to 0, then events are dispatched as soon as the `track` or `updateTraits` methods are called. Also, if you would like to manually dispatch the events/traits, you can use the following function:
+By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters xml file (see step 2 of setup).
+If `dispatchInterval == 0`, then events are dispatched as soon as they are received. If you would like to manually dispatch all the previously enqueued events/traits, you can use the following function:
 ```java
 ReplayIO.dispatch();
 ```
