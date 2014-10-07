@@ -31,19 +31,18 @@ You can get up and running with the Replay Android SDK in just a few quick steps
 
 ####Step 1 - Android Manifest
 Ensure your `AndroidManifest.xml` has the following items:
-    ```xml
-     <!-- Required for internet. -->
+```xml
+    <!-- Required for internet. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    ```
+```
 
 ####Step 2 - Configuration XML
 Add the configuration XML to your application/s `res/values` folder. The xml file can have any name:
-    ```xml
+```xml
     <?xml version="1.0" encoding="utf-8"?>
-    <!--NOTE: All the parameters except api_key have default values which will be used if no value is specified-->
     <resources>
-
+    <!--NOTE: All the parameters except api_key have default values which will be used if no value is specified-->
         <!--the interval between when events are dispatched to the server -->
         <!-- Default: 60000 ms  - OPTIONAL -->
         <integer name="dispatch_interval">0</integer>
@@ -67,7 +66,7 @@ Add the configuration XML to your application/s `res/values` folder. The xml fil
         <!--replay api key - REQUIRED -->
         <string name="api_key">API_KEY_HERE</string>
     </resources>
-    ```
+```
 
 ####Step 3 - Hook into Android App Lifecycle
 You have 3 choices for this:
@@ -81,7 +80,8 @@ You have 3 choices for this:
     
     public class ExampleActivity0 extends ReplayActivity {
 
-        @Override public void onCreate(Bundle savedInstanceState){
+        @Override
+        public void onCreate(Bundle savedInstanceState){
             super.onCreate(savedInstanceState);
             //regular Activity setup here
         }
@@ -175,6 +175,7 @@ To see a list of properties that can be specified go to:</br>
 <br>http://docs.replay.io/rest-api/api-special-properties </br>
 
 Note that properties are passed as either a `Map<String,?>` *or* as a varargs array of Objects - i.e., `"k1", v1, "k2", v2`.
+It is an error to pass an odd-numbered list to `ReplayIO.track(...)`.
 
 ### Set Distinct ID
 Once a Distinct ID (or *identity*) is set, all events from the user will be associated with that Distinct ID. In addition, traits are associated with a particular ID, so the Distinct ID provides a way to link users to a specific set of traits.
@@ -209,7 +210,7 @@ ReplayIO.stop();
 
 ### Dispatching
 By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters XML file (see step 2 of setup).
-If `dispatchInterval == 0`, then events are dispatched as soon as they are received. If you would like to manually dispatch all the previously enqueued events/traits, you can use the following function:
+<br>If `dispatchInterval == 0`, then events are dispatched as soon as they are received. If you would like to manually dispatch all the previously enqueued events/traits, you can use the following function:
 ```java
 ReplayIO.dispatch();
 ```
