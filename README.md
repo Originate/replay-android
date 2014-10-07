@@ -13,13 +13,12 @@ Replay.io-Android depends on [path/android-priority-jobqueue](https://github.com
 - If you are using ADT Bundle or Eclipse, import ReplayIO to your workspace, open the properties window, Android tab, check "Is Library".<br>
 - If you are using Android Studio, import the project by selecting build.gradle.
 In your app project, in file `settings.gradle`:
-
 ```gradle
 include ':replay-android'
 ```
 
 In file `build.gradle`:
-```java
+```gradle
 dependencies {
     compile project(':replay-android')
     ...
