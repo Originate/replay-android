@@ -21,7 +21,6 @@ In file `build.gradle`:
 ```gradle
 dependencies {
     compile project(':replay-android')
-    ...
 }
 ```
 * If you need a JAR file, run `./gradlew makeJar` in project root directory and a `replay-android.jar` will be created under `./build/libs/`
@@ -41,33 +40,32 @@ Ensure your `AndroidManifest.xml` has the following items:
 ####Step 2 - Configuration XML
 Add the configuration XML to your application/s `res/values` folder. The xml file can have any name:
     ```xml
-    //NOTE: All the parameters except api_key have default values which will be used if no value is specified
-    
     <?xml version="1.0" encoding="utf-8"?>
+    <!--NOTE: All the parameters except api_key have default values which will be used if no value is specified-->
     <resources>
-        //the interval between when events are dispatched to the server
-        //Default: 60000 ms
+
+        <!--the interval between when events are dispatched to the server -->
+        <!-- Default: 60000 ms  - OPTIONAL -->
         <integer name="dispatch_interval">0</integer>
     
-        //set true to enable event tracking
-        //Default: true
-        <string name="enabled">false</string> //OPTIONAL
+        <!-- set true to enable event tracking-->
+        <!-- Default: true - OPTIONAL-->
+        <string name="enabled">false</string>
     
-        //set true to print debug messages
-        //default: false
-        <string name="debug_mode_enabled">false</string> //OPTIONAL
+        <!-- set true to print debug messages-->
+        <!-- default: false - OPTIONAL-->
+        <string name="debug_mode_enabled">false</string>
     
-        //If the number of events stored (not yet dispatched) reaches this value, no more events will be received
-        //Default: 1200
-        <integer name="max_queue">1000</integer> //OPTIONAL
+        <!-- If the number of events stored (not yet dispatched) reaches this value, no more events will be received-->
+        <!-- Default: 1200 - OPTIONAL-->
+        <integer name="max_queue">1000</integer>
     
-        //Normally events are only sent to the server when the dispatch_interval is met
-        //but if the number of events reaches flush_at, they will be automatically sent
-        //Default: 100
-        <integer name="flush_at">50</integer> //OPTIONAL
+        <!-- Normally events are only sent to the server when the dispatch_interval is met but if the number of events reaches flush_at, they will be automatically sent-->
+        <!--Default: 100 - OPTIONAL-->
+        <integer name="flush_at">50</integer>
     
-        //replay api key
-        <string name="api_key">API_KEY_HERE</string> //*NOT* OPTIONAL
+        <!--replay api key - REQUIRED -->
+        <string name="api_key">API_KEY_HERE</string>
     </resources>
     ```
 
@@ -81,7 +79,16 @@ You have 3 choices for this:
     ```java
     import io.replay.framework.ReplayActivity;
     
-    public class ExampleActivity0 extends ReplayActivity { /*...*/ }
+    public class ExampleActivity0 extends ReplayActivity {
+
+        @Override public void onCreate(Bundle savedInstanceState){
+            super.onCreate(savedInstanceState);
+            //regular Activity setup here
+        }
+
+        /*for other lifecycle methods, just call "super"!*/
+
+    }
     ```
 
 3. If you already have a parent activity that you inherit from (e.g., you use ActionBarSherlock), you can manually add the lifecycle tracking events to any Activity that you'd like us to track:
@@ -124,7 +131,7 @@ You have 3 choices for this:
 <br>(In case you were curious, this is exactly what happens in `ReplayActivity`.)
 
 ####Step 4 - Track Away!
-You're ready! Kick things off with `ReplayIO.trackEvent(String, optionalVarArgsArrayOfData)`
+You're ready! Kick things off with `ReplayIO.track(String, optionalVarArgsArrayOfData)`
 
 
 ### Tests
@@ -201,7 +208,7 @@ ReplayIO.stop();
 ```
 
 ### Dispatching
-By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters xml file (see step 2 of setup).
+By default, ReplayIO will dispatch event data every minute. However, you may specify the interval (in milliseconds) between when in events are sent in the parameters XML file (see step 2 of setup).
 If `dispatchInterval == 0`, then events are dispatched as soon as they are received. If you would like to manually dispatch all the previously enqueued events/traits, you can use the following function:
 ```java
 ReplayIO.dispatch();
