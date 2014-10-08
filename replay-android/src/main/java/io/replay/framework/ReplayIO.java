@@ -16,7 +16,7 @@ import android.os.SystemClock;
 import java.util.Map;
 import java.util.UUID;
 
-final class ReplayIO {
+public final class ReplayIO {
 
     private static AlarmManager alarmManager;
     private static PendingIntent watchdogIntent;
