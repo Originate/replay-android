@@ -40,14 +40,14 @@ final class ReplayIO {
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
      */
-    static void init(Context context){
+    public static void init(Context context){
         if(initialized) return;
 
         Config options = ReplayParams.getOptions(context.getApplicationContext());
         init(context, options);
     }
 
-    static int count(){
+    public static int count(){
         return replayQueue.count();
     }
 
@@ -61,7 +61,7 @@ final class ReplayIO {
      *                to avoid the risk of memory leak.
      * @param apiKey  the Replay API key
      */
-    static void init(Context context, String apiKey){
+    public static void init(Context context, String apiKey){
         if(initialized) return;
 
         Config options = ReplayParams.getOptions(context.getApplicationContext());
@@ -80,7 +80,7 @@ final class ReplayIO {
      * @param options a full Config object that contains initialization parameters.
      */
     @SuppressLint("NewApi")
-    static void init(Context context, Config options) throws ReplayIONoKeyException {
+    public static void init(Context context, Config options) throws ReplayIONoKeyException {
         if (initialized) return;
 
         String detailMessage = "ReplayIO - %s should not be %s.";
@@ -150,7 +150,7 @@ final class ReplayIO {
      * @param eventName Name of the event.
      * @param data      Extra information to be tracked in the main JSON object.
      */
-    static void track(String eventName, Object...data) {
+    public static void track(String eventName, Object...data) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueue(eventName, data);
@@ -162,7 +162,7 @@ final class ReplayIO {
      * @param eventName Name of the event.
      * @param data      Extra information to be tracked in the main JSON object.
      */
-    static void track(String eventName, Map<String,?> data) {
+    public static void track(String eventName, Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueue(eventName, data);
@@ -173,7 +173,7 @@ final class ReplayIO {
      *
      * @param data      Extra information to be tracked in the main JSON object.
      */
-    static void updateTraits(Object... data ) {
+    public static void updateTraits(Object... data ) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueueTraits(data);
@@ -184,7 +184,7 @@ final class ReplayIO {
      *
      * @param data      Extra information to be tracked in the main JSON object.
      */
-    static void updateTraits(Map<String,?> data) {
+    public static void updateTraits(Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
         queueLayer.createAndEnqueueTraits(data);
@@ -193,7 +193,7 @@ final class ReplayIO {
     /**
      * Dispatch immediately.  When triggered, all requests in queue will be sent.
      */
-    static void dispatch() {
+    public static void dispatch() {
         checkInitialized();
         if (!enabled) return;
         queueLayer.sendFlush();
@@ -202,7 +202,7 @@ final class ReplayIO {
     /**
      * Enable ReplayIO.  Allow sending requests.
      */
-    static void enable() {
+    public static void enable() {
         checkInitialized();
         enabled = true;
         mConfig.setEnabled(true);
@@ -211,7 +211,7 @@ final class ReplayIO {
     /**
      * Disable ReplayIO.  Disallow sending requests.
      */
-    static void disable() {
+    public static void disable() {
         checkInitialized();
         enabled = false;
         mConfig.setEnabled(false);
@@ -222,7 +222,7 @@ final class ReplayIO {
      *
      * @return True if is enabled, false otherwise.
      */
-    static boolean isEnabled() {
+    public static boolean isEnabled() {
         checkInitialized();
         return mConfig.isEnabled();
     }
@@ -232,7 +232,7 @@ final class ReplayIO {
      *
      * @return True if enabled, false otherwise.
      */
-    static boolean isDebugMode() {
+    public static boolean isDebugMode() {
         return mConfig.isDebug();
     }
 
@@ -241,7 +241,7 @@ final class ReplayIO {
      *
      * @param debug Boolean value to set to.
      */
-    static void setDebugMode(boolean debug) {
+    public static void setDebugMode(boolean debug) {
         checkInitialized();
 
         mConfig.setDebug(debug);
@@ -252,7 +252,7 @@ final class ReplayIO {
      * , and the Session will be ended, too.
      *.
      */
-    static void stop() {
+    public static void stop() {
         checkInitialized();
         replayQueue.stop();
 
@@ -264,7 +264,7 @@ final class ReplayIO {
      * A new session is started. If there are persisted requests, load them into queue.
      *
      */
-    static void start() {
+    public static void start() {
         checkInitialized();
         if(replayQueue == null){
             replayQueue = new ReplayQueue(mContext, mConfig);
@@ -291,7 +291,7 @@ final class ReplayIO {
      *
      * @return Client UUID.
      */
-    static String getOrGenerateClientUUID() {
+    public static String getOrGenerateClientUUID() {
         if (null == mConfig) {
             throw new ReplayIONotInitializedException();
         }
@@ -307,7 +307,7 @@ final class ReplayIO {
      *
      * @param context an instance of the Activity
      */
-    static void onActivityCreate(Context context) {
+    public static void onActivityCreate(Context context) {
         ReplayIO.init(context);
         initWatchdog();
     }
@@ -318,7 +318,7 @@ final class ReplayIO {
      * @param context an instance of the Activity
      * @param apiKey the Replay API key
      */
-    static void onActivityCreate(Context context, String apiKey) {
+    public static void onActivityCreate(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
         initWatchdog();
     }
@@ -330,7 +330,7 @@ final class ReplayIO {
      * @param options a full Config object that contains initialization parameters.
      */
 
-    static void onActivityCreate(Context context, Config options) {
+    public static void onActivityCreate(Context context, Config options) {
         ReplayIO.init(context, options);
         initWatchdog();
     }
@@ -340,7 +340,7 @@ final class ReplayIO {
      *
      * @param context an instance of the Activity
      */
-    static void onActivityStart(Context context) {
+    public static void onActivityStart(Context context) {
         ReplayIO.init(context);
         initWatchdog();
     }
@@ -351,7 +351,7 @@ final class ReplayIO {
      * @param context an instance of the Activity
      * @param apiKey the Replay API key
      */
-    static void onActivityStart(Context context, String apiKey) {
+    public static void onActivityStart(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
         initWatchdog();
     }
@@ -362,7 +362,7 @@ final class ReplayIO {
      * @param context an instance of the Activity
      * @param options a full Config object that contains initialization parameters.
      */
-    static void onActivityStart(Context context, Config options){
+    public static void onActivityStart(Context context, Config options){
         ReplayIO.init(context, options);
         initWatchdog();
     }
@@ -372,7 +372,7 @@ final class ReplayIO {
      *
      * @param context the activity
      */
-    static void onActivityResume(Context context) {
+    public static void onActivityResume(Context context) {
         ReplayIO.init(context);
     }
 
@@ -381,7 +381,7 @@ final class ReplayIO {
      *
      * @param context the activity
      */
-    static void onActivityPause(Context context) {
+    public static void onActivityPause(Context context) {
         flushQueue(context.getApplicationContext());
     }
 
@@ -390,7 +390,7 @@ final class ReplayIO {
      *
      * @param context
      */
-    static void onActivityStop(Context context) {
+    public static void onActivityStop(Context context) {
         flushQueue(context.getApplicationContext());
         if(watchdogEnabled){
             alarmManager.cancel(watchdogIntent);
@@ -428,7 +428,7 @@ final class ReplayIO {
      *
      * @param distinctId New ID.
      */
-    static void identify(String distinctId) {
+    public static void identify(String distinctId) {
         checkInitialized();
         mPrefs.setDistinctID(distinctId);
     }
@@ -436,11 +436,11 @@ final class ReplayIO {
     /**
      * Clear the saved distinct ID. Convenience method for calling <code>ReplayIO.identify("");</code>.
      */
-    static void identify() {
+    public static void identify() {
         identify("");
     }
 
-    static Config getConfig(){
+    public static Config getConfig(){
         return mConfig;
     }
 }
