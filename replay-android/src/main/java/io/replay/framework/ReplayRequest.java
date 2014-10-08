@@ -9,13 +9,13 @@ import java.io.Serializable;
 
 class ReplayRequest implements Serializable {
 
-    public static enum RequestType{
+    static enum RequestType{
         /** The ReplayRequest type: traits. */
         TRAITS,
         /** The ReplayRequest type: events. */
         EVENTS;
 
-        @Override public String toString() {
+        public @Override String toString() {
             return name().toLowerCase();
         }
     }
@@ -29,17 +29,17 @@ class ReplayRequest implements Serializable {
      * @param type The data type of the request, it can either be {@link RequestType#TRAITS} or {@link RequestType#EVENTS}.
      * @param json The JSON data to be sent.
      */
-    public ReplayRequest(RequestType type, ReplayJsonObject json) {
+    ReplayRequest(RequestType type, ReplayJsonObject json) {
         this.type = type;
         this.json = json != null ? json : new ReplayJsonObject();
         createdAt = System.nanoTime();
     }
 
-    public ReplayJsonObject getJsonBody(){
+    ReplayJsonObject getJsonBody(){
         return json;
     }
 
-    public void setJsonBody(ReplayJsonObject json){
+    void setJsonBody(ReplayJsonObject json){
         if(json == null) {
             json = new ReplayJsonObject();
         }
@@ -47,14 +47,14 @@ class ReplayRequest implements Serializable {
     }
 
     /** @return The type of request data. */
-    public RequestType getType() {
+    RequestType getType() {
         return type;
     }
 
     /**
      * @return The json data to be sent, in byte array.
      */
-    public byte[] getBytes() {
+    byte[] getBytes() {
         return json.toString().getBytes();
     }
 
@@ -75,7 +75,7 @@ class ReplayRequest implements Serializable {
         return "ReplayRequest{" +"type=" + type +", json=" + json +'}';
     }
 
-    public long getCreatedAt() {
+    long getCreatedAt() {
         return createdAt;
     }
 

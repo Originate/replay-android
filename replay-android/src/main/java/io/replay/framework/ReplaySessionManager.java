@@ -12,7 +12,7 @@ class ReplaySessionManager {
      * @param context The {@link android.content.Context#getApplicationContext()}
      * @return The session UUID.
      */
-    public static String getOrCreateSessionUUID(Context context) {
+    static String getOrCreateSessionUUID(Context context) {
         ReplayPrefs prefs = ReplayPrefs.get(context);
         if (prefs.getSessionID().length() == 0) {
             prefs.setSessionID(UUID.randomUUID().toString());
@@ -26,7 +26,7 @@ class ReplaySessionManager {
      *
      * @param context The {@link android.content.Context#getApplicationContext()}
      */
-    public static void endSession(Context context) {
+    static void endSession(Context context) {
         ReplayLogger.d("Session ended");
         ReplayPrefs.get(context).setSessionID("");
     }

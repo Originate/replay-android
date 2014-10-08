@@ -18,7 +18,7 @@ class Config {
     /**
      * Creates a default options
      */
-    public Config() {
+    Config() {
         this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED, Defaults.API_KEY,
                 Defaults.DISPATCH_INTERVAL, Defaults.FLUSH_AT, Defaults.MAX_QUEUE);
     }
@@ -37,34 +37,34 @@ class Config {
         this.maxQueue = maxQueue;
     }
 
-    public boolean isDebug() {
+    boolean isDebug() {
         return debugModeEnabled;
     }
 
-    public Config setDebug(boolean debug){
+    Config setDebug(boolean debug){
         this.debugModeEnabled = debug;
         return this;
     }
 
-    public boolean isEnabled() {
+    boolean isEnabled() {
         return enabled;
     }
 
-    public Config setEnabled(boolean enabled){
+    Config setEnabled(boolean enabled){
         this.enabled = enabled;
         return this;
     }
 
-    public String getApiKey() {
+    String getApiKey() {
         return apiKey;
     }
 
-    public Config setApiKey(String apiKey){
+    Config setApiKey(String apiKey){
         this.apiKey = apiKey;
         return this;
     }
 
-    public int getDispatchInterval() {
+    int getDispatchInterval() {
         return dispatchInterval;
     }
 
@@ -73,25 +73,25 @@ class Config {
      * @param dispatchInterval
      * @return
      */
-    public Config setDispatchInterval(int dispatchInterval){
+    Config setDispatchInterval(int dispatchInterval){
         this.dispatchInterval = dispatchInterval;
         return this;
     }
 
-    public int getFlushAt() {
+    int getFlushAt() {
         return flushAt;
     }
 
-    public Config setFlushAt(int flushAt){
+    Config setFlushAt(int flushAt){
         this.flushAt = flushAt;
         return this;
     }
 
-    public int getMaxQueue() {
+    int getMaxQueue() {
         return maxQueue;
     }
 
-    public Config setMaxQueue(int maxQueue){
+    Config setMaxQueue(int maxQueue){
         this.maxQueue = maxQueue;
         return this;
     }

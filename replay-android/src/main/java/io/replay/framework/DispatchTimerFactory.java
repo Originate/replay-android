@@ -7,18 +7,18 @@ import android.os.SystemClock;
 import com.path.android.jobqueue.flush.DispatchTimerInterface;
 
 /**
- * Factory class for {@link io.replay.framework.util.DispatchTimerFactory.DispatchTimer}.
+ * Factory class for {@link io.replay.framework.DispatchTimerFactory.DispatchTimer}.
  *
- * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer
+ * @see io.replay.framework.DispatchTimerFactory.DispatchTimer
  */
 class DispatchTimerFactory {
 
     /**
      * Creates a DispatchTimer with the given parameters
      *
-     * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#DispatchTimer(long, boolean)
+     * @see io.replay.framework.DispatchTimerFactory.DispatchTimer#DispatchTimer(long, boolean)
      */
-    public static DispatchTimer createTimer(long dispatchInMs, boolean resetAfterComplete) {
+    static DispatchTimer createTimer(long dispatchInMs, boolean resetAfterComplete) {
         if (dispatchInMs > 0L) {
             return new DispatchTimer(dispatchInMs, resetAfterComplete);
         } else { //dispatchInMs <=0
@@ -34,7 +34,7 @@ class DispatchTimerFactory {
      * <p>Most notably, this class can reset itself ({@link #resetAfterComplete}) upon completion of the countdown, creating a loop that will be called until
      * {@link #cancel()} is called.
      */
-    public static class DispatchTimer implements DispatchTimerInterface { //extends CountDownTimer
+    static class DispatchTimer implements DispatchTimerInterface { //extends CountDownTimer
         protected static final int MSG = 1;
         private long mStopTimeInFuture;
         private long dispatchInterval;
@@ -46,13 +46,13 @@ class DispatchTimerFactory {
          * @param dispatchInMs       how long to wait before calling {@link com.path.android.jobqueue.flush.DispatchTimerInterface.TimerDispatcher#onTimeUp()}
          * @param resetAfterComplete if true, DispatchTimer will reset itself with the same parameters.
          */
-        public DispatchTimer(long dispatchInMs, boolean resetAfterComplete) {
+        DispatchTimer(long dispatchInMs, boolean resetAfterComplete) {
             this.dispatchInterval = dispatchInMs;
             this.resetAfterComplete = resetAfterComplete;
         }
 
         @Override
-        public synchronized void start() {
+        public synchronized void  start() {
             if (dispatchInterval <= 0) {
                 onFinish();
                 return;
@@ -113,16 +113,16 @@ class DispatchTimerFactory {
     }
 
     /**
-     * Specialty subclass of {@link io.replay.framework.util.DispatchTimerFactory.DispatchTimer} that more efficiently handles the case
+     * Specialty subclass of {@link io.replay.framework.DispatchTimerFactory.DispatchTimer} that more efficiently handles the case
      * where the user wants no timer. A call to {@link #start()} will immediately call {@link #onFinish()}.
      */
     private static class ZeroDispatchTimer extends DispatchTimer {
-        public ZeroDispatchTimer() {
+        ZeroDispatchTimer() {
             super(0, false);
         }
 
         /**Immediately calls {@link #onFinish()}.
-         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#start()
+         * @see io.replay.framework.DispatchTimerFactory.DispatchTimer#start()
          */
         @Override
         public synchronized void start() {
@@ -130,14 +130,14 @@ class DispatchTimerFactory {
         }
 
         /** Does nothing.
-         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#cancel()
+         * @see io.replay.framework.DispatchTimerFactory.DispatchTimer#cancel()
          */
         @Override
         public synchronized void cancel() {
         } //do nothing
 
         /**Immediately calls {@link #onFinish()}.
-         * @see io.replay.framework.util.DispatchTimerFactory.DispatchTimer#reset()
+         * @see io.replay.framework.DispatchTimerFactory.DispatchTimer#reset()
          */
         @Override
         public synchronized void reset() {

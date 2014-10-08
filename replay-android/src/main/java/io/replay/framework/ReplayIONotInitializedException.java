@@ -5,7 +5,7 @@ package io.replay.framework;
  * It is a subclass of {@link IllegalStateException}, so that try...catch is not needed everywhere.
  */
 class ReplayIONotInitializedException extends IllegalStateException {
-    public ReplayIONotInitializedException() {
+    ReplayIONotInitializedException() {
         super("ReplayIO is not initialized! Please call init() method before calling this method.");
     }
 }

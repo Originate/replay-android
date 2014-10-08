@@ -16,7 +16,7 @@ class ReplayQueue {
     private final DispatchTimerInterface dispatchTimer;
     private final int MAX_QUEUE;
 
-    public ReplayQueue(Context context, Config replayOptions) {
+    ReplayQueue(Context context, Config replayOptions) {
         Configuration queueOptions = getJobQueueConfig(context, replayOptions);
         jobqueue = new JobManager(context, queueOptions);
         dispatchTimer = queueOptions.getDispatchTimer();
@@ -55,16 +55,16 @@ class ReplayQueue {
               .build();
     }
 
-    public void start() {
+    void start() {
         jobqueue.start();
         dispatchTimer.start();
     }
 
-    public void stop() {
+    void stop() {
         jobqueue.stop();
     }
 
-    public void enqueue(ReplayRequest request) {
+    void enqueue(ReplayRequest request) {
         if(jobqueue.count() < MAX_QUEUE) {
             jobqueue.addJob(new ReplayJob(request));
         }else {
@@ -72,7 +72,7 @@ class ReplayQueue {
         }
     }
 
-    public void enqueue(ReplayJob job) {
+    void enqueue(ReplayJob job) {
         if(jobqueue.count() < MAX_QUEUE) {
             jobqueue.addJob(job);
         }else {
@@ -80,15 +80,15 @@ class ReplayQueue {
         }
     }
 
-    public void flush() {
+    void flush() {
         dispatchTimer.onFinish(); //DispatchTimer.onFinish implicitly calls start()
     }
 
-    public void clear(){
+    void clear(){
         jobqueue.clear();
     }
 
-    public int count() {
+    int count() {
         return jobqueue.count();
     }
 

@@ -21,17 +21,17 @@ import java.util.Map;
  */
 class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializable{
 
-    public ReplayJsonObject() {
+    ReplayJsonObject() {
         super();
     }
 
-    public ReplayJsonObject(JSONObject copyFrom) {
+    ReplayJsonObject(JSONObject copyFrom) {
         super();
         if(copyFrom != null && copyFrom.length() > 0)
             mergeJSON(copyFrom);
     }
 
-    public ReplayJsonObject(Map<String, ?> map) {
+    ReplayJsonObject(Map<String, ?> map) {
         this();
         if (map == null || map.isEmpty()) return;
         for (Map.Entry<String, ?> entry : map.entrySet()) {
@@ -45,7 +45,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
      *
      * @param keyValuePairs
      */
-    public ReplayJsonObject(Object... keyValuePairs) {
+    ReplayJsonObject(Object... keyValuePairs) {
         super();
         if (keyValuePairs != null) {
             final int length = keyValuePairs.length;
@@ -97,7 +97,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         return putObj(name, value);
     }
 
-    public JSONObject put(String name, ReplayJsonObject value) {
+    JSONObject put(String name, ReplayJsonObject value) {
         return putObj(name, value);
     }
 
@@ -175,7 +175,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         return getString(name, null);
     }
 
-    public String getString(String name, String defaultVal) {
+    String getString(String name, String defaultVal) {
         try {
             final String str = super.getString(name);
             return Util.isNullOrEmpty(str) ? defaultVal : str;
@@ -184,7 +184,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         }
     }
 
-    public long getLong(String name, long defaultVal) {
+    long getLong(String name, long defaultVal) {
         try {
             return super.getLong(name);
         } catch (JSONException e) {
@@ -192,7 +192,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         }
     }
 
-    public boolean getBoolean(String name, boolean defaultVal) {
+    boolean getBoolean(String name, boolean defaultVal) {
         try {
             return super.getBoolean(name);
         } catch (JSONException e) {
@@ -200,7 +200,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         }
     }
 
-    public double getDouble(String name, double defaultVal) {
+    double getDouble(String name, double defaultVal) {
         try {
             return super.getDouble(name);
         } catch (JSONException e) {
@@ -208,7 +208,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         }
     }
 
-    public int getInt(String name, int defaultVal) {
+    int getInt(String name, int defaultVal) {
         try {
             return super.getInt(name);
         } catch (JSONException e) {
@@ -222,7 +222,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
      * @param name
      * @return
      */
-    public JSONObject getJsonObject(String name) {
+    JSONObject getJsonObject(String name) {
         try {
             return super.getJSONObject(name);
         } catch (JSONException e) {
@@ -231,7 +231,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         }
     }
 
-    public <T> List<T> getArray(String name) {
+    <T> List<T> getArray(String name) {
         try {
             JSONArray array = this.getJSONArray(name);
             final int arrLen = array.length();
@@ -262,7 +262,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         return o instanceof JSONObject && equals(this, (JSONObject) o);
     }
 
-    public static boolean equals(JSONObject one, JSONObject two) {
+    static boolean equals(JSONObject one, JSONObject two) {
         if (one == null || two == null) return one == two;
         if (one.length() != two.length()) return false;
 
@@ -287,7 +287,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
     }
 
 
-/*    public static boolean equals(JSONArray one, JSONArray two) {
+/*    static boolean equals(JSONArray one, JSONArray two) {
         if (one == null || two == null) return one == two;
         if (one.length() != two.length()) return false;
 
@@ -306,7 +306,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         return true;
     }
 
-    public static boolean equals(Object left, Object right) {
+    static boolean equals(Object left, Object right) {
         if (left == null || right == null) return left == right;
 
         if (left instanceof JSONObject) {

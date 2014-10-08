@@ -8,12 +8,12 @@ import java.util.Map;
 class QueueLayer extends LooperThreadWithHandler {
     private ReplayQueue queue;
 
-    public QueueLayer(ReplayQueue queue) {
+    QueueLayer(ReplayQueue queue) {
         this.queue = queue;
         queue.start();
     }
 
-    public void enqueue(final ReplayRequest data) {
+    void enqueue(final ReplayRequest data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -28,7 +28,7 @@ class QueueLayer extends LooperThreadWithHandler {
      * @param event
      * @param data
      */
-    public void createAndEnqueue(final String event, final Object[] data) {
+    void createAndEnqueue(final String event, final Object[] data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -38,7 +38,7 @@ class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueue(final String event, final Map<String,?> data) {
+    void createAndEnqueue(final String event, final Map<String,?> data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -48,7 +48,7 @@ class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueueTraits(final Map<String,?> data) {
+    void createAndEnqueueTraits(final Map<String,?> data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -58,7 +58,7 @@ class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void createAndEnqueueTraits(final Object[] data) {
+    void createAndEnqueueTraits(final Object[] data) {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -72,7 +72,7 @@ class QueueLayer extends LooperThreadWithHandler {
         queue.enqueue(data);
     }
 
-    public void sendFlush() {
+    void sendFlush() {
         handler().post(new Runnable() {
             @Override
             public void run() {
@@ -81,7 +81,7 @@ class QueueLayer extends LooperThreadWithHandler {
         });
     }
 
-    public void enqueueJob(final ReplayJob job) {
+    void enqueueJob(final ReplayJob job) {
         if(!BuildConfig.BUILD_TYPE.equals("release"))
             handler().post(new Runnable() {
             @Override

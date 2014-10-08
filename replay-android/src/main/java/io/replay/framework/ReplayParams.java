@@ -42,7 +42,7 @@ class ReplayParams {
 
     private ReplayParams(){} //private constructor
 
-    public static Config getOptions(Context context) {
+    static Config getOptions(Context context) {
         Config options = new Config();
 
         Boolean enabled = getBoolean(context, ENABLED);

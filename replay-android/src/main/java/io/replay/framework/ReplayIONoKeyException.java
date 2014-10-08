@@ -5,7 +5,7 @@ package io.replay.framework;
  * It is a subclass of RuntimeException, so that try...catch is not needed everywhere.
  */
 class ReplayIONoKeyException extends IllegalArgumentException {
-    public ReplayIONoKeyException() {
+    ReplayIONoKeyException() {
         super("There is no api key defined in res/values/settings.xml");
     }
 }

@@ -20,7 +20,7 @@ class LooperThreadWithHandler extends Thread {
     }
 
     /** Gets this thread's handler */
-    public Handler handler() {
+    Handler handler() {
         waitForReady();
         return handler;
     }
@@ -38,7 +38,7 @@ class LooperThreadWithHandler extends Thread {
     }
 
     /** Quits the current looping thread */
-    public void quit() {
+    void quit() {
         Looper.myLooper().quit();
     }
 }

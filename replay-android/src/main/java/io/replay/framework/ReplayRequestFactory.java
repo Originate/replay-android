@@ -28,7 +28,7 @@ class ReplayRequestFactory {
     private static ReplayPrefs mPrefs;
 
     /** ReplayIO API key */
-    public static final String KEY_REPLAY_KEY = "replay_key";
+    static final String KEY_REPLAY_KEY = "replay_key";
     private static final String MODEL_KEY="device_model";
     private static final String MANUFACTURER_KEY="device_manufacturer";
     private static final String OS_KEY="client_os";
@@ -42,11 +42,11 @@ class ReplayRequestFactory {
 
     private final static ReplayJsonObject base = new ReplayJsonObject();
 
-    public static ReplayRequestFactory init(Context context) {
+    static ReplayRequestFactory init(Context context) {
         return instance == null ? instance = new ReplayRequestFactory(context.getApplicationContext()) : instance;
     }
 
-    public ReplayRequestFactory(Context context) {
+    ReplayRequestFactory(Context context) {
         mPrefs = ReplayPrefs.get(context);
         mContext = context;
     }
@@ -55,7 +55,7 @@ class ReplayRequestFactory {
      *
      * @param request
      */
-    public static void mergePassiveData(ReplayRequest request){
+    static void mergePassiveData(ReplayRequest request){
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
         toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, "meow");
@@ -86,7 +86,7 @@ class ReplayRequestFactory {
      * @param data  The name-value paired data.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForEvent(String event, Object... data)  {
+    static ReplayRequest requestForEvent(String event, Object... data)  {
         ReplayJsonObject props = collectPassiveData();
         ReplayJsonObject extras = new ReplayJsonObject(data);
         props.mergeJSON(extras);
@@ -105,7 +105,7 @@ class ReplayRequestFactory {
      * @param data  The name-value paired data.
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForEvent(String event, Map<String,?> data)  {
+    static ReplayRequest requestForEvent(String event, Map<String,?> data)  {
         ReplayJsonObject props = collectPassiveData();
         ReplayJsonObject extras = new ReplayJsonObject(data);
         props.mergeJSON(extras);
@@ -122,7 +122,7 @@ class ReplayRequestFactory {
      *
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForTraits(Object... data) {
+    static ReplayRequest requestForTraits(Object... data) {
         ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(PROPERTIES_KEY,extras);
@@ -135,7 +135,7 @@ class ReplayRequestFactory {
      *
      * @return ReplayRequest object.
      */
-    public static ReplayRequest requestForTraits(Map<String,?> data) {
+    static ReplayRequest requestForTraits(Map<String,?> data) {
         ReplayJsonObject extras = new ReplayJsonObject(data);
         ReplayJsonObject json = new ReplayJsonObject();
         json.put(PROPERTIES_KEY,extras);

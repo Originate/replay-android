@@ -19,7 +19,7 @@ class ReplayJob extends Job implements Serializable {
     private static final Params params = new Params(1).persist().groupBy("replayJob").requireNetwork();
     private ReplayRequest request;
 
-    public ReplayJob(ReplayRequest request) {
+    ReplayJob(ReplayRequest request) {
         super(params);
         this.request = request;
     }

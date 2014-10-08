@@ -7,7 +7,7 @@ import android.text.TextUtils;
 class Util {
 
     /** Returns true if the string is null, or empty (when trimmed). */
-    public static boolean isNullOrEmpty(String text) {
+    static boolean isNullOrEmpty(String text) {
         // Rather than using text.trim().length() == 0, use getTrimmedLength avoids allocating an
         // extra String object
         return TextUtils.isEmpty(text) || TextUtils.getTrimmedLength(text) == 0;
