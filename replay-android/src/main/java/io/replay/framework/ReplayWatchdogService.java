@@ -4,11 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import io.replay.framework.queue.ReplayQueue;
-import io.replay.framework.util.Config;
-import io.replay.framework.util.Util;
-
-public class ReplayWatchdogService extends IntentService {
+class ReplayWatchdogService extends IntentService {
 
     private static final String API_KEY = "api_key";
 

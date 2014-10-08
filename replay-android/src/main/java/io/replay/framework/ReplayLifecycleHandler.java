@@ -29,7 +29,7 @@ import android.os.Bundle;
  * this class will be disabled so as to not duplicate lifecycle-managing events.
  */
 @SuppressLint("NewApi")
-public class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
+class ReplayLifecycleHandler implements ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
