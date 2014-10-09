@@ -30,7 +30,6 @@ class QueueLayer extends LooperThreadWithHandler {
     public QueueLayer(ReplayQueue queue, Context context) {
         this.queue = queue;
         mContext = context;
-        queue.start();
         deviceInfo = InfoManager.buildInfo(context, ReplayPrefs.get(context));
     }
 
@@ -103,18 +102,20 @@ class QueueLayer extends LooperThreadWithHandler {
     }
 
     static class InfoManager {
-        private static final String MODEL_KEY="device_model";
-        private static final String MANUFACTURER_KEY="device_manufacturer";
-        private static final String OS_KEY="client_os";
-        private static final String SDK_KEY="client_sdk";
-        private static final String DISPLAY_KEY="display";
-        private static final String MOBILE_KEY="mobile";
-        private static final String WIFI_KEY="wifi";
-        private static final String BLUETOOTH_KEY="bluetooth";
-        private static final String CARRIER_KEY="carrier";
-        private static final String NETWORK_KEY = "network";
+        static final String MODEL_KEY="device_model";
+        static final String MANUFACTURER_KEY="device_manufacturer";
+        static final String OS_KEY="client_os";
+        static final String SDK_KEY="client_sdk";
+        static final String DISPLAY_KEY="display";
+        static final String MOBILE_KEY="mobile";
+        static final String WIFI_KEY="wifi";
+        static final String BLUETOOTH_KEY="bluetooth";
+        static final String CARRIER_KEY="carrier";
+        static final String NETWORK_KEY = "network";
+        static final String LOCATION_LAT = "latitude";
+        static final String LOCATION_LONG = "longitude";
 
-        private static ReplayJsonObject buildInfo(Context context, ReplayPrefs prefs){
+        static ReplayJsonObject buildInfo(Context context, ReplayPrefs prefs){
             ReplayJsonObject props = new ReplayJsonObject();
             try {
                 //location
@@ -127,8 +128,8 @@ class QueueLayer extends LooperThreadWithHandler {
                 if (provider != null) {
                     try {
                         Location location = locationManager.getLastKnownLocation(provider); // this is a cached location
-                        props.put("latitude", Double.toString(location.getLatitude()));
-                        props.put("longitude", Double.toString(location.getLongitude()));
+                        props.put(LOCATION_LAT, Double.toString(location.getLatitude()));
+                        props.put(LOCATION_LONG, Double.toString(location.getLongitude()));
                     } catch (SecurityException ex) {
                         //The application may not have permission to access location
                     }

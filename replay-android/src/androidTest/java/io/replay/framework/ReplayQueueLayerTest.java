@@ -4,14 +4,36 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
+
+import io.replay.framework.QueueLayer.InfoManager;
 
 public class ReplayQueueLayerTest extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+    }
+
+    public void testPassiveData() throws NoSuchFieldException, IllegalAccessException {
+        Context context = getContext();
+        // load parameters
+        Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
+        mConfig.setApiKey("testKey");
+
+        final ReplayJsonObject json = InfoManager.buildInfo(context, ReplayPrefs.get(context));
+        assertNotNull(json.get(InfoManager.DISPLAY_KEY));
+        assertNotNull(json.get(InfoManager.MODEL_KEY));
+        assertNotNull(json.get(InfoManager.MANUFACTURER_KEY));
+        assertNotNull(json.get(InfoManager.OS_KEY));
+        assertNotNull(json.get(InfoManager.SDK_KEY));
+        assertNotNull(json.get(InfoManager.LOCATION_LAT));
+        assertNotNull(json.get(InfoManager.LOCATION_LONG));
+        final JSONObject carrier = (JSONObject) json.get(InfoManager.CARRIER_KEY);
+        assertNotNull(carrier);
+        assertTrue(carrier.length() >0);
     }
 
     public void testCreateAndEnqueue() throws InterruptedException{
@@ -103,10 +125,5 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
 
         assertEquals(0,queue.count());
     }
-
-    public void testPassiveData(){
-        QueueLayer.InfoManager.buildInfo();
-    }
-
 
 }
