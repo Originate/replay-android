@@ -4,7 +4,7 @@ import android.text.TextUtils;
 
 /** Public utility class containing useful, reuseable methods.
  */
-class Util {
+public class Util {
 
     /** Returns true if the string is null, or empty (when trimmed). */
     static boolean isNullOrEmpty(String text) {

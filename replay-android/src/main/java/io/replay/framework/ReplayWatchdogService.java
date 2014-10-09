@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-class ReplayWatchdogService extends IntentService {
+public class ReplayWatchdogService extends IntentService {
 
     private static final String API_KEY = "api_key";
 
@@ -14,7 +14,7 @@ class ReplayWatchdogService extends IntentService {
         return i;
     }
 
-    ReplayWatchdogService() {
+    public ReplayWatchdogService() {
         super("ReplayWatchdogService");
     }
 

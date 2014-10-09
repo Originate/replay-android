@@ -19,7 +19,7 @@ import android.os.Bundle;
  * </ol>
  * You may only choose one of these methods.
  */
-class ReplayActivity extends Activity {
+public class ReplayActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
