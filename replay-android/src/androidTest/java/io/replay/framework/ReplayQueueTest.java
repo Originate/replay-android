@@ -57,7 +57,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         queue.start();
 
         //The queue should automatically flush
-        Thread.sleep(7000);
+        Thread.sleep(3000);
         assertEquals(0, queue.count());
     }
 
@@ -92,8 +92,8 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
 
         //add events to queue
-        ql.createAndEnqueue("event", null);
-        ql.createAndEnqueue("event", null);
+        ql.enqueueEvent("event", null);
+        ql.enqueueEvent("event", null);
         assertEquals(2, queue.count());
 
         //The queue should not flush after any amount of time
@@ -151,7 +151,7 @@ public class ReplayQueueTest extends AndroidTestCase {
     }
 */
 
-    /*
+    /**
      * Test setDispatcherInterval(5), this will fail if server side is not on.
      * Slow network connection will cause failure, too.
      *

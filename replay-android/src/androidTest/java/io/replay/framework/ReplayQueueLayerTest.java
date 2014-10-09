@@ -22,14 +22,14 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         mConfig.setApiKey("testKey");
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
-        QueueLayer ql = new QueueLayer(queue);
+        QueueLayer ql = new QueueLayer(queue, context);
         ql.start();
 
         //Queue should be empty
         assertEquals(0, queue.count());
 
         //check to make sure events can be enqueued
-        ql.createAndEnqueue("Event", new HashMap<String, Object>());
+        ql.enqueueEvent("Event", new HashMap<String, Object>());
         Thread.sleep(1000);
         assertEquals(1,queue.count());
     }
@@ -42,7 +42,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         mConfig.setApiKey("testKey");
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
-        QueueLayer ql = new QueueLayer(queue);
+        QueueLayer ql = new QueueLayer(queue, context);
         ql.start();
 
         //Queue should be empty
@@ -65,7 +65,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         mConfig.setApiKey("testKey");
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
-        QueueLayer ql = new QueueLayer(queue);
+        QueueLayer ql = new QueueLayer(queue, context);
         ql.start();
 
         //Queue should be empty
@@ -88,20 +88,24 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         mConfig.setApiKey("testKey");
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
-        QueueLayer ql = new QueueLayer(queue);
+        QueueLayer ql = new QueueLayer(queue, context);
         ql.start();
 
         //Queue should be empty
         assertEquals(0,queue.count());
 
         //enqueue event
-        ql.createAndEnqueue("Event",new HashMap<String, Object>());
+        ql.enqueueEvent("Event", new HashMap<String, Object>());
 
         //check to make sure events can be flushed
         ql.sendFlush();
         Thread.sleep(2000);
 
         assertEquals(0,queue.count());
+    }
+
+    public void testPassiveData(){
+        QueueLayer.InfoManager.buildInfo();
     }
 
 
