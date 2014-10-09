@@ -6,6 +6,7 @@ import android.test.AndroidTestCase;
 
 import org.json.JSONException;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import io.replay.framework.ReplayRequest.RequestType;
@@ -36,13 +37,13 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         //create new SessionID
         ReplaySessionManager.getOrCreateSessionUUID(appContext);
 
-        ReplayRequest request = ReplayRequestFactory.createRequest(context, RequestType.EVENTS, event, new ReplayJsonObject(deviceInfo, "test"));
+        ReplayRequest request = ReplayRequestFactory.createRequest(context, RequestType.EVENTS, event, new ReplayJsonObject(deviceInfo, "test"), new HashMap());
 
         final ReplayJsonObject jsonBody = request.getJsonBody();
 
         assertEquals(RequestType.EVENTS, request.getType());
         assertEquals(uuid, jsonBody.get("client_id"));
-        assertEquals("Event", jsonBody.get("event_name"));
+        assertEquals(event, jsonBody.get("event_name"));
         assertEquals("key", jsonBody.get("replay_key"));
         assertEquals("test", jsonBody.getJsonObject(properties).getString(deviceInfo));
 
