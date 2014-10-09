@@ -18,7 +18,6 @@ import java.util.UUID;
 
 import io.replay.framework.error.ReplayIONoKeyException;
 import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.model.ReplayRequestFactory;
 import io.replay.framework.queue.QueueLayer;
 import io.replay.framework.queue.ReplayQueue;
 import io.replay.framework.util.Config;
@@ -56,10 +55,6 @@ public final class ReplayIO {
 
         Config options = ReplayParams.getOptions(context.getApplicationContext());
         init(context, options);
-    }
-
-    public static int count(){
-        return replayQueue.count();
     }
 
     /**
@@ -117,42 +112,46 @@ public final class ReplayIO {
         //create new SessionID
         ReplaySessionManager.getOrCreateSessionUUID(appContext);
 
-        // initialize RequestFactory
-        ReplayRequestFactory.init(appContext);
-
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(context, mConfig);
-        queueLayer = new QueueLayer(replayQueue);
-        queueLayer.start();
-        replayQueue.start();
-
-
-        //determine if ReplayActivity is being used, regardless of SDK version
-        boolean subclassExists = false;
-        try { //reflection, but in the average case this code will run in <35ms
-            PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), PackageManager.GET_ACTIVITIES);
-            for (ActivityInfo info : packageInfo.activities) {
-                Class<?> clazz =  Class.forName(info.name);
-                if(clazz == null) continue;
-                if (ReplayActivity.class.isAssignableFrom(clazz)) { //ReplayActivity is the superclass
-                    subclassExists = true;
-                    break;
-                }
-            }
-        }
-        catch (ClassCastException     e)  { e.printStackTrace(); }
-        catch (ClassNotFoundException e)  { e.printStackTrace(); }
-        catch (NameNotFoundException  e)  { e.printStackTrace(); }
-        catch (NullPointerException   e)  { e.printStackTrace(); }
-
+        queueLayer = new QueueLayer(replayQueue, appContext);
 
         //hook into lifecycle if we're >=ICS and if we don't already have hooks
-        if (!subclassExists && VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
-            ((Application) appContext).registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
-            ReplayLogger.d("ReplayIO", "added ActivityLifecycleCallbacks");
+        if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
+            //determine if ReplayActivity is being used
+            boolean subclassExists = false;
+            try { //reflection, but in the average case this code will run in <35ms
+                PackageInfo packageInfo = appContext.getPackageManager().getPackageInfo(appContext.getPackageName(), PackageManager.GET_ACTIVITIES);
+                for (ActivityInfo info : packageInfo.activities) {
+                    Class<?> clazz =  Class.forName(info.name);
+                    if(clazz == null) continue;
+                    if (ReplayActivity.class.isAssignableFrom(clazz)) { //ReplayActivity is the superclass
+                        subclassExists = true;
+                        break;
+                    }
+                }
+            }
+            catch (ClassCastException     e)  { e.printStackTrace(); }
+            catch (ClassNotFoundException e)  { e.printStackTrace(); }
+            catch (NameNotFoundException  e)  { e.printStackTrace(); }
+            catch (NullPointerException   e)  { e.printStackTrace(); }
+
+            if (!subclassExists) {
+                ((Application) appContext).registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
+                ReplayLogger.d("ReplayIO", "added ActivityLifecycleCallbacks");
+            }
         }
 
         initialized = true;
+    }
+
+    /**
+     * Send event to the server.
+     *
+     * @param eventName Name of the event
+     */
+    public static void track(String eventName){
+        track(eventName, (Object[]) null);
     }
 
     /**
@@ -164,7 +163,9 @@ public final class ReplayIO {
     public static void track(String eventName, Object...data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueue(eventName, data);
+        if (!Util.isNullOrEmpty(eventName)) {
+            queueLayer.enqueueEvent(eventName, data);
+        } else throw new IllegalArgumentException("EventName should not be null or empty");
     }
 
     /**
@@ -176,7 +177,9 @@ public final class ReplayIO {
     public static void track(String eventName, Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueue(eventName, data);
+        if (!Util.isNullOrEmpty(eventName)) {
+            queueLayer.enqueueEvent(eventName, data);
+        } else throw new IllegalArgumentException("EventName should not be null or empty");
     }
 
     /**
@@ -187,7 +190,9 @@ public final class ReplayIO {
     public static void updateTraits(Object... data ) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueueTraits(data);
+        if (data != null && data.length != 0) {
+            queueLayer.enqueueTrait(data);
+        } else throw new IllegalArgumentException("Error: traits data cannot be null or empty.");
     }
 
     /**
@@ -198,7 +203,9 @@ public final class ReplayIO {
     public static void updateTraits(Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
-        queueLayer.createAndEnqueueTraits(data);
+        if (data != null && !data.isEmpty()) {
+            queueLayer.enqueueTrait(data);
+        } else throw new IllegalArgumentException("Error: traits data cannot be null or empty.");
     }
 
     /**
@@ -429,7 +436,7 @@ public final class ReplayIO {
             if (replayQueue == null) {
                 replayQueue = new ReplayQueue(context, mConfig);
             }
-            queueLayer = new QueueLayer(replayQueue);
+            queueLayer = new QueueLayer(replayQueue, context);
         }
         queueLayer.sendFlush();
     }
@@ -449,6 +456,10 @@ public final class ReplayIO {
      */
     public static void identify() {
         identify("");
+    }
+
+    public static int count(){
+        return replayQueue.count();
     }
 
     public static Config getConfig(){

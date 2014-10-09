@@ -25,14 +25,14 @@ public class ReplayRequest implements Serializable {
     private long createdAt;
 
     /**
-     * ReplayRequest represent a request that's ready to be sent to Replay.io server.
+     *ReplayRequest represent a request that's ready to be sent to Replay.io server.
      * @param type The data type of the request, it can either be {@link RequestType#TRAITS} or {@link RequestType#EVENTS}.
      * @param json The JSON data to be sent.
      */
     public ReplayRequest(RequestType type, ReplayJsonObject json) {
         this.type = type;
         this.json = json != null ? json : new ReplayJsonObject();
-        createdAt = System.nanoTime();
+        createdAt = System.nanoTime(); //potential bug - if the device is rebooted, this time will be invalid.
     }
 
     public ReplayJsonObject getJsonBody(){

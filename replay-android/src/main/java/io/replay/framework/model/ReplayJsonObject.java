@@ -53,11 +53,11 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
         if (keyValuePairs != null) {
             final int length = keyValuePairs.length;
             if (length % 2 == 0 && length > 0) {
-                for (int i = 0; i < length; i+=2) {
-                    this.putObj(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
+                for (int i = 0; i < length; i += 2) {
+                    this.putObj((String) keyValuePairs[i], keyValuePairs[i + 1]);
                 }
             } else {
-                ReplayLogger.w("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
+                throw new IllegalArgumentException("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
                                      "arguments: e.g., [key, value, key, value]. ");
             }
         }
@@ -97,6 +97,10 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
 
     @Override
     public JSONObject put(String name, Object value) {
+        return putObj(name, value);
+    }
+
+    public JSONObject put(String name, String value) {
         return putObj(name, value);
     }
 
@@ -343,7 +347,7 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.length());
         for (String key : this) {
-            out.writeObject(key);
+            out.writeUTF(key);
             out.writeObject(this.get(key));
         }
     }
@@ -352,7 +356,7 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
         int length = in.readInt();
         if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
         for (int i = 0; i < length; i++) {
-            String key = (String) in.readObject();
+            String key = in.readUTF();
             Object val = in.readObject();
             this.putObj(key, val);
 
