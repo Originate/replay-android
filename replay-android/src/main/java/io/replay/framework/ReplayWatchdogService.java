@@ -4,15 +4,11 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import io.replay.framework.queue.ReplayQueue;
-import io.replay.framework.util.Config;
-import io.replay.framework.util.Util;
-
 public class ReplayWatchdogService extends IntentService {
 
     private static final String API_KEY = "api_key";
 
-    public static Intent createIntent(Context c, String apiKey){
+    static Intent createIntent(Context c, String apiKey){
         Intent i = new Intent(c, ReplayWatchdogService.class);
         i.putExtra(API_KEY, apiKey);
         return i;
