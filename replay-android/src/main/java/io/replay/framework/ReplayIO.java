@@ -83,14 +83,10 @@ public final class ReplayIO {
     public static void init(Context context, Config options) throws ReplayIONoKeyException {
         if (initialized) return;
 
-        String detailMessage = "ReplayIO - %s should not be %s.";
+        options.applyConstraints();
 
         if(context == null){
-            throw new IllegalArgumentException(String.format(detailMessage, "context", "null"));
-        }
-
-        if(Util.isNullOrEmpty(options.getApiKey())){
-            throw new IllegalArgumentException(String.format(detailMessage, "API key", "null or empty"));
+            throw new IllegalArgumentException("ReplayIO - context should not be null");
         }
 
         mContext = context.getApplicationContext();

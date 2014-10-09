@@ -58,7 +58,10 @@ class ReplayRequestFactory {
     static void mergePassiveData(ReplayRequest request){
         ReplayJsonObject toReturn = new ReplayJsonObject( request.getJsonBody() ); //copy constructor
 
-        toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, "meow");
+        if (!Util.isNullOrEmpty(mPrefs.getDistinctID())) {
+            toReturn.put(ReplayPrefs.KEY_DISTINCT_ID, mPrefs.getDistinctID());
+        }
+
         toReturn.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
         toReturn.put(ReplayPrefs.KEY_CLIENT_ID, mPrefs.getClientID());
 
