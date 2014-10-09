@@ -80,7 +80,7 @@ public final class ReplayIO {
      * @param options a full Config object that contains initialization parameters.
      */
     @SuppressLint("NewApi")
-    public static void init(Context context, Config options) throws ReplayIONoKeyException {
+    private static void init(Context context, Config options) throws ReplayIONoKeyException {
         if (initialized) return;
 
         String detailMessage = "ReplayIO - %s should not be %s.";
