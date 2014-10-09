@@ -16,16 +16,6 @@ import android.os.SystemClock;
 import java.util.Map;
 import java.util.UUID;
 
-import io.replay.framework.error.ReplayIONoKeyException;
-import io.replay.framework.error.ReplayIONotInitializedException;
-import io.replay.framework.queue.QueueLayer;
-import io.replay.framework.queue.ReplayQueue;
-import io.replay.framework.util.Config;
-import io.replay.framework.util.ReplayLogger;
-import io.replay.framework.util.ReplayParams;
-import io.replay.framework.util.ReplayPrefs;
-import io.replay.framework.util.Util;
-
 public final class ReplayIO {
 
     private static AlarmManager alarmManager;
@@ -278,7 +268,7 @@ public final class ReplayIO {
     }
 
     /**
-     * Called when the app entered foreground.  {@link io.replay.framework.queue.ReplayQueue} will be restarted.
+     * Called when the app entered foreground.  {@link io.replay.framework.ReplayQueue} will be restarted.
      * A new session is started. If there are persisted requests, load them into queue.
      *
      */
@@ -296,7 +286,7 @@ public final class ReplayIO {
     /**
      * Stop if ReplayIO is not initialized.
      *
-     * @throws io.replay.framework.error.ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.util.Config)}.
+     * @throws io.replay.framework.ReplayIONotInitializedException when called before {@link #init(android.content.Context, io.replay.framework.Config)}.
      */
     private static void checkInitialized() throws ReplayIONotInitializedException {
         if (!initialized) {
