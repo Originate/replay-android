@@ -86,7 +86,7 @@ public final class ReplayIO {
         options.applyConstraints();
 
         if(context == null){
-            throw new IllegalArgumentException(String.format("ReplayIO - API context should not be null"));
+            throw new IllegalArgumentException("ReplayIO - context should not be null");
         }
 
         mContext = context.getApplicationContext();

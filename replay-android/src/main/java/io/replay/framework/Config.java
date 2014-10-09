@@ -126,7 +126,7 @@ public class Config {
             throw new IllegalArgumentException("Max Queue cannot have a value greater than " + MAX_MAX_QUEUE);
         }
 
-        if (apiKey==null || apiKey.equals("")){
+        if (Util.isNullOrEmpty(apiKey)){
             throw new IllegalArgumentException("ReplayIO - API key should not be null or empty.");
         }
     }

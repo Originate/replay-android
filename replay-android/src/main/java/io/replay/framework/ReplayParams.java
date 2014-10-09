@@ -48,19 +48,19 @@ class ReplayParams {
         if (apiKey != null) options.setApiKey(apiKey);
 
         Integer dispatchInterval = getInteger(context, DISPATCH_INTERVAL);
-        //Ensure that the value is not null and is within constraints before assigning it
+        //Ensure that the value is not null
         if (dispatchInterval != null) {
             options.setDispatchInterval(dispatchInterval);
         }
 
         Integer maxQueue = getInteger(context, MAX_QUEUE);
-        //Ensure that the value is not null and is within constraints before assigning it
+        //Ensure that the value is not null
         if (maxQueue != null){
             options.setMaxQueue(maxQueue);
         }
 
         Integer flushAt = getInteger(context, FLUSH_AT);
-        //Ensure that the value is not null and is within constraints before assigning it
+        //Ensure that the value is not null
         if (flushAt != null){
             options.setFlushAt(flushAt);
         }
