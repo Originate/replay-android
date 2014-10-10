@@ -1,6 +1,7 @@
 package io.replay.framework;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.location.Criteria;
 import android.location.Location;
@@ -119,21 +120,24 @@ class QueueLayer extends LooperThreadWithHandler {
             ReplayJsonObject props = new ReplayJsonObject();
             try {
                 //location
-                LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-                Criteria crit = new Criteria();
-                crit.setPowerRequirement(Criteria.POWER_LOW);
-                crit.setAccuracy(Criteria.ACCURACY_FINE); //used to be Criteria.ACCURACY_COARSE
-                String provider = locationManager.getBestProvider(crit, true);
+                if(context.checkCallingOrSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_GRANTED){
+                    LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                    Criteria crit = new Criteria();
+                    crit.setPowerRequirement(Criteria.POWER_LOW);
+                    crit.setAccuracy(Criteria.ACCURACY_COARSE); //used to be Criteria.ACCURACY_COARSE
+                    String provider = locationManager.getBestProvider(crit, true);
 
-                if (provider != null) {
-                    try {
-                        Location location = locationManager.getLastKnownLocation(provider); // this is a cached location
-                        props.put(LOCATION_LAT, Double.toString(location.getLatitude()));
-                        props.put(LOCATION_LONG, Double.toString(location.getLongitude()));
-                    } catch (SecurityException ex) {
-                        //The application may not have permission to access location
+                    if (provider != null) {
+                        try {
+                            Location location = locationManager.getLastKnownLocation(provider); // this is a cached location
+                            props.put(LOCATION_LAT, Double.toString(location.getLatitude()));
+                            props.put(LOCATION_LONG, Double.toString(location.getLongitude()));
+                        } catch (SecurityException ex) {
+                            //The application may not have permission to access location
+                        }
                     }
                 }
+
 
                 //OS info
                 props.put(OS_KEY, VERSION.RELEASE);

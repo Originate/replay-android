@@ -35,6 +35,9 @@ Ensure your `AndroidManifest.xml` has the following items:
     <!-- Required for internet. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- Optional -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 ```
 
 ####Step 2 - Configuration XML

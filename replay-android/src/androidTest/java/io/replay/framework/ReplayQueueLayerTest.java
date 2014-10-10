@@ -88,8 +88,7 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
 
         // load parameters
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey("testKey");
-        ReplayQueue queue = new ReplayQueue(context, mConfig);
+        mConfig.setApiKey("testKey");        ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
         QueueLayer ql = new QueueLayer(queue, context);
         ql.start();
@@ -122,9 +121,9 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertNotNull(json.get(InfoManager.SDK_KEY));
         assertNotNull(json.get(InfoManager.LOCATION_LAT));
         assertNotNull(json.get(InfoManager.LOCATION_LONG));
-        final JSONObject carrier = (JSONObject) json.get(InfoManager.CARRIER_KEY);
-        assertNotNull(carrier);
-        assertTrue(carrier.length() >0);
+        final JSONObject network = (JSONObject) json.get(InfoManager.NETWORK_KEY);
+        assertNotNull(network);
+        assertTrue(network.length() >0);
     }
 
 }

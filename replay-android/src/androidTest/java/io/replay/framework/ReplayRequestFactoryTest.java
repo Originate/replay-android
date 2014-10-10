@@ -37,6 +37,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         //create new SessionID
         ReplaySessionManager.getOrCreateSessionUUID(appContext);
 
+
         ReplayRequest request = ReplayRequestFactory.createRequest(context, RequestType.EVENTS, event, new ReplayJsonObject(deviceInfo, "test"), new HashMap());
 
         final ReplayJsonObject jsonBody = request.getJsonBody();
@@ -47,7 +48,12 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         assertEquals("key", jsonBody.get("replay_key"));
         assertEquals("test", jsonBody.getJsonObject(properties).getString(deviceInfo));
 
-        assertEquals((System.nanoTime() - request.getCreatedAt()) / 10000000L,
-                          jsonBody.getJsonObject(properties).getLong("timestamp") / 10L);
+        ReplayRequestFactory.updateTimestamp(request);
+        final long expectedTimestamp = (System.nanoTime() - request.getCreatedAt()) / 1000000L;
+        final long observedTimestamp = jsonBody.getJsonObject(properties).getLong("timestamp");
+
+        final long abs = Math.abs(observedTimestamp - expectedTimestamp);
+        final boolean a = abs <= 1000L;
+        assertTrue(String.format("observed: %d \t\texpected: %d", observedTimestamp, expectedTimestamp),a);
     }
 }

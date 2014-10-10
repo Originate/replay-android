@@ -12,13 +12,13 @@ class ReplayRequestFactory {
 
     private static final String KEY_REPLAY_KEY = "replay_key";
     private static final String KEY_EVENT_NAME = "event_name";
-    private static final String KEY_TIME ="timestamp";
+    private static final String KEY_TIME = "timestamp";
     private static final String KEY_PROPERTIES = "properties";
     private static final String KEY_BROWSER_INFO = "browser_info";
 
-    private ReplayRequestFactory(){} //private constructor
+    private ReplayRequestFactory() {} //private constructor
 
-    static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Object... extras){
+    static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Object... extras) {
         ReplayJsonObject json = init(context, type, eventName, properties);
         properties.mergeJSON(new ReplayJsonObject(extras));
         return new ReplayRequest(type, json);
@@ -55,7 +55,7 @@ class ReplayRequestFactory {
         JSONObject prop = json.getJsonObject(KEY_PROPERTIES);
         if(prop != null){
             ReplayJsonObject props = (ReplayJsonObject) prop;
-            long delta = (System.nanoTime() - request.getCreatedAt()) / 1000000L ;
+            long delta = (System.nanoTime() - request.getCreatedAt()) / 1000000L ; //convert ns -> ms
             if (delta > 0) props.put(KEY_TIME, delta); //if the system has restarted, createdAt is useless.
             json.put(KEY_PROPERTIES, props); //it's clobberin' time!
         }
