@@ -3,7 +3,15 @@ package io.replay.framework;
 /**
  * Client configuration
  */
-class Config {
+public class Config {
+
+    private static final int MIN_DISPATCH_INTERVAL = 5*1000; //5 seconds
+    private static final int MIN_MAX_QUEUE = 100;
+    private static final int MIN_FLUSH_AT = 10;
+    private static final int MAX_DISPATCH_INTERVAL = 30*60*1000; //30 minutes
+    private static final int MAX_MAX_QUEUE = 10000;
+    private static final int MAX_FLUSH_AT = 1000;
+
 
     /**
      * Whether or not debug logging is enabled to ADT logcat
@@ -18,7 +26,7 @@ class Config {
     /**
      * Creates a default options
      */
-    Config() {
+    public Config() {
         this(Defaults.DEBUG_MODE_ENABLED, Defaults.ENABLED, Defaults.API_KEY,
                 Defaults.DISPATCH_INTERVAL, Defaults.FLUSH_AT, Defaults.MAX_QUEUE);
     }
@@ -26,7 +34,7 @@ class Config {
     /**
      * Creates an option with the provided settings
      */
-    Config(boolean debugModeEnabled, boolean enabled, String apiKey,
+    public Config(boolean debugModeEnabled, boolean enabled, String apiKey,
            int dispatchInterval, int flushAt, int maxQueue) {
 
         this.debugModeEnabled = debugModeEnabled;
@@ -37,34 +45,34 @@ class Config {
         this.maxQueue = maxQueue;
     }
 
-    boolean isDebug() {
+    public boolean isDebug() {
         return debugModeEnabled;
     }
 
-    Config setDebug(boolean debug){
+    public Config setDebug(boolean debug){
         this.debugModeEnabled = debug;
         return this;
     }
 
-    boolean isEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    Config setEnabled(boolean enabled){
+    public Config setEnabled(boolean enabled){
         this.enabled = enabled;
         return this;
     }
 
-    String getApiKey() {
+    public String getApiKey() {
         return apiKey;
     }
 
-    Config setApiKey(String apiKey){
+    public Config setApiKey(String apiKey){
         this.apiKey = apiKey;
         return this;
     }
 
-    int getDispatchInterval() {
+    public int getDispatchInterval() {
         return dispatchInterval;
     }
 
@@ -73,26 +81,53 @@ class Config {
      * @param dispatchInterval
      * @return
      */
-    Config setDispatchInterval(int dispatchInterval){
+    public Config setDispatchInterval(int dispatchInterval){
         this.dispatchInterval = dispatchInterval;
         return this;
     }
 
-    int getFlushAt() {
+    public int getFlushAt() {
         return flushAt;
     }
 
-    Config setFlushAt(int flushAt){
+    public Config setFlushAt(int flushAt){
         this.flushAt = flushAt;
         return this;
     }
 
-    int getMaxQueue() {
+    public int getMaxQueue() {
         return maxQueue;
     }
 
-    Config setMaxQueue(int maxQueue){
+    public Config setMaxQueue(int maxQueue){
         this.maxQueue = maxQueue;
         return this;
+    }
+
+    public void applyConstraints(){
+        if (dispatchInterval < MIN_DISPATCH_INTERVAL){
+            throw new IllegalArgumentException("Dispatch Interval cannot have a value less than " + MIN_DISPATCH_INTERVAL);
+        }
+        else if (dispatchInterval > MAX_DISPATCH_INTERVAL){
+            throw new IllegalArgumentException("Dispatch Interval cannot have a value greater than " + MAX_DISPATCH_INTERVAL);
+        }
+
+        if (flushAt < MIN_FLUSH_AT){
+            throw new IllegalArgumentException("Flush At cannot have a value less than " + MIN_FLUSH_AT);
+        }
+        else if (flushAt > MAX_FLUSH_AT){
+            throw new IllegalArgumentException("Flush At cannot have a value greater than " + MAX_FLUSH_AT);
+        }
+
+        if (maxQueue < MIN_MAX_QUEUE){
+            throw new IllegalArgumentException("Max Queue cannot have a value less than " + MIN_MAX_QUEUE);
+        }
+        else if (maxQueue > MAX_MAX_QUEUE){
+            throw new IllegalArgumentException("Max Queue cannot have a value greater than " + MAX_MAX_QUEUE);
+        }
+
+        if (Util.isNullOrEmpty(apiKey)){
+            throw new IllegalArgumentException("ReplayIO - API key should not be null or empty.");
+        }
     }
 }

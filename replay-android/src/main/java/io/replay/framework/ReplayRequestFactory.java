@@ -24,7 +24,7 @@ class ReplayRequestFactory {
         return new ReplayRequest(type, json);
     }
 
-    static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Map<String, ?> extras){
+    static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Map<String, ?> extras) {
         ReplayJsonObject json = init(context, type, eventName, properties);
         properties.mergeJSON(new ReplayJsonObject(extras));
         return new ReplayRequest(type, json);
@@ -35,7 +35,7 @@ class ReplayRequestFactory {
 
         ReplayPrefs prefs = ReplayPrefs.get(context);
         String distinctID = prefs.getDistinctID();
-        if(!Util.isNullOrEmpty(distinctID)) {
+        if (!Util.isNullOrEmpty(distinctID)) {
             json.put(ReplayPrefs.KEY_DISTINCT_ID, distinctID);
         }
         json.put(KEY_REPLAY_KEY, ReplayIO.getConfig().getApiKey());
@@ -53,9 +53,9 @@ class ReplayRequestFactory {
     static void updateTimestamp(ReplayRequest request) {
         ReplayJsonObject json = request.getJsonBody();
         JSONObject prop = json.getJsonObject(KEY_PROPERTIES);
-        if(prop != null){
+        if (prop != null) {
             ReplayJsonObject props = (ReplayJsonObject) prop;
-            long delta = (System.nanoTime() - request.getCreatedAt()) / 1000000L ; //convert ns -> ms
+            long delta = (System.nanoTime() - request.getCreatedAt()) / 1000000L; //convert ns -> ms
             if (delta > 0) props.put(KEY_TIME, delta); //if the system has restarted, createdAt is useless.
             json.put(KEY_PROPERTIES, props); //it's clobberin' time!
         }
