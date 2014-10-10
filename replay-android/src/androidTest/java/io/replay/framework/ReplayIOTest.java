@@ -1,10 +1,10 @@
 package io.replay.framework;
 
-import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
+
+import java.lang.reflect.Field;
 
 public class ReplayIOTest extends AndroidTestCase {
 

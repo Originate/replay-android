@@ -19,7 +19,7 @@ import java.util.Map;
  * and implements {@link java.lang.Iterable}, allowing the user to non-deterministically iterate through the KeySet of this object.
  *
  */
-class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializable{
+public class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializable{
 
     ReplayJsonObject() {
         super();
@@ -50,11 +50,11 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         if (keyValuePairs != null) {
             final int length = keyValuePairs.length;
             if (length % 2 == 0 && length > 0) {
-                for (int i = 0; i < length; i+=2) {
-                    this.putObj(keyValuePairs[i].toString(), keyValuePairs[i + 1]);
+                for (int i = 0; i < length; i += 2) {
+                    this.putObj((String) keyValuePairs[i], keyValuePairs[i + 1]);
                 }
             } else {
-                ReplayLogger.w("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
+                throw new IllegalArgumentException("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
                                      "arguments: e.g., [key, value, key, value]. ");
             }
         }
@@ -97,7 +97,11 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         return putObj(name, value);
     }
 
-    JSONObject put(String name, ReplayJsonObject value) {
+    public JSONObject put(String name, String value) {
+        return putObj(name, value);
+    }
+
+    public JSONObject put(String name, ReplayJsonObject value) {
         return putObj(name, value);
     }
 
@@ -340,7 +344,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeInt(this.length());
         for (String key : this) {
-            out.writeObject(key);
+            out.writeUTF(key);
             out.writeObject(this.get(key));
         }
     }
@@ -349,7 +353,7 @@ class ReplayJsonObject extends JSONObject implements Iterable<String>, Serializa
         int length = in.readInt();
         if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
         for (int i = 0; i < length; i++) {
-            String key = (String) in.readObject();
+            String key = in.readUTF();
             Object val = in.readObject();
             this.putObj(key, val);
 
