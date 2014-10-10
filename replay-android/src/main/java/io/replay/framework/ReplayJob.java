@@ -32,7 +32,7 @@ class ReplayJob extends Job implements Serializable {
     @Override
     public void onRun() throws Throwable {
 
-        ReplayRequestFactory.mergePassiveData(request);
+        ReplayRequestFactory.updateTimestamp(request);
 
         Pair<Integer, String> result;
         try {

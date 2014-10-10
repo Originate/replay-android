@@ -5,80 +5,55 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.UUID;
+
+import io.replay.framework.ReplayRequest.RequestType;
 
 public class ReplayRequestFactoryTest extends AndroidTestCase {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
 
-	public void testRequestForEvent() throws InterruptedException, JSONException{
+    public void testRequestCreation() throws JSONException {
         Context context = getContext();
         ReplayIO.init(getContext(), "key");
 
-        final Context appContext = context.getApplicationContext(); //cache locally for performance reasons
+        final Context appContext = context.getApplicationContext();
+        final String distinct = "distinct";
+        final String event = "event";
+        final String deviceInfo = "passiveEvents";
+        final String properties = "properties";
 
         // load the default settings
         ReplayPrefs prefs = ReplayPrefs.get(appContext);
         String uuid = UUID.randomUUID().toString();
         prefs.setClientID(uuid);
-        prefs.setDistinctID("distinct");
+        prefs.setDistinctID(distinct);
 
         //create new SessionID
         ReplaySessionManager.getOrCreateSessionUUID(appContext);
 
-        // initialize RequestFactory
-        ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
-        Thread.sleep(1000);
-        ReplayRequestFactory.mergePassiveData(rq);
 
-        assertEquals(ReplayRequest.RequestType.EVENTS,rq.getType());
-        assertEquals(uuid,rq.getJsonBody().get("client_id"));
-        assertEquals("Event",rq.getJsonBody().get("event_name"));
-        assertEquals("key",rq.getJsonBody().get("replay_key"));
+        ReplayRequest request = ReplayRequestFactory.createRequest(context, RequestType.EVENTS, event, new ReplayJsonObject(deviceInfo, "test"), new HashMap());
 
-        assertEquals((System.nanoTime()-rq.getCreatedAt())/10000000L,rq.getJsonBody().getJsonObject("properties").getLong("timestamp")/10L);
+        final ReplayJsonObject jsonBody = request.getJsonBody();
+
+        assertEquals(RequestType.EVENTS, request.getType());
+        assertEquals(uuid, jsonBody.get("client_id"));
+        assertEquals(event, jsonBody.get("event_name"));
+        assertEquals("key", jsonBody.get("replay_key"));
+        assertEquals("test", jsonBody.getJsonObject(properties).getString(deviceInfo));
+
+        ReplayRequestFactory.updateTimestamp(request);
+        final long expectedTimestamp = (System.nanoTime() - request.getCreatedAt()) / 1000000L;
+        final long observedTimestamp = jsonBody.getJsonObject(properties).getLong("timestamp");
+
+        final long abs = Math.abs(observedTimestamp - expectedTimestamp);
+        final boolean a = abs <= 1000L;
+        assertTrue(String.format("observed: %d \t\texpected: %d", observedTimestamp, expectedTimestamp),a);
     }
-
-    public void testPassiveData() throws InterruptedException, JSONException{
-        Context context = getContext();
-        ReplayIO.init(getContext(), "key");
-
-        final Context appContext = context.getApplicationContext(); //cache locally for performance reasons
-
-        // load the default settings
-        ReplayPrefs prefs = ReplayPrefs.get(appContext);
-        String uuid = UUID.randomUUID().toString();
-        prefs.setClientID(uuid);
-        prefs.setDistinctID("distinct");
-
-        //create new SessionID
-        ReplaySessionManager.getOrCreateSessionUUID(appContext);
-
-        // initialize RequestFactory
-        ReplayRequestFactory.init(appContext);
-        ReplayRequest rq = ReplayRequestFactory.requestForEvent("Event","");
-        Thread.sleep(1000);
-        ReplayRequestFactory.mergePassiveData(rq);
-
-        JSONObject properties = rq.getJsonBody().getJsonObject("properties");
-
-        assertNotNull(properties.get("device_model"));
-        assertNotNull(properties.get("device_manufacturer"));
-        assertNotNull(properties.get("client_os"));
-        assertNotNull(properties.get("client_sdk"));
-        assertNotNull(properties.get("display"));
-
-        JSONObject network = properties.getJSONObject("network");
-        assertNotNull(network.get("mobile"));
-        assertNotNull(network.get("wifi"));
-        assertNotNull(network.get("carrier"));
-
-    }
-
 }
