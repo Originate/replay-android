@@ -17,4 +17,7 @@ ext{
     minSDKVersion = 10
     versionCode = 1
     versionName = "1.0"
+    versionNameDemo = "1.0"
+    groupID = "io.replay"
+
 }

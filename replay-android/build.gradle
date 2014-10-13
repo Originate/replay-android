@@ -2,7 +2,7 @@ apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.library'
 
 repositories {
-    flatDir{
+    flatDir {
         dirs 'libs'
     }
 }
@@ -29,7 +29,7 @@ android {
     buildTypes {
         final def STRING = "String"
         final def REPLAY_URL = "REPLAY_URL"
-        def urlStr = {"\"http://$it\"" }
+        def urlStr = { "\"http://$it\"" }
 
         debug {
             debuggable true

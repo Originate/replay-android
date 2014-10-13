@@ -9,7 +9,7 @@ android {
         minSdkVersion rootProject.ext.minSDKVersion
         targetSdkVersion rootProject.ext.targetSDKVersion
         versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
+        versionName rootProject.ext.versionNameDemo
     }
 }
 

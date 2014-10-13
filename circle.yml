@@ -23,7 +23,7 @@ dependencies:
         - ~/.android
         - ~/android
     pre:
-        - (source replay-envsetup.sh && ensureDependenciesAndCreateAVD)
+        - (source scripts/replay-envsetup.sh && ensureDependenciesAndCreateAVD)
 
 test:
     pre:
@@ -33,8 +33,15 @@ test:
             timeout: 1200
         - (./gradlew assembleDebugTest):
             timeout: 1200
-        - (source replay-envsetup.sh && waitAVD)
+        - (source scripts/replay-envsetup.sh && waitAVD)
     override:
         - (./gradlew connectedAndroidTest)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
+
+deployment:
+    production:
+        branch: master
+        owner: originate
+        commands:
+            - (source scripts/replay-setup.sh && sonatypePublish)
