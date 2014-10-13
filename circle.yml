@@ -38,10 +38,3 @@ test:
         - (./gradlew connectedAndroidTest)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
-
-deployment:
-    production:
-        branch: master
-        owner: originate
-        commands:
-            - (source scripts/replay-setup.sh && sonatypePublish)
