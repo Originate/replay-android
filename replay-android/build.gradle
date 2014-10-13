@@ -1,0 +1,75 @@
+apply plugin: 'android-sdk-manager'
+apply plugin: 'com.android.library'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+android {
+    publishNonDefault true
+
+    compileSdkVersion rootProject.ext.compileSDKVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "io.replay.framework"
+        minSdkVersion rootProject.ext.minSDKVersion
+        targetSdkVersion rootProject.ext.targetSDKVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+
+        testApplicationId "io.replay.framework.tests"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+    }
+    lintOptions {
+        abortOnError false
+    }
+    buildTypes {
+        final def STRING = "String"
+        final def REPLAY_URL = "REPLAY_URL"
+        def urlStr = { "\"http://$it\"" }
+
+        debug {
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, urlStr("")
+        }
+
+        emulator.initWith(buildTypes.debug)
+        emulator {
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, urlStr("10.0.2.2:3000/")
+            //stupidly, without the extra strings, it tries to make "10.0.2.2" into a very very weird Long.
+
+        }
+        genymotion.initWith(buildTypes.debug)
+        genymotion {
+            debuggable true
+            buildConfigField STRING, REPLAY_URL, urlStr("192.168.56.1:3000/")
+        }
+        release {
+            debuggable false
+            buildConfigField STRING, REPLAY_URL, urlStr("api.replay.io/")
+        }
+    }
+}
+
+dependencies {
+    //compile fileTree(dir: 'libs', include: ['*.aar'])
+    //compile(name: 'jobqueue', ext: 'aar')
+    compile project(':jobqueue')
+}
+
+task clearJar(type: Delete) {
+    delete 'build/libs/replay-android.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('build/libs/')
+    include('classes.jar')
+    rename('classes.jar', 'replay-android.jar')
+}
+
+makeJar.dependsOn(clearJar, build)
