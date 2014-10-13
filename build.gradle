@@ -9,3 +9,15 @@ buildscript {
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
     }
 }
+
+ext{
+    compileSDKVersion = 19
+    buildToolsVersion = "20.0.0"
+    targetSDKVersion = 19
+    minSDKVersion = 10
+    versionCode = new Integer("00900")
+    versionName = "0.9.0 BETA"
+    versionNameDemo = versionName
+    groupID = "io.replay"
+
+}
