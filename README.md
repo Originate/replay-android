@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/Originate/replay-android/tree/develop.png?style=badge&circle-token=d9bbccb7db1bfaa58c304a8ac313aa2338f92423)](https://circleci.com/gh/Originate/replay-android/tree/develop)
+[![Circle CI](https://circleci.com/gh/Originate/replay-android/tree/master.png?style=badge&circle-token=d9bbccb7db1bfaa58c304a8ac313aa2338f92423)](https://circleci.com/gh/Originate/replay-android/tree/master)
 
 
 # Replay.IO Android Framework
@@ -7,8 +7,8 @@ Building this project will produce `replay-android.jar`, which can then be distr
 
 ### How to build the framework
 
-Replay.io-Android depends on [path/android-priority-jobqueue](https://github.com/path/android-priority-jobqueue). However, currently, we are using a custom-modified version. 
-*//TODO: add diff of path/jobqueue-master and our master*
+Replay.io-Android depends on [path/android-priority-jobqueue](https://github.com/path/android-priority-jobqueue). However, currently, we are using a custom-modified version.
+You can find the diff [here](https://github.com/ParthPadg/android-priority-jobqueue/pull/1)
 
 - If you are using ADT Bundle or Eclipse, import ReplayIO to your workspace, open the properties window, Android tab, check "Is Library".<br>
 - If you are using Android Studio, import the project by selecting build.gradle.
