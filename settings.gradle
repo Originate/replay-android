@@ -1,2 +1,1 @@
-include ':replay-android', ':replay-android-demo', ':jobqueue'  //, ':jobqueue'
-//project(':jobqueue').projectDir = new File(settingsDir, '../android-priority-jobqueue/jobqueue')
+include ':replay-android', ':replay-android-demo'

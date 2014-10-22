@@ -1,15 +1,7 @@
 apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.library'
 
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
-
 android {
-    publishNonDefault true
-
     compileSdkVersion rootProject.ext.compileSDKVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
@@ -58,7 +50,8 @@ android {
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.aar'])
     //compile(name: 'jobqueue', ext: 'aar')
-    compile project(':jobqueue')
+    //compile project(':jobqueue')
+    compile files('libs/jobqueue.jar')
 }
 
 task clearJar(type: Delete) {
@@ -73,3 +66,5 @@ task makeJar(type: Copy) {
 }
 
 makeJar.dependsOn(clearJar, build)
+
+apply from: '../scripts/upload.gradle'
