@@ -68,15 +68,7 @@ public class MainActivity extends Activity {
 
     @OnClick(R.id.button_identify)
     public void identifyButtonClick(){
-        Object[] data = new Object[6];
-        data[0] = "email";
-        data[1] = "example@gmail.com";
-        data[2] = "age";
-        data[3] = 22;
-        data[4] = "gender";
-        data[5] = "male";
-
-        ReplayIO.updateTraits(data);
+        ReplayIO.updateTraits("email", "example@gmail.com", "age", 22, "gender", "male");
         log.setText(log.getText() + "\nAdded Traits Job");
     }
 

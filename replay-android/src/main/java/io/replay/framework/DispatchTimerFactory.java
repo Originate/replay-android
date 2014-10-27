@@ -9,7 +9,7 @@ import com.path.android.jobqueue.flush.DispatchTimerInterface;
 /**
  * Factory class for {@link io.replay.framework.DispatchTimerFactory.DispatchTimer}.
  *
- * @see io.replay.framework.DispatchTimerFactory.DispatchTimer
+ * @see DispatchTimer
  */
 class DispatchTimerFactory {
 
@@ -28,7 +28,7 @@ class DispatchTimerFactory {
 
     /**
      * Implementation is very similar to {@link android.os.CountDownTimer}, but since that class marks most of its
-     * implemented methods as <code>final</code>, it is infeasible to use.
+     * implemented methods as <code>final</code>, it is infeasible to extend.
      * <p>Unlike CountDownTimer, this class does not provide the option to "tick" multiple times; it "ticks" once
      * - when {@link #onFinish()} is called.
      * <p>Most notably, this class can reset itself ({@link #resetAfterComplete}) upon completion of the countdown, creating a loop that will be called until

@@ -3,8 +3,8 @@ package io.replay.framework;
 import android.os.Handler;
 import android.os.Looper;
 
-/**
- * Created by parthpadgaonkar on 8/13/14.
+/**A Thread with a looping Handler. This class should be extended to provide additional functionality.
+ *
  */
 class LooperThreadWithHandler extends Thread {
     private Handler handler;

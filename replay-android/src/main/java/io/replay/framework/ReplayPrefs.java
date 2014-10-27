@@ -26,7 +26,7 @@ class ReplayPrefs {
     }
 
     void setSessionID(String sessionID){
-        mPrefs.edit().putString(KEY_SESSION_ID, sessionID).commit();
+        mPrefs.edit().putString(KEY_SESSION_ID, sessionID).apply();
     }
 
     String getSessionID(){
@@ -34,7 +34,7 @@ class ReplayPrefs {
     }
 
     void setClientID(String clientUUID) {
-        mPrefs.edit().putString(KEY_CLIENT_ID, clientUUID).commit();
+        mPrefs.edit().putString(KEY_CLIENT_ID, clientUUID).apply();
     }
 
     String getClientID() {
@@ -42,7 +42,7 @@ class ReplayPrefs {
     }
 
     void setDistinctID(String distinctID) {
-        mPrefs.edit().putString(KEY_DISTINCT_ID, distinctID).commit();
+        mPrefs.edit().putString(KEY_DISTINCT_ID, distinctID).apply();
     }
 
     String getDistinctID(){

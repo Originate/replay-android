@@ -36,16 +36,15 @@ class ReplayParams {
     private ReplayParams(){} //private constructor
 
     static Config getOptions(Context context) {
-        Config options = new Config();
+        String apiKey = getString(context, API_KEY);
+
+        Config options = new Config(apiKey);
 
         Boolean enabled = getBoolean(context, ENABLED);
         if (enabled != null) options.setEnabled(enabled);
 
         Boolean debug = getBoolean(context, DEBUG_MODE_ENABLED);
         if (debug != null) options.setDebug(debug);
-
-        String apiKey = getString(context, API_KEY);
-        if (apiKey != null) options.setApiKey(apiKey);
 
         Integer dispatchInterval = getInteger(context, DISPATCH_INTERVAL);
         //Ensure that the value is not null

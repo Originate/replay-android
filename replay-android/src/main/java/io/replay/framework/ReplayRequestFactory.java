@@ -43,7 +43,7 @@ class ReplayRequestFactory {
         json.put(KEY_BROWSER_INFO, new ReplayJsonObject());
         //TODO find out what info is required here. Chances are, we're collecting it elsewhere
 
-        if (type == RequestType.EVENTS) {
+        if (type == RequestType.EVENTS && !Util.isNullOrEmpty(eventName)) {
             json.put(KEY_EVENT_NAME, eventName);
         }
         json.put(KEY_PROPERTIES, properties);
