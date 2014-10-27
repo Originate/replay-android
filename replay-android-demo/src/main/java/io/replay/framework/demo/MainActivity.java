@@ -14,7 +14,6 @@ import io.replay.framework.ReplayIO;
 
 public class MainActivity extends Activity {
 
-    public static final String API_KEY = "2bbf36db-ed6f-4944-92ab-11639c2b74f2";
     @InjectView(R.id.customEventText) TextView customText;
     @InjectView(R.id.flushCountTV) TextView count;
     @InjectView(R.id.log) TextView log;
