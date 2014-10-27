@@ -22,8 +22,23 @@ public class ReplayIOTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testInit() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
+    public void testInit1() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
+        ReplayIO.init(getContext());
+
+        Field initialized = ReplayIO.class.getDeclaredField("initialized");
+        initialized.setAccessible(true);
+        assertTrue(initialized.getBoolean(null));
+    }
+
+    public void testInit2() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
         ReplayIO.init(getContext(), "api_key");
+        Field initialized = ReplayIO.class.getDeclaredField("initialized");
+        initialized.setAccessible(true);
+        assertTrue(initialized.getBoolean(null));
+    }
+
+    public void testInit3() throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException, ReplayIONotInitializedException {
+        ReplayIO.init(getContext(), ReplayParams.getOptions(getContext()));
 
         Field initialized = ReplayIO.class.getDeclaredField("initialized");
         initialized.setAccessible(true);
@@ -35,7 +50,7 @@ public class ReplayIOTest extends AndroidTestCase {
         SharedPreferences mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
         mPrefs.contains(ReplayPrefs.KEY_CLIENT_ID);
         mPrefs.edit().remove(ReplayPrefs.KEY_CLIENT_ID);
-        mPrefs.edit().commit();
+        mPrefs.edit().apply();
 
         // get/generate client UUID
         String clientUUID = ReplayIO.getOrGenerateClientUUID();
@@ -56,7 +71,7 @@ public class ReplayIOTest extends AndroidTestCase {
         if (mPrefs.contains(ReplayPrefs.KEY_DISTINCT_ID)) {
             SharedPreferences.Editor editor = mPrefs.edit();
             editor.remove(ReplayPrefs.KEY_DISTINCT_ID);
-            editor.commit();
+            editor.apply();
         }
 
         // should not be able to set identity before  initialized
