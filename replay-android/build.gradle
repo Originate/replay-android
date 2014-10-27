@@ -44,9 +44,6 @@ android {
 
 
 dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.aar'])
-    //compile(name: 'jobqueue', ext: 'aar')
-    //compile project(':jobqueue')
     compile files('libs/jobqueue.jar')
 }
 

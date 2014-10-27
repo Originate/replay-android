@@ -15,8 +15,6 @@ import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.path.android.jobqueue.BuildConfig;
-
 import java.util.Map;
 
 import io.replay.framework.ReplayRequest.RequestType;
@@ -102,7 +100,7 @@ class QueueLayer extends LooperThreadWithHandler {
     }
 
     void enqueueJob(final ReplayJob job) {
-        if (BuildConfig.BUILD_TYPE.equals("release")) {
+        if (io.replay.framework.BuildConfig.BUILD_TYPE.equals("release")) {
             throw new IllegalStateException("This method is used solely for testing - please use QueueLayer#enqueueEvent");
         } else {
             handler().post(new Runnable() {

@@ -10,6 +10,10 @@ buildscript {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
+
 ext{
     compileSDKVersion = 19
     buildToolsVersion = "20.0.0"
