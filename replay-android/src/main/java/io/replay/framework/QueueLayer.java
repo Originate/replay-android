@@ -15,28 +15,39 @@ import android.telephony.TelephonyManager;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.path.android.jobqueue.BuildConfig;
+
 import java.util.Map;
 
 import io.replay.framework.ReplayRequest.RequestType;
 
 /**
- * Created by parthpadgaonkar on 8/28/14.
+ *A thread-backed class that massages data into a usable form and then enqueues it for persistence. Most operations occur on a separate thread.
  */
 class QueueLayer extends LooperThreadWithHandler {
     private ReplayQueue queue;
     private Context mContext;
-    private final ReplayJsonObject deviceInfo;
+    private ReplayJsonObject deviceInfo;
 
 
-    public QueueLayer(ReplayQueue queue, Context context) {
+    public QueueLayer(ReplayQueue queue, final Context context) {
         this.queue = queue;
         mContext = context;
-        deviceInfo = InfoManager.buildInfo(context, ReplayPrefs.get(context));
+        start();
+
+        handler().post(new Runnable() {
+            @Override
+            public void run() {
+                deviceInfo = InfoManager.buildInfo(context, ReplayPrefs.get(context));
+            }
+        });
     }
 
     @Override
     public synchronized void start() {
-        super.start();
+        if(!isAlive()){
+            super.start();
+        }
         queue.start();
     }
 
@@ -56,6 +67,7 @@ class QueueLayer extends LooperThreadWithHandler {
             public void run() {
                 ReplayRequest request = ReplayRequestFactory.createRequest(mContext, RequestType.EVENTS, event, deviceInfo, data);
                 queue.enqueue(request);
+                ReplayLogger.d("Enqueued event with name: %s", event);
             }
         });
     }
@@ -138,7 +150,6 @@ class QueueLayer extends LooperThreadWithHandler {
                     }
                 }
 
-
                 //OS info
                 props.put(OS_KEY, VERSION.RELEASE);
                 props.put(SDK_KEY, Integer.toString(VERSION.SDK_INT));
@@ -146,20 +157,14 @@ class QueueLayer extends LooperThreadWithHandler {
                 //display + make/model info
                 WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
                 Display display = window.getDefaultDisplay();
-                final int width;
-                final int height;
                 if(VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2){
                     Point size = new Point();
                     display.getSize(size);
-                    width = size.x;
-                    height = size.y;
+                    props.put(DISPLAY_KEY, size.x +"x"+ size.y);
                 }else{
-                    height = display.getHeight();
-                    width = display.getWidth();
-                    props.put(DISPLAY_KEY,width+"x"+height);
+                    props.put(DISPLAY_KEY,display.getWidth()+"x"+display.getHeight());
                 }
 
-                props.put(DISPLAY_KEY,width+"x"+height);
                 props.put(MANUFACTURER_KEY, Build.MANUFACTURER);
                 props.put(MODEL_KEY, Build.MODEL);
 

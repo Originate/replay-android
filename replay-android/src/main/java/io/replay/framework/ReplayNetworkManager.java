@@ -2,6 +2,8 @@ package io.replay.framework;
 
 import android.util.Pair;
 
+import com.path.android.jobqueue.BuildConfig;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,6 +14,7 @@ import java.net.URL;
  *
  */
 class ReplayNetworkManager {
+    private static final String TAG = ReplayNetworkManager.class.getSimpleName();
 
     /**
      * Post the request to the server. This operation occurs in the thread that called it.
@@ -26,7 +29,7 @@ class ReplayNetworkManager {
 
         URL url = new URL(BuildConfig.REPLAY_URL + request.getType().toString());
 
-        ReplayLogger.d("","POSTing to ", url.toString());
+        ReplayLogger.d(TAG,"POSTing to ", url.toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setFixedLengthStreamingMode(jsonBody.length);

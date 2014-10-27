@@ -16,6 +16,13 @@ import android.os.SystemClock;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * The ReplayIO static class is a wrapper around a database-backed, multithreaded queue and a basic
+ * consumer of the Replay.io REST API.
+ *
+ * All methods that involve the database are moved immediately to a background thread, so you don't have to worry about ReplayIO
+ * blocking the UI thread.
+ */
 public final class ReplayIO {
 
     private static AlarmManager alarmManager;
@@ -79,8 +86,6 @@ public final class ReplayIO {
     public static void init(Context context, Config options) throws ReplayIONoKeyException {
         if (initialized) return;
 
-        options.applyConstraints();
-
         if(context == null){
             throw new IllegalArgumentException("ReplayIO - context should not be null");
         }
@@ -94,6 +99,7 @@ public final class ReplayIO {
         mPrefs = ReplayPrefs.get(appContext);
         mPrefs.setClientID(getOrGenerateClientUUID());
         mPrefs.setDistinctID("");
+        ReplayLogger.setLogging(mConfig.isDebug());
 
         //create new SessionID
         ReplaySessionManager.getOrCreateSessionUUID(appContext);
@@ -102,7 +108,7 @@ public final class ReplayIO {
         replayQueue = new ReplayQueue(context, mConfig);
         queueLayer = new QueueLayer(replayQueue, appContext);
 
-        //hook into lifecycle if we're >=ICS and if we don't already have hooks
+
         if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
             //determine if ReplayActivity is being used
             boolean subclassExists = false;
@@ -122,12 +128,11 @@ public final class ReplayIO {
             catch (NameNotFoundException  e)  { e.printStackTrace(); }
             catch (NullPointerException   e)  { e.printStackTrace(); }
 
-            if (!subclassExists) {
+            if (!subclassExists) { //hook into lifecycle if we're >=ICS and if we don't already have hooks
                 ((Application) appContext).registerActivityLifecycleCallbacks(new ReplayLifecycleHandler());
                 ReplayLogger.d("ReplayIO", "added ActivityLifecycleCallbacks");
             }
         }
-
         initialized = true;
     }
 
@@ -176,7 +181,7 @@ public final class ReplayIO {
     public static void updateTraits(Object... data ) {
         checkInitialized();
         if (!enabled) return;
-        if (data != null && data.length != 0) {
+        if (!Util.isNullOrEmpty(data)) {
             queueLayer.enqueueTrait(data);
         } else throw new IllegalArgumentException("Error: traits data cannot be null or empty.");
     }
@@ -189,7 +194,7 @@ public final class ReplayIO {
     public static void updateTraits(Map<String,?> data) {
         checkInitialized();
         if (!enabled) return;
-        if (data != null && !data.isEmpty()) {
+        if (!Util.isNullOrEmpty(data)) {
             queueLayer.enqueueTrait(data);
         } else throw new IllegalArgumentException("Error: traits data cannot be null or empty.");
     }
@@ -409,7 +414,7 @@ public final class ReplayIO {
             }
             watchdogIntent = PendingIntent.getService(mContext, 0,
                    ReplayWatchdogService.createIntent(mContext, mConfig.getApiKey()), PendingIntent.FLAG_UPDATE_CURRENT);
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 43200000L, watchdogIntent); //12 hours
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 21600000L, watchdogIntent); //6 hours
             watchdogEnabled ^= true;
         }
     }
