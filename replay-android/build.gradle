@@ -18,34 +18,30 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    defaultPublishConfig "debug"
+
     buildTypes {
         final def STRING = "String"
         final def REPLAY_URL = "REPLAY_URL"
-        def urlStr = { "\"http://$it\"" }
+        def url = {scheme, path, port -> "\"http$scheme://$path${!port.isEmpty() ? ":$port/" : "/"}\""}
 
-        debug {
+        debug { //default build config works with emulator
             debuggable true
-            buildConfigField STRING, REPLAY_URL, urlStr("")
+            buildConfigField STRING, REPLAY_URL, url("", "10.0.2.2", "3000")
         }
-
-        emulator.initWith(buildTypes.debug)
-        emulator {
-            debuggable true
-            buildConfigField STRING, REPLAY_URL, urlStr("10.0.2.2:3000/")
-            //stupidly, without the extra strings, it tries to make "10.0.2.2" into a very very weird Long.
-
-        }
-        genymotion.initWith(buildTypes.debug)
+        genymotion.initWith(buildTypes.debug) //extra build config to work with Genymotion
         genymotion {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, urlStr("192.168.56.1:3000/")
+            buildConfigField STRING, REPLAY_URL, url("", "192.168.56.1", "3000")
         }
         release {
             debuggable false
-            buildConfigField STRING, REPLAY_URL, urlStr("api.replay.io/")
+            buildConfigField STRING, REPLAY_URL, url("s", "api.replay.io", "")
         }
     }
 }
+
 
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.aar'])

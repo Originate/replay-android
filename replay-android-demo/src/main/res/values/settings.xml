@@ -11,13 +11,13 @@
     <bool name="debug_mode_enabled">true</bool>
 
     //If the number of events stored (not yet dispatched) reaches this value, no more events will be received
-    <integer name="max_queue">50</integer>
+    <integer name="max_queue">1200</integer>
 
     //Normally events are only sent to the server when the dispatch_interval is met
     //but if the number of events reaches flush_at, they will be automatically sent
-    //<integer name="flush_at">10</integer>
+    //<integer name="flush_at">50</integer>
 
      //replay api key
-    <string name="api_key">"testKey"</string>
+    <string name="api_key">testKey</string>
 
 </resources>

@@ -42,14 +42,13 @@ function sonatypePublish(){
   echo $PRIVATE_KEY > temppk.gpg      # pipe private key ascii into temp file
   tr -d \\n < temppk.gpg | tr \, \\n > privatekey.gpg   # 1) pipe temp file into 'tr' and remove any stray newlines 2) replace all commas with newlines
   gpg --allow-secret-key --import privatekey.gpg        # import newly-minted gpg file into gpg as a secret key
-  rm -f temppk.gpg
-  rm -f privatekey.gpg
+  rm -f temppk.gpg privatekey.gpg
   ./gradlew uploadArchives -PUSERNAME="${SONTAYPE_USERNAME}" -PPASSWORD="${SONATYPE_PASSWORD}" -Psigning.keyId=FDD99559 -Psigning.password=${SONATYPE_PASSWORD} -Psigning.secretKeyRingFile=/home/ubuntu/.gnupg/secring.gpg
 
   RETVAL=$?
 
   if [ $RETVAL -eq 0 ]; then
-    echo 'Completed publish!'
+    echo ' Completed publish!'
   else
     echo 'Publish failed.'
     return 1
