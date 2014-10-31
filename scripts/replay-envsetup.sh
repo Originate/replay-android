@@ -9,7 +9,7 @@ function ensureDependenciesAndCreateAVD(){
 
   if [ ! -e $DEPS ]; then
     cp -r /usr/local/android-sdk-linux $ANDROID_HOME &&
-    echo y | android update sdk -u -a -t android-8 &&
+    #echo y | android update sdk -u -a -t android-8 &&
     echo y | android update sdk -u -a -t android-19 &&
     echo y | android update sdk -u -a -t platform-tools &&
     echo y | android update sdk -u -a -t build-tools-20.0.0 &&
@@ -24,7 +24,6 @@ function waitAVD {
     # http://blog.crowdint.com/2013/05/17/android-builds-on-travis-ci-with-maven.html
     (
     local bootanim=""
-    local failcounter=0
     export PATH=$(dirname $(dirname $(which android)))/platform-tools:$PATH
     until [[ "$bootanim" =~ "stopped" ]]; do
         sleep 5
