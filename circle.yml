@@ -30,9 +30,9 @@ test:
         - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
            background: true
         - (./gradlew assembleDebug):
-            timeout: 1200
+            timeout: 360
         - (./gradlew assembleDebugTest):
-            timeout: 1200
+            timeout: 360
         - (source scripts/replay-envsetup.sh && waitAVD)
     override:
         - (echo "Override")
@@ -46,4 +46,5 @@ deployment:
         owner: Originate
         commands:
             - (echo "Beginning publish task to Sonatype/MavenCentral")
-            - (source scripts/replay-envsetup.sh && sonatypePublish)
+            - (source scripts/replay-envsetup.sh && sonatypePublish):
+                timeout: 360
