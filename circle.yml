@@ -7,13 +7,11 @@
 
 general: 
     artifacts:
-        - cd /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+        - /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
 
 machine:
     environment:
         ANDROID_HOME: /home/ubuntu/android
-    timezone:
-        America/Los_Angeles
     java:
         version: oraclejdk6
 
@@ -23,18 +21,29 @@ dependencies:
         - ~/.android
         - ~/android
     pre:
-        - (source scripts/replay-envsetup.sh && ensureDependenciesAndCreateAVD)
+       - (source scripts/replay-envsetup.sh && ensureDependenciesAndCreateAVD)
+    override:
+       - (echo "overriding `gradlew dependencies`")
 
 test:
     pre:
         - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
-            background: true
-        - (./gradlew assembleEmulator):
+           background: true
+        - (./gradlew assembleDebug):
             timeout: 1200
         - (./gradlew assembleDebugTest):
             timeout: 1200
         - (source scripts/replay-envsetup.sh && waitAVD)
     override:
-        - (./gradlew connectedAndroidTest)
+        - (echo "Override")
+        - (./gradlew :replay-android:connectedAndroidTest)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
+
+deployment:
+    sonatype:
+        branch: [master]
+        owner: Originate
+        commands:
+            - (echo "Beginning publish task to Sonatype/MavenCentral")
+            - (source scripts/replay-envsetup.sh && sonatypePublish)

@@ -2,9 +2,6 @@ package io.replay.framework;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by parthpadgaonkar on 9/18/14.
- */
 public class TestReplayJob extends ReplayJob {
 
     public static final AtomicInteger id = new AtomicInteger(0);
@@ -14,7 +11,6 @@ public class TestReplayJob extends ReplayJob {
     public TestReplayJob(ReplayRequest request) {
         super(request);
         idStr = "Test Job " + id.incrementAndGet();
-
     }
 
     @Override

@@ -33,7 +33,7 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
 
     ReplayJsonObject(Map<String, ?> map) {
         this();
-        if (map == null || map.isEmpty()) return;
+        if (Util.isNullOrEmpty(map)) return;
         for (Map.Entry<String, ?> entry : map.entrySet()) {
             String key = entry.getKey();
             if (this.has(key)) continue;
@@ -291,51 +291,11 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
     }
 
 
-/*    static boolean equals(JSONArray one, JSONArray two) {
-        if (one == null || two == null) return one == two;
-        if (one.length() != two.length()) return false;
-
-        final int oneLength = one.length();
-        for (int i = 0; i < oneLength; i++) {
-            try {
-                Object oneVal = one.get(i);
-                Object twoVal = two.get(i);
-                //recursive equals call
-                if (!equals(oneVal, twoVal)) return false;
-            } catch (JSONException e) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    static boolean equals(Object left, Object right) {
-        if (left == null || right == null) return left == right;
-
-        if (left instanceof JSONObject) {
-            // it's a nested object
-            if (!(right instanceof JSONObject)) return false;
-
-            // call equals recursively
-            if (!equals((JSONObject) left, (JSONObject) right)) return false;
-        } else if (left instanceof JSONArray) {
-            // its an array
-            if (!(right instanceof JSONArray)) return false;
-            JSONArray oneValArray = (JSONArray) left;
-            JSONArray twoValArray = (JSONArray) right;
-
-            // call the array equals method
-            if (!equals(oneValArray, twoValArray)) return false;
-        } else {
-            // its a string, float, boolean, int, double, or a nested type
-
-            if (!left.equals(right)) return false;
-        }
-
-        return true;
-    }*/
-
+    /**Returns an {@link Iterator} that iterates through the key-value pairs.
+     * Note that the iterator's order is not determined.
+     *
+     * @return
+     */
     @Override
     public Iterator<String> iterator() {
         return this.keys();

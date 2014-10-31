@@ -32,7 +32,7 @@ class ReplayRequest implements Serializable {
     ReplayRequest(RequestType type, ReplayJsonObject json) {
         this.type = type;
         this.json = json != null ? json : new ReplayJsonObject();
-        createdAt = System.nanoTime(); //potential bug - if the device is rebooted, this time will be invalid.
+        createdAt = System.nanoTime(); //TODO potential bug - if the device is rebooted, this time will be invalid.
     }
 
     ReplayJsonObject getJsonBody(){
@@ -58,18 +58,6 @@ class ReplayRequest implements Serializable {
         return json.toString().getBytes();
     }
 
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeObject(type);
-        oos.writeObject(json);
-        oos.writeLong(createdAt);
-
-    }
-    private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
-        type = (RequestType) ois.readObject();
-        json = (ReplayJsonObject) ois.readObject();
-        createdAt = ois.readLong();
-    }
-
     @Override
     public String toString() {
         return "ReplayRequest{" +"type=" + type +", json=" + json +'}';
@@ -86,14 +74,24 @@ class ReplayRequest implements Serializable {
 
         ReplayRequest that = (ReplayRequest) o;
 
-        if (json != null ? !json.equals(that.json) : that.json != null) return false;
-        if (type != that.type) return false;
+        return !((json != null ? !json.equals(that.json) : that.json != null) || type != that.type);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
         return 31 * (type != null ? type.hashCode() : 0) + (json != null ? json.hashCode() : 0);
+    }
+
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.writeObject(type);
+        oos.writeObject(json);
+        oos.writeLong(createdAt);
+
+    }
+    private void readObject(ObjectInputStream ois) throws IOException, JSONException, ClassNotFoundException {
+        type = (RequestType) ois.readObject();
+        json = (ReplayJsonObject) ois.readObject();
+        createdAt = ois.readLong();
     }
 }

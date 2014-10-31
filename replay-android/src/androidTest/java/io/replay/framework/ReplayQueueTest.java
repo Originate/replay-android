@@ -37,7 +37,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         mConfig.setApiKey("testKey");
         mConfig.setDispatchInterval(0);
         mConfig.setFlushAt(10);
-        mConfig.setMaxQueue(15);
+        mConfig.setMaxQueue(100);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
         queue.stop();
@@ -169,9 +169,9 @@ public class ReplayQueueTest extends AndroidTestCase {
         // load parameters
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey("testKey");
-        mConfig.setDispatchInterval(3600000); // 60 min == infinity?
-        mConfig.setFlushAt(15);
-        mConfig.setMaxQueue(5);
+        mConfig.setDispatchInterval(179999); // 60 min == infinity?
+        mConfig.setFlushAt(105);
+        mConfig.setMaxQueue(100);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
         queue.start();
@@ -183,16 +183,18 @@ public class ReplayQueueTest extends AndroidTestCase {
         ReplayJsonObject json = new ReplayJsonObject();
         json.put("event_name", "test");
 
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        assertEquals(5, queue.count());
+        for (int i = 0; i < 100; i+=5) {
+            queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+            queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+            queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+            queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+            queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        }
+        assertEquals(100, queue.count());
 
         //After maxQueue events are added, the system shouldn't allow any more
         queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        assertEquals(5, queue.count());
+        assertEquals(100, queue.count());
 
         //flush the queue so future tests work
         queue.clear();
@@ -216,9 +218,9 @@ public class ReplayQueueTest extends AndroidTestCase {
         // load parameters
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey("testKey");
-        mConfig.setDispatchInterval(36000000); // 10 hours == infinity?
-        mConfig.setFlushAt(5);
-        mConfig.setMaxQueue(10);
+        mConfig.setDispatchInterval(179999); // 10 hours == infinity?
+        mConfig.setFlushAt(10);
+        mConfig.setMaxQueue(100);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
         queue.start();
@@ -234,7 +236,13 @@ public class ReplayQueueTest extends AndroidTestCase {
         queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
         queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
         queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        assertEquals(4, queue.count());
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        assertEquals(10, queue.count());
 
         //After flushAt events are added, the queue should automatically flush
         queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));

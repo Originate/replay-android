@@ -14,7 +14,7 @@ class ReplaySessionManager {
      */
     static String getOrCreateSessionUUID(Context context) {
         ReplayPrefs prefs = ReplayPrefs.get(context);
-        if (prefs.getSessionID().length() == 0) {
+        if (prefs.getSessionID().isEmpty()) {
             prefs.setSessionID(UUID.randomUUID().toString());
             ReplayLogger.d("Generated new session uuid");
         }

@@ -62,6 +62,7 @@ class ReplayQueue {
 
     void stop() {
         jobqueue.stop();
+        dispatchTimer.cancel();
     }
 
     void enqueue(ReplayRequest request) {

@@ -12,7 +12,8 @@ import java.io.Serializable;
 import java.net.HttpURLConnection;
 
 /**
- * Created by parthpadgaonkar on 8/27/14.
+ * Class that is used to persist information to the database and attempts to POST info to API.
+ * If the POST fails, it will retry up to 20 times.
  */
 class ReplayJob extends Job implements Serializable {
     private final static String TAG = ReplayJob.class.getSimpleName();
@@ -31,12 +32,9 @@ class ReplayJob extends Job implements Serializable {
 
     @Override
     public void onRun() throws Throwable {
-
         ReplayRequestFactory.updateTimestamp(request);
-
         Pair<Integer, String> result;
-        try {
-            //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
+        try { //called on JobConsumerExecutor thread, which is NOT the JobQueue thread
             result = ReplayNetworkManager.doPost(request);
         } catch (Exception e) {
             ReplayLogger.e(e, "Error while POSTing job to Replay server: ");
@@ -60,15 +58,6 @@ class ReplayJob extends Job implements Serializable {
         return true;
     }
 
-
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-       oos.writeObject(request);
-    }
-
-    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        request = (ReplayRequest) ois.readObject();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -77,11 +66,18 @@ class ReplayJob extends Job implements Serializable {
         ReplayJob replayJob = (ReplayJob) o;
 
         return !(request != null ? !request.equals(replayJob.request) : replayJob.request != null);
-
     }
 
     @Override
     public int hashCode() {
         return request != null ? request.hashCode() : 0;
+    }
+
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.writeObject(request);
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        request = (ReplayRequest) ois.readObject();
     }
 }

@@ -2,7 +2,6 @@ package io.replay.framework;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.test.ServiceTestCase;
 
 import java.util.concurrent.CountDownLatch;
@@ -29,7 +28,7 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         // Create Queue
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey("testKey");
-        mConfig.setDispatchInterval(3600000); // 60 min == infinity?
+        mConfig.setDispatchInterval(179999); // 60 min == infinity?
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.stop();
 
@@ -42,7 +41,7 @@ public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> 
         assertEquals(3,queue.count());
 
         //Invoke the watchdog service
-        startService(new Intent(getSystemContext(), ReplayWatchdogService.class));
+        startService(ReplayWatchdogService.createIntent(getSystemContext(), "testKey"));
         try {
             latch.await();
             Thread.sleep(2000);

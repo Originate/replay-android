@@ -40,19 +40,19 @@ final class ReplayLogger {
     static void v(String tag, String format, Object... args) { log(Log.VERBOSE,  tag, format, args); }
 
 
-    private static void log(int level, String tag, String format, Object[] args){
-        if(!logEnabled) return;
-        Log.println(level, tag, String.format(format, args));
-    }
-
     private static void log(int level, String format, Object[] args){
         if(!logEnabled) return;
         log(level, processTag(), format, args);
     }
 
+    private static void log(int level, String tag, String format, Object[] args){
+        if(!logEnabled) return;
+        Log.println(level, tag, String.format(format, args));
+    }
+
     private static void log(int level, Throwable throwable, String format, Object[] args){
         if(!logEnabled) return;
-        Log.println(level, processTag(), String.format(format, args) + '\n' + Log.getStackTraceString(throwable));
+        Log.println(level, processTag(), String.format(format, args) + "\n" + Log.getStackTraceString(throwable));
     }
 
     /**

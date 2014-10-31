@@ -12,6 +12,7 @@ import java.net.URL;
  *
  */
 class ReplayNetworkManager {
+    private static final String TAG = ReplayNetworkManager.class.getSimpleName();
 
     /**
      * Post the request to the server. This operation occurs in the thread that called it.
@@ -24,9 +25,9 @@ class ReplayNetworkManager {
     static Pair<Integer, String> doPost(ReplayRequest request) throws IOException {
         final byte[] jsonBody = request.getBytes();
 
-        URL url = new URL(BuildConfig.REPLAY_URL + request.getType().toString());
+        URL url = new URL(io.replay.framework.BuildConfig.REPLAY_URL + request.getType().toString());
 
-        ReplayLogger.d("","POSTing to ", url.toString());
+        ReplayLogger.d(TAG,"POSTing to ", url.toString());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setFixedLengthStreamingMode(jsonBody.length);
