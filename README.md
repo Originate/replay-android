@@ -15,7 +15,7 @@ You can find extensive documentation at [http://docs.replay.io/client-libraries/
 
 	```gradle
     dependencies{
-    	compile 'io.replay:-replay-android:+
+    	compile 'io.replay:replay-android:+
     }
     ```
 - Maven
@@ -27,7 +27,7 @@ You can find extensive documentation at [http://docs.replay.io/client-libraries/
       <version>0.9.2</version>
 	</dependency>
     ```
-- [JAR or .aar](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android) 
+- [JAR](https://github.com/Originate/replay-android/releases) or [.aar](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android)
 - Git (last resort or if you need to make modifications)<br>
     In your terminal window:
 
