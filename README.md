@@ -1,6 +1,7 @@
 #Replay.io Android Client Library
 ---
-[![MavenCentral](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android) [![Circle CI](https://circleci.com/gh/Originate/replay-android/tree/master.png?style=badge&circle-token=d9bbccb7db1bfaa58c304a8ac313aa2338f92423)](https://circleci.com/gh/Originate/replay-android/tree/master)
+[![MavenCentral](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android) <br>
+[![Circle CI](https://circleci.com/gh/Originate/replay-android/tree/master.png?style=shield&circle-token=d9bbccb7db1bfaa58c304a8ac313aa2338f92423)](https://circleci.com/gh/Originate/replay-android/tree/master)
 
 
 [Replay.io](http://replay.io) is an analytics platform that wraps all those other analytics tools so you don't have to. One-touch integrations and smart analysis!
@@ -45,6 +46,8 @@ You can find extensive documentation at [http://docs.replay.io/client-libraries/
 
 Compiling with Gradle is the best solution, mostly because bundling JARs is *so* 2005! The library supports API 10+, so hack away!<br>
 *(Note: If you really need API 8+, you can definitely retrofit the code to support API 8 instead of 10.)*
+*(Note 2: This code does not contain a `build.xml`, so unless you manually create one, you will not be able to use replay-android as a library project in Eclipse/ADT.)*
+
 
 ###Build
 The library targets/compiles against API 19, so make sure you're rocking a Build Tools Version of at least 19.1.0 - also obviously make sure that you've downloaded the Android SDK for API 19. 
