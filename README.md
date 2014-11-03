@@ -8,7 +8,7 @@
 
 
 ##Documentation
-You can find extensive documentation at [http://docs.replay.io/client-libraries/android-api](http://docs.replay.io/client-libraries/android-api). 
+You can find extensive documentation at [http://dev.replay.io/docs/client_libraries/android_api.html](http://dev.replay.io/docs/client_libraries/android_api.html).
 
 ###Download
 - Gradle (preferred)<br>
