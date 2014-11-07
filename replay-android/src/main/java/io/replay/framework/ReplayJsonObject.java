@@ -41,22 +41,20 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
         }
     }
 
-    /**Convenience method for creating a JsonObject pre-instantiated with key-value pairs.
+    /**
+     * Convenience method for creating a JsonObject pre-instantiated with key-value pairs.
      *
      * @param keyValuePairs
      */
     ReplayJsonObject(Object... keyValuePairs) {
         super();
-        if (keyValuePairs != null) {
-            final int length = keyValuePairs.length;
-            if (length % 2 == 0 && length > 0) {
-                for (int i = 0; i < length; i += 2) {
-                    this.putObj((String) keyValuePairs[i], keyValuePairs[i + 1]);
-                }
-            } else {
-                throw new IllegalArgumentException("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
-                                     "arguments: e.g., [key, value, key, value]. ");
-            }
+        if (Util.isNullOrEmpty(keyValuePairs) || (keyValuePairs.length % 2 != 0)) {
+            throw new IllegalArgumentException("Error: ReplayJSONObject should be initialized with a non-zero, even number of" +
+                                                     "arguments: e.g., [key, value, key, value]. ");
+        }
+
+        for (int i = 0, keyValuePairsLength = keyValuePairs.length; i < keyValuePairsLength; i += 2) {
+            this.putObj((String) keyValuePairs[i], keyValuePairs[i + 1]);
         }
     }
 
@@ -312,7 +310,8 @@ public class ReplayJsonObject extends JSONObject implements Iterable<String>, Se
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
         int length = in.readInt();
         if(length <  0) throw new InvalidObjectException("ReplayJsonObject length: " + length);
-        for (int i = 0; i < length; i++) {
+
+        for (int i = length; --i >= 0;) {
             String key = in.readUTF();
             Object val = in.readObject();
             this.putObj(key, val);

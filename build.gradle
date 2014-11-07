@@ -19,7 +19,7 @@ ext{
     buildToolsVersion = "20.0.0"
     targetSDKVersion = 19
     minSDKVersion = 10
-    versionCode = new Integer("00905")
+    versionCode = new Integer("00905") //after v1.0, this will be unnecessary - `1001` will be sufficient.
     versionName = "0.9.5"
     versionNameDemo = versionName
     groupID = "io.replay"

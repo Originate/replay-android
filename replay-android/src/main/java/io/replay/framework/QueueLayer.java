@@ -23,12 +23,14 @@ import io.replay.framework.ReplayRequest.RequestType;
  *A thread-backed class that massages data into a usable form and then enqueues it for persistence. Most operations occur on a separate thread.
  */
 class QueueLayer extends LooperThreadWithHandler {
+    private final static String TAG = QueueLayer.class.getSimpleName();
     private ReplayQueue queue;
     private Context mContext;
     private ReplayJsonObject deviceInfo;
 
 
     public QueueLayer(ReplayQueue queue, final Context context) {
+        super(TAG);
         this.queue = queue;
         mContext = context;
         start();
@@ -65,7 +67,7 @@ class QueueLayer extends LooperThreadWithHandler {
             public void run() {
                 ReplayRequest request = ReplayRequestFactory.createRequest(mContext, RequestType.EVENTS, event, deviceInfo, data);
                 queue.enqueue(request);
-                ReplayLogger.d("Enqueued event with name: %s", event);
+                ReplayLogger.d(TAG, "Enqueued event with name: %s", event);
             }
         });
     }
