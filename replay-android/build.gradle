@@ -19,7 +19,7 @@ android {
         abortOnError false
     }
 
-    defaultPublishConfig "debug"
+    //defaultPublishConfig "debug" //use this when :relay-android:replay-android is being used as a local library project
 
     buildTypes {
         final def STRING = "String"

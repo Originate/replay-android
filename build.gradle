@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.2'
+        classpath 'com.android.tools.build:gradle:0.14.0'
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12+'
     }
 }
@@ -19,8 +19,8 @@ ext{
     buildToolsVersion = "20.0.0"
     targetSDKVersion = 19
     minSDKVersion = 10
-    versionCode = new Integer("00904")
-    versionName = "0.9.4"
+    versionCode = new Integer("00905")
+    versionName = "0.9.5"
     versionNameDemo = versionName
     groupID = "io.replay"
 
