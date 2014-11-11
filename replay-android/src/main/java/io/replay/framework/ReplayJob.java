@@ -73,6 +73,11 @@ class ReplayJob extends Job implements Serializable {
         return request != null ? request.hashCode() : 0;
     }
 
+    @Override
+    public String toString() {
+        return "ReplayJob{" +"request=" + request +'}';
+    }
+
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.writeObject(request);
     }

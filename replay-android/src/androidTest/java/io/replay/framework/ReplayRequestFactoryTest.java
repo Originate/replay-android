@@ -35,7 +35,7 @@ public class ReplayRequestFactoryTest extends AndroidTestCase {
         prefs.setDistinctID(distinct);
 
         //create new SessionID
-        ReplaySessionManager.getOrCreateSessionUUID(appContext);
+        ReplaySessionManager.startSession(appContext);
 
 
         ReplayRequest request = ReplayRequestFactory.createRequest(context, RequestType.EVENTS, event, new ReplayJsonObject(deviceInfo, "test"), new HashMap());

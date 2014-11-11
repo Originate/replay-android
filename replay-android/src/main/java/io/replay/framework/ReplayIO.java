@@ -100,14 +100,11 @@ public final class ReplayIO {
         mPrefs.setClientID(getOrGenerateClientUUID());
         mPrefs.setDistinctID("");
         ReplayLogger.setLogging(mConfig.isDebug());
-
-        //create new SessionID
-        ReplaySessionManager.getOrCreateSessionUUID(appContext);
+        ReplaySessionManager.startSession(mContext);
 
         // initialize ReplayQueue
         replayQueue = new ReplayQueue(context, mConfig);
         queueLayer = new QueueLayer(replayQueue, appContext);
-
 
         if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
             //determine if ReplayActivity is being used
@@ -252,14 +249,11 @@ public final class ReplayIO {
      */
     public static void setDebugMode(boolean debug) {
         checkInitialized();
-
         mConfig.setDebug(debug);
     }
 
     /**
-     * Called when the app entered background.  {@link ReplayQueue} will stop running,
-     * , and the Session will be ended, too.
-     *.
+     * Call this to stop ReplayIO, including the job queue and session.
      */
     public static void stop() {
         checkInitialized();
@@ -269,9 +263,9 @@ public final class ReplayIO {
     }
 
     /**
-     * Called when the app entered foreground.  {@link io.replay.framework.ReplayQueue} will be restarted.
-     * A new session is started. If there are persisted requests, load them into queue.
-     *
+     * Call this when you've explicitly stopped ReplayIO.
+     * The job queue will be restarted, and a new session is started.
+     * If there are persisted requests, load them into queue.
      */
     public static void start() {
         checkInitialized();
@@ -280,8 +274,7 @@ public final class ReplayIO {
         }else {
             replayQueue.start();
         }
-
-        mPrefs.setSessionID(ReplaySessionManager.getOrCreateSessionUUID(mContext));
+        ReplaySessionManager.startSession(mContext);
     }
 
     /**

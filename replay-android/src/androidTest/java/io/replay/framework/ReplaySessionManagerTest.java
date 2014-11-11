@@ -18,7 +18,7 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 	public void testSessionUUID() {
         assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID,""),"");
 		
-		String uuid = ReplaySessionManager.getOrCreateSessionUUID(getContext());
+		String uuid = ReplaySessionManager.startSession(getContext());
 		
 		// should get UUID string
 		assertNotNull(uuid);
@@ -29,12 +29,12 @@ public class ReplaySessionManagerTest extends AndroidTestCase {
 		assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID, ""), uuid);
 		
 		// should not regenerate the UUID
-		assertEquals(ReplaySessionManager.getOrCreateSessionUUID(getContext()), uuid);
+		assertEquals(ReplaySessionManager.startSession(getContext()), uuid);
 	}
 	
 	public void testEndSession() {
 		if (!mPrefs.contains(ReplayPrefs.KEY_SESSION_ID)) {
-			ReplaySessionManager.getOrCreateSessionUUID(getContext());
+			ReplaySessionManager.startSession(getContext());
 			assertTrue(mPrefs.contains(ReplayPrefs.KEY_SESSION_ID));
 		}
 		

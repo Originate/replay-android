@@ -20,13 +20,17 @@ class ReplayRequestFactory {
 
     static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Object... extras) {
         ReplayJsonObject json = init(context, type, eventName, properties);
-        properties.mergeJSON(new ReplayJsonObject(extras));
+        if(extras != null){
+            properties.mergeJSON(new ReplayJsonObject(extras));
+        }
         return new ReplayRequest(type, json);
     }
 
     static ReplayRequest createRequest(Context context, RequestType type, String eventName, ReplayJsonObject properties, Map<String, ?> extras) {
         ReplayJsonObject json = init(context, type, eventName, properties);
-        properties.mergeJSON(new ReplayJsonObject(extras));
+        if(extras != null){
+            properties.mergeJSON(new ReplayJsonObject(extras));
+        }
         return new ReplayRequest(type, json);
     }
 
