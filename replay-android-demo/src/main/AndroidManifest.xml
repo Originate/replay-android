@@ -1,23 +1,25 @@
-<manifest
-    package="io.replay.demo"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.replay.demo" >
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:icon="@drawable/replay_icon"
-        android:label="@string/app_name">
-
+        android:label="@string/app_name" >
         <activity
             android:name="io.replay.framework.demo.MainActivity"
             android:label="@string/app_name" >
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="io.replay.framework.demo.MainActivity2"
+            android:label="@string/title_activity_main_activity2" >
         </activity>
     </application>
 
