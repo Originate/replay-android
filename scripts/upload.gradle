@@ -24,7 +24,7 @@ version = rootProject.ext.versionName
 group = rootProject.ext.groupID
 
 def isReleaseBuild() {
-   return project.version.contains("SNAPSHOT") == false
+   return !project.version.contains("SNAPSHOT")
 }
 
 def getReleaseRepositoryUrl() {
@@ -38,12 +38,11 @@ def getSnapshotRepositoryUrl() {
 }
 
 def getRepositoryUsername() {
-    return hasProperty('USERNAME') ? USERNAME :
-            (hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : "")
+    return hasProperty('USERNAME') ? USERNAME : ""
 }
 
 def getRepositoryPassword() {
-    return hasProperty('PASSWORD') ? PASSWORD : (hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : "")
+    return hasProperty('PASSWORD') ? PASSWORD : ""
 }
 
 afterEvaluate { project ->
