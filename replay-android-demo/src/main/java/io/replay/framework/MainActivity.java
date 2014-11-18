@@ -9,7 +9,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import io.replay.demo.R;
+import io.replay.framework.demo.R;
 
 public class MainActivity extends Activity {
 
