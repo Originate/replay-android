@@ -11,7 +11,7 @@ public class Config {
     private static final int MIN_MAX_QUEUE = 100;
     private static final int MIN_FLUSH_AT = 10;
     private static final int MAX_DISPATCH_INTERVAL = 30*60*1000; //30 minutes
-    private static final int MAX_MAX_QUEUE = 10000;
+    private static final int MAX_MAX_QUEUE = 50000;
     private static final int MAX_FLUSH_AT = 1000;
     private static final String base = "%s cannot have a value %s than %d";
 
@@ -25,7 +25,6 @@ public class Config {
     static class Defaults {
         static final boolean DEBUG_MODE_ENABLED = false;
         static final boolean ENABLED = true;
-        static final String API_KEY = "";
         static final Integer DISPATCH_INTERVAL = 60*1000; //1 minutes
         static final Integer FLUSH_AT = 100;
         static final Integer MAX_QUEUE = 1200;
@@ -49,32 +48,32 @@ public class Config {
      * @param maxQueue the number at which we stop accepting items in the queue
      */
     public Config(boolean debugModeEnabled, boolean enabled, String apiKey,
-           int dispatchInterval, int flushAt, int maxQueue) {
+                       int dispatchInterval, int flushAt, int maxQueue) {
 
         String str = null;
-        if (dispatchInterval !=0 && dispatchInterval < MIN_DISPATCH_INTERVAL){
-            str = String.format(base, "\"dispatch interval\"", "less", MIN_DISPATCH_INTERVAL);
-        } else if (dispatchInterval > MAX_DISPATCH_INTERVAL){
-            str = String.format(base, "\"dispatch interval\"", "greater", + MAX_DISPATCH_INTERVAL);
-        }
-
-        if (flushAt < MIN_FLUSH_AT){
-            str = String.format(base, "\"flush at\"", "less", + MIN_FLUSH_AT);
-        } else if (flushAt > MAX_FLUSH_AT){
-            str = String.format(base, "\"flush at\"", "greater", + + MAX_FLUSH_AT);
-        }
-
-        if (maxQueue < MIN_MAX_QUEUE){
-            str = String.format(base, "\"max queue\"", "less", + MIN_MAX_QUEUE);
-        }else if (maxQueue > MAX_MAX_QUEUE){
-            str = String.format(base, "\"max queue\"", "greater", + + MAX_MAX_QUEUE);
-        }
-
-        if (Util.isNullOrEmpty(apiKey)){
+        if (Util.isNullOrEmpty(apiKey)) {
             str = "ReplayIO - API key should not be null or empty.";
+        } else {
+            if (dispatchInterval != 0 && dispatchInterval < MIN_DISPATCH_INTERVAL) {
+                str = String.format(base, "\"dispatch interval\"", "less", MIN_DISPATCH_INTERVAL);
+            } else if (dispatchInterval > MAX_DISPATCH_INTERVAL) {
+                str = String.format(base, "\"dispatch interval\"", "greater", MAX_DISPATCH_INTERVAL);
+            }
+
+            if (flushAt < MIN_FLUSH_AT) {
+                str = String.format(base, "\"flush at\"", "less", MIN_FLUSH_AT);
+            } else if (flushAt > MAX_FLUSH_AT) {
+                str = String.format(base, "\"flush at\"", "greater", MAX_FLUSH_AT);
+            }
+
+            if (maxQueue < MIN_MAX_QUEUE) {
+                str = String.format(base, "\"max queue\"", "less", MIN_MAX_QUEUE);
+            } else if (maxQueue > MAX_MAX_QUEUE) {
+                str = String.format(base, "\"max queue\"", "greater", MAX_MAX_QUEUE);
+            }
         }
 
-        if(str != null) throw new IllegalArgumentException(str);
+        if (str != null) throw new IllegalArgumentException(str);
 
         this.debugModeEnabled = debugModeEnabled;
         this.enabled = enabled;
@@ -129,7 +128,7 @@ public class Config {
             throw new IllegalArgumentException(String.format(base, "\"dispatch interval\"", "less", MIN_DISPATCH_INTERVAL));
         }
         else if (dispatchInterval > MAX_DISPATCH_INTERVAL){
-            throw new IllegalArgumentException(String.format(base, "\"dispatch interval\"", "greater", + MAX_DISPATCH_INTERVAL));
+            throw new IllegalArgumentException(String.format(base, "\"dispatch interval\"", "greater", MAX_DISPATCH_INTERVAL));
         }
 
         this.dispatchInterval = dispatchInterval;
@@ -142,10 +141,10 @@ public class Config {
 
     public Config setFlushAt(int flushAt){
         if (flushAt < MIN_FLUSH_AT){
-            throw new IllegalArgumentException(String.format(base, "\"flush at\"", "less", + MIN_FLUSH_AT));
+            throw new IllegalArgumentException(String.format(base, "\"flush at\"", "less", MIN_FLUSH_AT));
         }
         else if (flushAt > MAX_FLUSH_AT){
-            throw new IllegalArgumentException(String.format(base, "\"flush at\"", "greater", + + MAX_FLUSH_AT));
+            throw new IllegalArgumentException(String.format(base, "\"flush at\"", "greater", MAX_FLUSH_AT));
         }
         this.flushAt = flushAt;
         return this;
@@ -157,10 +156,10 @@ public class Config {
 
     public Config setMaxQueue(int maxQueue){
         if (maxQueue < MIN_MAX_QUEUE){
-            throw new IllegalArgumentException(String.format(base, "\"max queue\"", "less", + MIN_MAX_QUEUE));
+            throw new IllegalArgumentException(String.format(base, "\"max queue\"", "less", MIN_MAX_QUEUE));
         }
         else if (maxQueue > MAX_MAX_QUEUE){
-            throw new IllegalArgumentException(String.format(base, "\"max queue\"", "greater", + + MAX_MAX_QUEUE));
+            throw new IllegalArgumentException(String.format(base, "\"max queue\"", "greater", MAX_MAX_QUEUE));
         }
         this.maxQueue = maxQueue;
         return this;

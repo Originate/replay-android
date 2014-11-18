@@ -1,4 +1,4 @@
-package io.replay.framework.demo;
+package io.replay.framework;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,7 +10,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import io.replay.demo.R;
-import io.replay.framework.ReplayIO;
 
 public class MainActivity extends Activity {
 

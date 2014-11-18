@@ -49,6 +49,12 @@ class QueueLayer extends LooperThreadWithHandler {
         queue.start();
     }
 
+    @Override
+    void quit() {
+        queue.stop();
+        super.quit();
+    }
+
     void enqueueEvent(final String event, final Object[] data) {
         handler().post(new Runnable() {
             @Override
