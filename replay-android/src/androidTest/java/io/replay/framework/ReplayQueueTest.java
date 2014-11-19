@@ -2,6 +2,7 @@ package io.replay.framework;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
+import android.test.UiThreadTest;
 
 import org.json.JSONException;
 
@@ -28,6 +29,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws InterruptedException
      */
 
+    @UiThreadTest
     public void testSetDispatcherIntervalZero() throws NoSuchFieldException, IllegalAccessException,
             IllegalArgumentException, JSONException, InterruptedException {
         Context context = getContext();
@@ -61,51 +63,6 @@ public class ReplayQueueTest extends AndroidTestCase {
         assertEquals(0, queue.count());
     }
 
-    /**
-     * Test setDispatcherInterval(-1), this will fail if server side is not on.
-     * Slow network connection will cause failure, too.
-     *
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws org.json.JSONException
-     * @throws InterruptedException
-     */
-   /*
-    public void testSetDispatcherIntervalMinus() throws NoSuchFieldException, IllegalAccessException,
-                                                              IllegalArgumentException, JSONException, InterruptedException {
-        Context context = getContext();
-        Context appContext = context.getApplicationContext();
-
-        // load parameters
-        mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey("testKey");
-        mConfig.setDispatchInterval(-1);
-        ReplayRequestFactory.init(appContext);
-        queue = new ReplayQueue(context, mConfig);
-        QueueLayer ql = new QueueLayer(queue);
-
-
-        //make sure queue is empty for start of tests
-        ql.sendFlush();
-        Thread.sleep(2000);
-        assertEquals(0, queue.count());
-
-        //add events to queue
-        ql.enqueueEvent("event", null);
-        ql.enqueueEvent("event", null);
-        assertEquals(2, queue.count());
-
-        //The queue should not flush after any amount of time
-        Thread.sleep(10000);
-        assertEquals(2, queue.count());
-
-        //The queue should flush with flush() is called
-        ql.sendFlush();
-        Thread.sleep(2000);
-        assertEquals(0, queue.count());
-        queue.stop();
-    }*/
 
     /**
      * Test setDispatcherInterval(5), this will fail if server side is not on.
@@ -118,16 +75,18 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws InterruptedException
      */
 /*
+    @UiThreadTest
     public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException,
                                                           IllegalArgumentException, JSONException, InterruptedException {
         Context context = getContext();
-        final int interval = 300;
+        final int interval = 5000;
 
         // load parameters
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey("testKey");
         mConfig.setDispatchInterval(interval);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
+
         queue.clear();
         queue.start();
 
@@ -138,14 +97,14 @@ public class ReplayQueueTest extends AndroidTestCase {
         ReplayJsonObject json = new ReplayJsonObject();
         json.put("event_name", "test");
 
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
         assertEquals(4, queue.count());
 
         //make sure the queue is flushed after dispatchInterval milliseconds have passed
-        Thread.sleep(interval * 3);
+
         assertEquals(0, queue.count());
         queue.stop();
     }
@@ -161,6 +120,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws org.json.JSONException
      * @throws InterruptedException
      */
+    @UiThreadTest
     public void testMaxQueue() throws NoSuchFieldException, IllegalAccessException,
             IllegalArgumentException, JSONException, InterruptedException {
 
@@ -170,7 +130,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
         mConfig.setApiKey("testKey");
         mConfig.setDispatchInterval(179999); // 60 min == infinity?
-        mConfig.setFlushAt(105);
+        mConfig.setFlushAt(150);
         mConfig.setMaxQueue(100);
         ReplayQueue queue = new ReplayQueue(context, mConfig);
         queue.clear();
@@ -183,7 +143,7 @@ public class ReplayQueueTest extends AndroidTestCase {
         ReplayJsonObject json = new ReplayJsonObject();
         json.put("event_name", "test");
 
-        for (int i = 0; i < 100; i+=5) {
+        for (int i = 0; i < 120; i+=5) {
             queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
             queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
             queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
@@ -210,6 +170,7 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws org.json.JSONException
      * @throws InterruptedException
      */
+    @UiThreadTest
     public void testFlushAt() throws NoSuchFieldException, IllegalAccessException,
             IllegalArgumentException, JSONException, InterruptedException {
 

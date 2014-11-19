@@ -76,22 +76,22 @@ public class ConfigTest extends AndroidTestCase {
         }
 
         try{
-            new Config(true, true, "testKey", 5000, 100, 1000);
-            fail("Config should not accept an outlandish value");
+            new Config(true, true, "testKey", 5000, 1200, 1000);
+            fail("Config should not accept an excessive flush value");
         }catch (IllegalArgumentException e){
             assertNotNull(e);
         }
 
         try{
-            new Config(true, true, "testKey", 5000, 100, 1000);
-            fail("Config should not accept an outlandish value");
+            new Config(true, true, "testKey", 5000, 100, 15);
+            fail("Config should not accept a small maxqueue value");
         }catch (IllegalArgumentException e){
             assertNotNull(e);
         }
 
         try{
-            new Config(true, true, "testKey", 5000, 100, 1000);
-            fail("Config should not accept an outlandish value");
+            new Config(true, true, "testKey", 5000, 100, 100000);
+            fail("Config should not accept an excessive maxqueue value");
         }catch (IllegalArgumentException e){
             assertNotNull(e);
         }
@@ -156,7 +156,7 @@ public class ConfigTest extends AndroidTestCase {
         }
 
         try{
-            baseConfig.setFlushAt(10);
+            baseConfig.setFlushAt(9);
             fail("Config should reject a flush interval that is too small");
         }catch (IllegalArgumentException e){
             assertNotNull(e);

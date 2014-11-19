@@ -1,44 +1,48 @@
 package io.replay.framework;
 
-import java.util.UUID;
-
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.test.AndroidTestCase;
 
-public class ReplaySessionManagerTest extends AndroidTestCase {
-	private SharedPreferences mPrefs;
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		mPrefs = getContext().getSharedPreferences("ReplayIOPreferences", Context.MODE_PRIVATE);
-	}
+import java.util.UUID;
 
-	public void testSessionUUID() {
-        assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID,""),"");
-		
-		String uuid = ReplaySessionManager.startSession(getContext());
-		
-		// should get UUID string
-		assertNotNull(uuid);
-		assertEquals(UUID.fromString(uuid).toString(), uuid);
-		
-		// should save to preferences
-		assertTrue(mPrefs.contains(ReplayPrefs.KEY_SESSION_ID));
-		assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID, ""), uuid);
-		
-		// should not regenerate the UUID
-		assertEquals(ReplaySessionManager.startSession(getContext()), uuid);
-	}
-	
-	public void testEndSession() {
-		if (!mPrefs.contains(ReplayPrefs.KEY_SESSION_ID)) {
-			ReplaySessionManager.startSession(getContext());
-			assertTrue(mPrefs.contains(ReplayPrefs.KEY_SESSION_ID));
-		}
-		
-		ReplaySessionManager.endSession(getContext());
-		assertEquals(mPrefs.getString(ReplayPrefs.KEY_SESSION_ID,""),"");
-	}
+public class ReplaySessionManagerTest extends AndroidTestCase {
+    private ReplayPrefs mPrefs;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mPrefs = ReplayPrefs.get(getContext());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        mPrefs.setSessionID("");
+
+    }
+
+    public void testSessionUUID() {
+        assertEquals(mPrefs.getSessionID(), "");
+
+        String uuid = ReplaySessionManager.startSession(getContext());
+
+        // should get UUID string
+        assertNotNull(uuid);
+        assertEquals(UUID.fromString(uuid).toString(), uuid); //I would be concerned if this fails
+
+        // should save to preferences
+        assertNotNull(mPrefs.getSessionID());
+        assertEquals(uuid, mPrefs.getSessionID());
+
+        // should not regenerate the UUID if it hasn't been unset
+        assertEquals(ReplaySessionManager.startSession(getContext()), uuid);
+    }
+
+    public void testEndSession() {
+        assertEquals(mPrefs.getSessionID(), "");
+
+        String uuid = ReplaySessionManager.startSession(getContext());
+        ReplaySessionManager.endSession(getContext());
+
+        assertEquals(mPrefs.getSessionID(), "");
+    }
 }
