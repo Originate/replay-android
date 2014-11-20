@@ -40,16 +40,19 @@ dependencies {
 }
 
 task clearJar(type: Delete) {
-    delete 'build/libs/replay-android.jar'
+    delete "build/libs/replay-android-${rootProject.ext.versionName-1}.jar"
+    delete "build/libs/replay-android-${rootProject.ext.versionName}.jar"
 }
 
-task makeJar(type: Copy) {
-    from('build/intermediates/bundles/release/')
-    into('build/libs/')
-    include('classes.jar')
-    rename('classes.jar', "replay-android-${rootProject.ext.versionName}.jar")
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.core.BuilderConstants.RELEASE)) {
+        def task = project.tasks.create "jar${name.capitalize()}", Jar
+        task.dependsOn clearJar, variant.javaCompile
+        task.from variant.javaCompile.destinationDir, configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        artifacts.add('archives', task);
+    }
 }
 
-makeJar.dependsOn(clearJar, build)
 
-apply from: '../scripts/upload.gradle'
+apply from: "../scripts/upload.gradle"
