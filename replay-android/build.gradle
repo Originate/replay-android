@@ -19,25 +19,17 @@ android {
         abortOnError false
     }
 
-    //defaultPublishConfig "debug" //use this when :relay-android:replay-android is being used as a local library project
-
     buildTypes {
-        final def STRING = "String"
-        final def REPLAY_URL = "REPLAY_URL"
-        def url = {scheme, path, port -> "\"http$scheme://$path${!port.isEmpty() ? ":$port/" : "/"}\""}
+        final def (STRING, REPLAY_URL) = ["String", "REPLAY_URL"]
 
-        debug { //default build config works with emulator
+        debug {
             debuggable true
-            buildConfigField STRING, REPLAY_URL, url("", "10.0.2.2", "3000")
+            buildConfigField STRING, REPLAY_URL, "\"https://api.replay.io/\""
         }
-        genymotion.initWith(buildTypes.debug) //extra build config to work with Genymotion
-        genymotion {
-            debuggable true
-            buildConfigField STRING, REPLAY_URL, url("", "192.168.56.1", "3000")
-        }
+
         release {
             debuggable false
-            buildConfigField STRING, REPLAY_URL, url("s", "api.replay.io", "")
+            buildConfigField STRING, REPLAY_URL, "\"https://api.replay.io/\""
         }
     }
 }

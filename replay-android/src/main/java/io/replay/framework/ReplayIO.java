@@ -15,6 +15,7 @@ import android.os.SystemClock;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The ReplayIO static class is a wrapper around a database-backed, multithreaded queue and a basic
@@ -38,11 +39,14 @@ public final class ReplayIO {
     private static ReplayQueue replayQueue;
     private static QueueLayer queueLayer;
 
+    /** Used to track meta-activity lifecycle - i.e., how many activities have been created vs. stopped. */
+    private static AtomicInteger activityCount = new AtomicInteger(0);
+
     /**
      * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
      * including the Replay API key, which is required to be present in order to communicate with the server.
      *
-     * It is acceptable to call this class from the main UI thread.
+     * It is acceptable to call this method from the main UI thread.
      *
      * @param context The application context.  Use application context instead of activity context
      *                to avoid the risk of memory leak.
@@ -58,7 +62,7 @@ public final class ReplayIO {
      * Initializes the ReplayIO client. Loads the configuration parameters <code>/res/values/replay_io.xml</code>,
      * including the Replay API key, which is required to be present in order to communicate with the server.
      *
-     * It is acceptable to call this class from the main UI thread.
+     * It is acceptable to call this method from the main UI thread.
      *
      * @param context The application context.  We use application context instead of activity context
      *                to avoid the risk of memory leak.
@@ -76,7 +80,7 @@ public final class ReplayIO {
      * Initializes the ReplayIO client. Loads the configuration parameters from the provided <code>options</code>
      * object, including the Replay API key, which is required to be present in order to communicate with the server.
      *
-     * It is acceptable to call this class from the main UI thread.
+     * It is acceptable to call this method from the main UI thread.
      *
      * @param context The application context.  We use application context instead of activity context
      *                to avoid the risk of memory leak.
@@ -99,11 +103,11 @@ public final class ReplayIO {
         mPrefs = ReplayPrefs.get(appContext);
         mPrefs.setClientID(getOrGenerateClientUUID());
         mPrefs.setDistinctID("");
-        ReplayLogger.setLogging(mConfig.isDebug());
-        ReplaySessionManager.startSession(mContext);
+        ReplayLogger.setLogging(options.isDebug());
+        ReplaySessionManager.startSession(appContext);
 
         // initialize ReplayQueue
-        replayQueue = new ReplayQueue(context, mConfig);
+        replayQueue = new ReplayQueue(appContext, options);
         queueLayer = new QueueLayer(replayQueue, appContext);
 
         if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH ) {
@@ -239,6 +243,7 @@ public final class ReplayIO {
      * @return True if enabled, false otherwise.
      */
     public static boolean isDebugMode() {
+        checkInitialized();
         return mConfig.isDebug();
     }
 
@@ -294,9 +299,6 @@ public final class ReplayIO {
      * @return Client UUID.
      */
     public static String getOrGenerateClientUUID() {
-        if (null == mConfig) {
-            throw new ReplayIONotInitializedException();
-        }
         if (Util.isNullOrEmpty(mPrefs.getClientID())) {
             mPrefs.setClientID(UUID.randomUUID().toString());
             ReplayLogger.d("Generated new client UUID");
@@ -311,7 +313,7 @@ public final class ReplayIO {
      */
     public static void onActivityCreate(Context context) {
         ReplayIO.init(context);
-        initWatchdog();
+        activityCount.incrementAndGet();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -322,7 +324,7 @@ public final class ReplayIO {
      */
     public static void onActivityCreate(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
-        initWatchdog();
+        activityCount.incrementAndGet();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
@@ -334,39 +336,36 @@ public final class ReplayIO {
 
     public static void onActivityCreate(Context context, Config options) {
         ReplayIO.init(context, options);
-        initWatchdog();
+        activityCount.incrementAndGet();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
-     *  and notifies the client that this activity has been created.
+     *  and notifies the client that this activity has been started.
      *
      * @param context an instance of the Activity
      */
     public static void onActivityStart(Context context) {
         ReplayIO.init(context);
-        initWatchdog();
     }
 
     /** Initializes the Replay.io client, kicks off all worker threads,
-     *  and notifies the client that this activity has been created.
+     *  and notifies the client that this activity has been started.
      *
      * @param context an instance of the Activity
      * @param apiKey the Replay API key
      */
     public static void onActivityStart(Context context, String apiKey) {
         ReplayIO.init(context, apiKey);
-        initWatchdog();
     }
 
     /**Initializes the Replay.io client, kicks off all worker threads,
-     *  and notifies the client that this activity has been created.
+     *  and notifies the client that this activity has been started.
      *
      * @param context an instance of the Activity
      * @param options a full Config object that contains initialization parameters.
      */
     public static void onActivityStart(Context context, Config options){
         ReplayIO.init(context, options);
-        initWatchdog();
     }
 
     /**
@@ -384,7 +383,10 @@ public final class ReplayIO {
      * @param context the activity
      */
     public static void onActivityPause(Context context) {
-        flushQueue(context.getApplicationContext());
+        checkInitialized();
+        if(activityCount.get() == 1){ //last activity on the stack
+            queueLayer.sendFlush(); //try to flush out the events
+        }
     }
 
     /**
@@ -393,14 +395,16 @@ public final class ReplayIO {
      * @param context
      */
     public static void onActivityStop(Context context) {
-        flushQueue(context.getApplicationContext());
-        if(watchdogEnabled){
-            alarmManager.cancel(watchdogIntent);
-            watchdogEnabled ^= true;
+        checkInitialized();
+        if(activityCount.decrementAndGet() == 0){ //no more activities; we'll be shut down soon
+            queueLayer.quit();
+            ReplaySessionManager.endSession(context);
+            initWatchdogService();
+            initialized = false;
         }
     }
 
-    private static void initWatchdog() {
+    private static void initWatchdogService() {
         if(!watchdogEnabled){
             if(alarmManager == null){
                 alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -410,19 +414,6 @@ public final class ReplayIO {
             alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 21600000L, watchdogIntent); //6 hours
             watchdogEnabled ^= true;
         }
-    }
-
-    private static void flushQueue(Context context) {
-        if (queueLayer == null) {
-            if (mConfig == null) {
-                mConfig = ReplayParams.getOptions(context);
-            }
-            if (replayQueue == null) {
-                replayQueue = new ReplayQueue(context, mConfig);
-            }
-            queueLayer = new QueueLayer(replayQueue, context);
-        }
-        queueLayer.sendFlush();
     }
 
     /**
@@ -442,11 +433,11 @@ public final class ReplayIO {
         identify("");
     }
 
-    public static int count(){
+    static int count(){
         return replayQueue.count();
     }
 
-    public static Config getConfig(){
+    static Config getConfig(){
         return mConfig;
     }
 }
