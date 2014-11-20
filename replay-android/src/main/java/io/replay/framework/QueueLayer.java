@@ -26,6 +26,7 @@ class QueueLayer extends LooperThreadWithHandler {
     private ReplayQueue queue;
     private Context mContext;
     private ReplayJsonObject deviceInfo;
+    private boolean running = false;
 
 
     public QueueLayer(ReplayQueue queue, final Context context) {
@@ -43,8 +44,9 @@ class QueueLayer extends LooperThreadWithHandler {
 
     @Override
     public synchronized void start() {
-        if(!isAlive()){
+        if(!running){
             super.start();
+            running = true;
         }
         queue.start();
     }
@@ -52,6 +54,7 @@ class QueueLayer extends LooperThreadWithHandler {
     @Override
     void quit() {
         queue.stop();
+        running = false;
         super.quit();
     }
 

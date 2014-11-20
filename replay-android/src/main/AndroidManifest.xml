@@ -12,7 +12,6 @@
         <service
             android:name="io.replay.framework.ReplayWatchdogService"
             android:exported="false" />
-
     </application>
 
 </manifest>

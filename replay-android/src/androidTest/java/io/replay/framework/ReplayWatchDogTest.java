@@ -6,6 +6,8 @@ import android.test.ServiceTestCase;
 
 import java.util.concurrent.CountDownLatch;
 
+import io.replay.framework.testClasses.WatchDogServiceWrapper;
+
 public class ReplayWatchDogTest extends ServiceTestCase<WatchDogServiceWrapper> {
 
     private CountDownLatch latch;

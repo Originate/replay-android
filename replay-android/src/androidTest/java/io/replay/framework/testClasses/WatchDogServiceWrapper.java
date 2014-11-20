@@ -1,7 +1,10 @@
-package io.replay.framework;
+package io.replay.framework.testClasses;
+
+import android.content.Intent;
 
 import java.util.concurrent.CountDownLatch;
-import android.content.Intent;
+
+import io.replay.framework.ReplayWatchdogService;
 
 public class WatchDogServiceWrapper extends ReplayWatchdogService {
     private CountDownLatch latch;

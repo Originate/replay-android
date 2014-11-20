@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ReplayIO {
 
     private static AlarmManager alarmManager;
-    private static PendingIntent watchdogIntent;
     private static boolean watchdogEnabled = false;
 
     private static boolean enabled;
@@ -409,8 +408,8 @@ public final class ReplayIO {
             if(alarmManager == null){
                 alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             }
-            watchdogIntent = PendingIntent.getService(mContext, 0,
-                   ReplayWatchdogService.createIntent(mContext, mConfig.getApiKey()), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent watchdogIntent = PendingIntent.getService(mContext, 0,
+                     ReplayWatchdogService.createIntent(mContext, mConfig.getApiKey()), PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 21600000L, watchdogIntent); //6 hours
             watchdogEnabled ^= true;
         }

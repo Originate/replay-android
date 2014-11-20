@@ -74,41 +74,50 @@ public class ReplayQueueTest extends AndroidTestCase {
      * @throws org.json.JSONException
      * @throws InterruptedException
      */
-/*
-    @UiThreadTest
+
     public void testSetDispatcherInterval5() throws NoSuchFieldException, IllegalAccessException,
                                                           IllegalArgumentException, JSONException, InterruptedException {
-        Context context = getContext();
-        final int interval = 5000;
 
-        // load parameters
-        Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey("testKey");
-        mConfig.setDispatchInterval(interval);
-        ReplayQueue queue = new ReplayQueue(context, mConfig);
+       //unfortunately hacky, but this is the only way to get the QueueHandler to run on its own thread. That way, Junit doesn't complain about killing the main thread.
+       new Thread(){
+           @Override
+           public void run() {
+               super.run();
 
-        queue.clear();
-        queue.start();
+               Context context = getContext();
+               final int interval = 5000;
 
-        //make sure queue is empty for start of tests
-        assertEquals(0, queue.count());
+               // load parameters
+               Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
+               mConfig.setApiKey("testKey");
+               mConfig.setDispatchInterval(interval);
+               ReplayQueue queue = new ReplayQueue(context, mConfig);
 
-        //add events to queue
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put("event_name", "test");
+               queue.clear();
+               queue.start();
 
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        assertEquals(4, queue.count());
+               //make sure queue is empty for start of tests
+               assertEquals(0, queue.count());
 
-        //make sure the queue is flushed after dispatchInterval milliseconds have passed
+               //add events to queue
+               ReplayJsonObject json = new ReplayJsonObject();
+               json.put("event_name", "test");
 
-        assertEquals(0, queue.count());
-        queue.stop();
+               queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+               queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+               queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+               queue.enqueue(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
+               assertEquals(4, queue.count());
+
+               //make sure the queue is flushed after dispatchInterval milliseconds have passed
+
+               assertEquals(0, queue.count());
+               queue.stop();
+
+           }
+       };
     }
-*/
+
 
     /**
      * Test setDispatcherInterval(5), this will fail if server side is not on.
