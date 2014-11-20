@@ -14,7 +14,7 @@ public class DummyLifecycleActivity2 extends ReplayActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.dummy_lifecycle_layout2);
+        setContentView(R.layout.dummy_lifecycle_layout);
         setTitle("Dummy Activity 2");
     }
 }

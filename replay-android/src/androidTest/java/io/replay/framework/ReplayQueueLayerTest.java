@@ -6,8 +6,6 @@ import android.test.AndroidTestCase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-
 import io.replay.framework.QueueLayer.InfoManager;
 
 public class ReplayQueueLayerTest extends AndroidTestCase {
@@ -17,50 +15,12 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         super.setUp();
     }
 
-    public void testCreateAndEnqueue() throws InterruptedException{
-        Context context = getContext();
-
-        // load parameters
-        Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey("testKey");
-        ReplayQueue queue = new ReplayQueue(context, mConfig);
-        queue.clear();
-        QueueLayer ql = new QueueLayer(queue, context);
-        ql.start();
-
-        //Queue should be empty
-        assertEquals(0, queue.count());
-
-        //check to make sure events can be enqueued
-        ql.enqueueEvent("Event", new HashMap<String, Object>());
-        Thread.sleep(1000);
-        assertEquals(1,queue.count());
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
     }
 
     public void testEnqueueJob() throws JSONException, InterruptedException{
-        Context context = getContext();
-
-        // load parameters
-        Config mConfig = ReplayParams.getOptions(context.getApplicationContext());
-        mConfig.setApiKey("testKey");
-        ReplayQueue queue = new ReplayQueue(context, mConfig);
-        queue.clear();
-        QueueLayer ql = new QueueLayer(queue, context);
-        ql.start();
-
-        //Queue should be empty
-        assertEquals(0,queue.count());
-
-        //check to make sure events can be enqueued
-        ReplayJsonObject json = new ReplayJsonObject();
-        json.put("event_name", "test");
-
-        ql.enqueueJob(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
-        Thread.sleep(1000);
-        assertEquals(1,queue.count());
-    }
-
-    public void testEnqueueRequest() throws JSONException, InterruptedException{
         Context context = getContext();
 
         // load parameters
@@ -97,7 +57,9 @@ public class ReplayQueueLayerTest extends AndroidTestCase {
         assertEquals(0,queue.count());
 
         //enqueue event
-        ql.enqueueEvent("Event", new HashMap<String, Object>());
+        ReplayJsonObject json = new ReplayJsonObject();
+        json.put("event_name", "test");
+        ql.enqueueJob(new TestReplayJob(new ReplayRequest(ReplayRequest.RequestType.EVENTS, json)));
 
         //check to make sure events can be flushed
         ql.sendFlush();
