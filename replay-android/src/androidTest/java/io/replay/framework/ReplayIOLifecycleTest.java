@@ -95,10 +95,8 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
 
         final DummyLifecycleActivity2 dummyActivity2 = (DummyLifecycleActivity2) instrumentation.waitForMonitor(activityMonitor);
         assertNotNull(dummyActivity2);
-
-        assertEquals(1, activityCount.get());
         //annoying, but the wait/notify pattern is necessary to ensure that the UI thread's actions are synchronized with the JUnit thread - at least for a few lines
-        dummyActivity1.runOnUiThread(new Runnable() {
+       /* dummyActivity1.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 instrumentation.callActivityOnCreate(dummyActivity2, null);
@@ -109,10 +107,10 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
         });
 
         synchronized (LOCK) {
-            LOCK.wait();
-            activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
-            assertEquals(2, activityCount.get());
-        }
+            LOCK.wait();*/
+        activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
+        assertEquals(2, activityCount.get());
+        // }
 
 
         //TODO add onStop functionality with back presses?
