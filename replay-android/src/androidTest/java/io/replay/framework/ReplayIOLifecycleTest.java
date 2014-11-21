@@ -80,6 +80,7 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
     }
 
     public void testTwoActivityLifecycle() throws Exception {
+        assertEquals(1, activityCount.get());
         dummyActivity1 = getActivity();
         assertEquals(1, activityCount.get());
 
@@ -93,8 +94,11 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
 
         TouchUtils.clickView(ReplayIOLifecycleTest.this, button);
 
+
+        assertEquals(1, activityCount.get());
         final DummyLifecycleActivity2 dummyActivity2 = (DummyLifecycleActivity2) instrumentation.waitForMonitor(activityMonitor);
         assertNotNull(dummyActivity2);
+        assertEquals(1, activityCount.get());
         //annoying, but the wait/notify pattern is necessary to ensure that the UI thread's actions are synchronized with the JUnit thread - at least for a few lines
        /* dummyActivity1.runOnUiThread(new Runnable() {
             @Override

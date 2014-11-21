@@ -39,7 +39,7 @@ test:
         - (./gradlew :replay-android:connectedAndroidTest)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
-        - $ANDROID_HOME/platform-tools/adb -e shell pm list packages | grep replay
+        - echo $($ANDROID_HOME/platform-tools/adb -e shell pm list packages | grep replay)
       #  - ($ANDROID_HOME/platform-tools/adb uninstall io.replay.framework.tests)
 
 
