@@ -92,10 +92,13 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
 
         final ActivityMonitor activityMonitor = instrumentation.addMonitor(DummyLifecycleActivity2.class
                                                                                  .getName(), null, false);
-
+        activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
         TouchUtils.clickView(ReplayIOLifecycleTest.this, button);
 
-
+        Thread.sleep(1000);
+        
+        activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
+        assertEquals(1, activityCount.get());
         final DummyLifecycleActivity2 dummyActivity2 = (DummyLifecycleActivity2) activityMonitor.waitForActivityWithTimeout(2000);
         assertNotNull(dummyActivity2);
         assertEquals(1, activityCount.get());
