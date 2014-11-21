@@ -22,13 +22,13 @@ dependencies:
         - ~/android
     pre:
        - (source scripts/replay-envsetup.sh && ensureDependenciesAndCreateAVD)
+       - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
+           background: true
     override:
        - (echo "overriding `gradlew dependencies`")
 
 test:
     pre:
-        - $ANDROID_HOME/tools/emulator -avd testAVD -no-skin -no-audio -no-window:
-           background: true
         - (./gradlew assembleDebug):
             timeout: 360
         - (./gradlew assembleDebugTest):
