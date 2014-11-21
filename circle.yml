@@ -36,7 +36,7 @@ test:
         - (source scripts/replay-envsetup.sh && waitAVD)
     override:
         - (echo "Override")
-        - (./gradlew :replay-android:connectedAndroidTest)
+        - (./gradlew :replay-android:connectedAndroidTest --info)
     post:
         - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
         - echo $($ANDROID_HOME/platform-tools/adb -e shell pm list packages | grep replay)

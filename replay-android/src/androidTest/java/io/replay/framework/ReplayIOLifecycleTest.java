@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.replay.framework.testClasses.DummyLifecycleActivity1;
@@ -99,22 +100,18 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
         assertNotNull(dummyActivity2);
         assertEquals(1, activityCount.get());
         //annoying, but the wait/notify pattern is necessary to ensure that the UI thread's actions are synchronized with the JUnit thread - at least for a few lines
+        final CountDownLatch latch = new CountDownLatch(1);
         dummyActivity1.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 instrumentation.callActivityOnCreate(dummyActivity2, null);
-                synchronized (LOCK) {
-                    LOCK.notifyAll();
-                }
+                latch.countDown();
             }
         });
 
-        synchronized (LOCK) {
-            LOCK.wait();
-            activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
-            assertEquals(2, activityCount.get());
-        }
-
+        latch.await();
+        activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
+        assertEquals(2, activityCount.get());
 
         //TODO add onStop functionality with back presses?
 
