@@ -16,7 +16,7 @@ task wrapper(type: Wrapper) {
 
 ext{
     compileSDKVersion = 19
-    buildToolsVersion = "20.0.0"
+    buildToolsVersion = "21.1.1"
     targetSDKVersion = 19
     minSDKVersion = 10
     versionCode = new Integer("00906")

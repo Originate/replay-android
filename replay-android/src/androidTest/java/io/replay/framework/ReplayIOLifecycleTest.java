@@ -81,7 +81,12 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
     }
 
     public void testTwoActivityLifecycle() throws Exception {
-        assertEquals(1, activityCount.get());
+        Field initialized = ReplayIO.class.getDeclaredField("initialized");
+        initialized.setAccessible(true);
+        initialized.setBoolean(null, true);
+        dummyActivity1.finish();
+
+        assertEquals(0, activityCount.get());
         dummyActivity1 = getActivity();
         assertEquals(1, activityCount.get());
 
@@ -96,7 +101,7 @@ public class ReplayIOLifecycleTest extends ActivityInstrumentationTestCase2<Dumm
         TouchUtils.clickView(ReplayIOLifecycleTest.this, button);
 
         Thread.sleep(1000);
-        
+
         activityCount = getReplayStaticFieldByReflection("activityCount", AtomicInteger.class);
         assertEquals(1, activityCount.get());
         final DummyLifecycleActivity2 dummyActivity2 = (DummyLifecycleActivity2) activityMonitor.waitForActivityWithTimeout(2000);
