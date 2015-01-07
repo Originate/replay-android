@@ -18,7 +18,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.jakewharton:butterknife:5.1.2'
-    //debugCompile project(path: ':replay-android', configuration: "genymotion")
     compile project(':replay-android')
+    compile 'com.jakewharton:butterknife:5.1.2'
 }
