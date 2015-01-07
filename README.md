@@ -25,7 +25,7 @@ You can find extensive documentation at [http://dev.replay.io/docs/client_librar
     <dependency>
       <groupId>io.replay</groupId>
       <artifactId>replay-android</artifactId>
-      <version>0.9.2</version>
+      <version>0.9.6</version>
 	</dependency>
     ```
 - [JAR](https://github.com/Originate/replay-android/releases) or [.aar](https://maven-badges.herokuapp.com/maven-central/io.replay/replay-android)
