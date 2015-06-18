@@ -5,23 +5,22 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.2.3'
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12+'
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+    gradleVersion = '2.4'
 }
 
 ext{
     compileSDKVersion = 19
-    buildToolsVersion = "20.0.0"
+    buildToolsVersion = "22.0.1"
     targetSDKVersion = 19
     minSDKVersion = 10
     versionCode = new Integer("00906")
     versionName = "0.9.6"
     versionNameDemo = versionName
     groupID = "io.replay"
-
 }
