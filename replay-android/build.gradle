@@ -6,7 +6,6 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "io.replay.framework"
         minSdkVersion rootProject.ext.minSDKVersion
         targetSdkVersion rootProject.ext.targetSDKVersion
         versionCode rootProject.ext.versionCode
@@ -54,5 +53,4 @@ android.libraryVariants.all { variant ->
     }
 }
 
-
-apply from: "../scripts/upload.gradle"
+apply from: '../scripts/upload.gradle'

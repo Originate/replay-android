@@ -28,25 +28,25 @@ public class ReplayActivity extends Activity {
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
         ReplayIO.onActivityStart(this);
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
         ReplayIO.onActivityResume(this);
     }
 
     @Override
-    public void onPause() {
+    protected void onPause() {
         ReplayIO.onActivityPause(this);
         super.onPause();
     }
 
     @Override
-    public void onStop() {
+    protected void onStop() {
         ReplayIO.onActivityStop(this);
         super.onStop();
     }
