@@ -31,7 +31,7 @@ test:
            background: true
         - (./gradlew assembleDebug):
             timeout: 360
-        - (./gradlew assembleDebugTest):
+        - (./gradlew assembleDebugAndroidTest):
             timeout: 360
         - (source scripts/replay-envsetup.sh && waitAVD)
     override:
