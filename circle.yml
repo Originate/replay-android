@@ -1,19 +1,10 @@
-# Build configuration file for Circle CI
-#
-#
-# ANDROID_API_LEVEL 19
-# ANDROID_BUILD_TOOLS_VERSION (20.0.0)
-#
-
-general: 
+general:
     artifacts:
-        - /home/ubuntu/replay-android/replay-android/build/outputs/reports/androidTests/connected
+         - "~/build_output.zip" # Save APK's, Lint Results, and Test Results
 
 machine:
     environment:
-        ANDROID_HOME: /home/ubuntu/android
-    java:
-        version: oraclejdk6
+        ANDROID_HOME: /usr/local/android-sdk-linux
 
 
 dependencies:
@@ -38,7 +29,7 @@ test:
         - (echo "Override")
         - (./gradlew :replay-android:connectedAndroidTest)
     post:
-        - cp -R ./replay-android/build/outputs/reports/androidTests/connected $CIRCLE_ARTIFACTS
+        - zip -r ~/build_output.zip app/build/outputs/
 
 deployment:
     sonatype:

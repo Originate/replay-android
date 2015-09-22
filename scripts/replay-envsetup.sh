@@ -1,4 +1,4 @@
-#!/bin/bash
+git#!/bin/bash
 
 
 # Fix the CircleCI path
@@ -8,14 +8,10 @@ function ensureDependenciesAndCreateAVD(){
   DEPS="$ANDROID_HOME/installed-dependencies"
 
   if [ ! -e $DEPS ]; then
-    cp -r /usr/local/android-sdk-linux $ANDROID_HOME &&
-    #echo y | android update sdk -u -a -t android-8 &&
     echo y | android update sdk -u -a -t android-19 &&
     echo y | android update sdk -u -a -t platform-tools &&
-    echo y | android update sdk -u -a -t build-tools-20.0.0 &&
-    echo y | android update sdk -u -a -t sys-img-x86-android-19 &&
-    #echo y | android update sdk -u -a -t addon-google_apis-google-18 && 
-    echo no | android create avd -n testAVD -f -t android-19 --abi default/x86 &&
+    echo y | android update sdk -u -a -t build-tools-21.1.2 &&
+    echo no | android create avd -n testAVD -f -t android-19 --abi default/armeabi-v7a &&
     touch $DEPS
   fi
 }
@@ -36,7 +32,7 @@ function waitAVD {
 function sonatypePublish(){
   #http://benlimmer.com/2014/01/04/automatically-publish-to-sonatype-with-gradle-and-travis-ci/
   #http://www.survivingwithandroid.com/2014/05/android-guide-to-publish-aar-to-maven-gradle.html
-  
+
   cd /home/ubuntu/replay-android/     # top dir of repo
   echo $PRIVATE_KEY > temppk.gpg      # pipe private key ascii into temp file
   tr -d \\n < temppk.gpg | tr \, \\n > privatekey.gpg   # 1) pipe temp file into 'tr' and remove any stray newlines 2) replace all commas with newlines
@@ -54,4 +50,3 @@ function sonatypePublish(){
   fi
 
 }
-
